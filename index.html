@@ -3,54 +3,62 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LEGENDS OF ABDE</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#050914;color:white;font-family:Arial,sans-serif}
+body{margin:0;overflow:hidden;background:#050914;color:#fff;font-family:Arial,sans-serif}
 canvas{display:block}
 #hud{position:fixed;inset:0;pointer-events:none}
-#brand{position:absolute;top:16px;left:18px;color:#42eaff;font-size:24px;font-weight:900;text-shadow:0 0 15px #00bfff}
-#stats{position:absolute;top:65px;left:18px;display:grid;gap:8px}
-#right{position:absolute;top:16px;right:16px;text-align:right;display:grid;gap:8px}
-.panel{background:#101827dd;border:1px solid #35dfff;border-radius:9px;padding:10px}
-#crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:25px}
-#help{position:absolute;bottom:15px;left:15px;background:#101827dd;padding:12px;border-radius:10px;font-size:12px;line-height:1.8}
-#start{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:radial-gradient(#173b5a,#040711 75%);padding:14px;overflow:auto}
-#card{width:min(680px,100%);max-height:95vh;overflow:auto;text-align:center;padding:25px;background:#101827f5;border:1px solid #32dfff;border-radius:18px;box-shadow:0 0 35px #00bfff30}
+#brand{position:absolute;top:14px;left:16px;color:#42eaff;font-size:22px;font-weight:900;text-shadow:0 0 15px #00bfff}
+#stats,#right{position:absolute;top:58px;display:grid;gap:6px}
+#stats{left:12px}#right{right:12px;text-align:right;top:14px}
+.panel{padding:8px 10px;border:1px solid #35dfff77;border-radius:8px;background:#0b1424e8;font-size:13px}
+#crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:25px;color:white;text-shadow:0 0 8px #00eaff}
+#help{position:absolute;bottom:10px;left:10px;padding:10px;background:#0b1424e8;border:1px solid #35dfff55;border-radius:9px;font-size:12px;line-height:1.7}
+#toast{position:absolute;top:65%;left:50%;transform:translateX(-50%);color:#ffe477;font-weight:900;text-shadow:0 0 12px #ffae00;white-space:nowrap}
+#start{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:12px;background:radial-gradient(ellipse,#173b5a,#040711 75%);overflow:auto}
+#card{width:min(700px,100%);max-height:96vh;overflow:auto;text-align:center;padding:20px;background:#101827f5;border:1px solid #32dfff;border-radius:18px;box-shadow:0 0 35px #00bfff30}
 h1{color:#42eaff;text-shadow:0 0 18px #00bfff;margin:5px}
-h2{font-size:15px;color:#78eaff}
+h2{font-size:14px;color:#78eaff;margin:15px 0 8px}
 .small{font-size:12px;color:#a8c8dc}
 .choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}
 .choice{padding:12px 5px;border:1px solid #38516b;border-radius:10px;background:#0b1321;cursor:pointer;font-size:12px}
 .choice.selected{border:2px solid #42eaff;box-shadow:0 0 12px #00bfff55}
-.swatch{height:25px;width:25px;border-radius:50%;margin:0 auto 7px;box-shadow:0 0 12px currentColor}
+.swatch{height:30px;width:30px;border-radius:50%;margin:0 auto 7px;box-shadow:0 0 12px currentColor}
 input{width:100%;padding:12px;margin:5px 0;background:#070d18;border:1px solid #38516b;border-radius:8px;color:white}
 button{cursor:pointer;border:0;border-radius:9px;padding:13px 22px;background:linear-gradient(100deg,#00b8e8,#73efff);font-weight:bold;color:#03101a}
-button:disabled{opacity:.5}
 #message{color:#8defff;min-height:20px;font-size:13px}
-#toast{position:absolute;top:65%;left:50%;transform:translateX(-50%);color:#ffdf72;font-weight:bold}
-@media(max-width:500px){.choices{grid-template-columns:repeat(2,minmax(0,1fr))}#brand{font-size:17px}}
+@media(max-width:500px){.choices{grid-template-columns:repeat(2,minmax(0,1fr))}#brand{font-size:16px}.panel{font-size:11px;padding:6px}}
 </style>
 </head>
 <body>
 <div id="hud">
  <div id="brand">LEGENDS OF ABDE</div>
  <div id="stats">
-  <div class="panel">💎 Cristales: <span id="score">0</span></div>
-  <div class="panel">🏆 Récord: <span id="best">0</span></div>
   <div class="panel">❤️ Vida: <span id="health">100</span></div>
-  <div class="panel">🔫 Arma: <span id="weaponName">Pulse</span></div>
-  <div class="panel">Munición: <span id="ammo">30</span></div>
+  <div class="panel">🔫 Arma: <span id="weaponName">PULSE RIFLE</span></div>
+  <div class="panel">💥 Munición: <span id="ammo">30</span></div>
+  <div class="panel">👑 Rango: <span id="rankName">JUGADOR</span></div>
+  <div class="panel">⚔️ Bajas: <span id="kills">0</span></div>
+  <div class="panel">☠️ Muertes: <span id="deaths">0</span></div>
  </div>
  <div id="right">
   <div class="panel">FPS: <span id="fps">0</span></div>
-  <div class="panel">Jugadores: <span id="players">1/40</span></div>
-  <div class="panel">Servidor: <span id="connection">Conectando</span></div>
-  <div class="panel">Skin: <span id="skinName">CYBER BLUE</span></div>
+  <div class="panel">Jugadores: <span id="players">0/40</span></div>
+  <div class="panel">Servidor: <span id="connection">Desconectado</span></div>
+  <div class="panel">Skin: <span id="skinName">CYBER NEXUS</span></div>
  </div>
  <div id="crosshair">+</div>
- <div id="help">WASD: moverte<br>Ratón: mirar<br>Espacio: saltar<br>Shift: correr<br>Clic: disparar<br>R: recargar<br>ESC: liberar ratón</div>
+ <div id="help">
+  WASD: moverte<br>
+  Ratón: mirar<br>
+  Espacio: saltar<br>
+  Shift: correr<br>
+  Clic: disparar<br>
+  R: recargar<br>
+  ESC: liberar ratón
+ </div>
  <div id="toast"></div>
 </div>
 
@@ -58,313 +66,689 @@ button:disabled{opacity:.5}
  <div id="card">
   <h1>LEGENDS OF ABDE</h1>
   <p class="small">MULTIPLAYER FUTURISTA · ARENA 3D</p>
-  <h2>ELIGE TU SKIN</h2>
+  <h2>ELIGE TU ARMADURA</h2>
   <div class="choices" id="skinChoices"></div>
   <h2>ELIGE TU ARMA</h2>
   <div class="choices" id="weaponChoices"></div>
   <h2>ACCESO DEL CREADOR</h2>
+  <input id="playerName" maxlength="16" placeholder="Tu nombre de jugador" value="Jugador">
   <input id="creatorKey" type="password" autocomplete="off" placeholder="Clave privada del creador (opcional)">
-  <p class="small">La clave solo debe validarse en el servidor. No la publiques ni la escribas en el código.</p>
-  <p id="message">Preparando arena...</p>
+  <p class="small">La clave se valida en el servidor. No la publiques.</p>
+  <p id="message">Preparando el juego...</p>
   <button id="play" disabled>PREPARANDO...</button>
-  <p class="small">Hasta 40 jugadores si el servidor está configurado para ello.</p>
  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="https://cdn.socket.io/4.8.1/dist/socket.io.min.js"></script>
 <script>
 "use strict";
-const $=id=>document.getElementById(id);
 
-const SERVER_URL="https://mi-web-poxe.onrender.com";
-const MAX_PLAYERS=40;
+const $ = id => document.getElementById(id);
+const SERVER_URL = "https://mi-web-poxe.onrender.com";
+const MAX_PLAYERS = 40;
 
-const SKINS={
- cyber:{name:"CYBER BLUE",color:0x00dfff,armor:0x12334c,glow:0x00cfff},
- shadow:{name:"SHADOW PURPLE",color:0xb45cff,armor:0x28153f,glow:0x922cff},
- inferno:{name:"INFERNO",color:0xff4545,armor:0x45151c,glow:0xff2020},
- gold:{name:"GOLD LEGEND",color:0xffd34d,armor:0x4a3812,glow:0xffaa00},
- creator:{name:"ABDE CREATOR",color:0x42eaff,armor:0x090d16,glow:0xffc928,exclusive:true}
+const SKINS = {
+ cyber:   {name:"CYBER NEXUS",color:0x00eaff,armor:0x102a42,glow:0x00dfff},
+ shadow:  {name:"VOID SHADOW",color:0xc05cff,armor:0x21122f,glow:0x8c24ff},
+ inferno: {name:"INFERNO X",color:0xff453d,armor:0x40151c,glow:0xff241b},
+ gold:    {name:"GOLDEN PHANTOM",color:0xffd34d,armor:0x493612,glow:0xffb900},
+ creator: {name:"ABDE LEGEND",color:0x42eaff,armor:0x090d16,glow:0xffc928}
 };
 
-const WEAPONS={
- pulse:{name:"PULSE RIFLE",damage:20,ammo:30,rate:220,color:0x00dfff},
- plasma:{name:"PLASMA BLASTER",damage:35,ammo:12,rate:500,color:0xb45cff},
- rapid:{name:"RAPID SMG",damage:10,ammo:50,rate:90,color:0xff4545},
- creator:{name:"CREATOR BLASTER",damage:50,ammo:20,rate:300,color:0xffc928,exclusive:true}
+const WEAPONS = {
+ pulse:   {name:"PULSE RIFLE",ammo:30,rate:220,color:0x00dfff},
+ plasma:  {name:"PLASMA DESTROYER",ammo:12,rate:500,color:0xb45cff},
+ rapid:   {name:"NEON RAPID SMG",ammo:50,rate:100,color:0xff4545},
+ creator: {name:"ABDE GOLDEN BLASTER",ammo:20,rate:300,color:0xffc928}
 };
 
-let selectedSkin="cyber",selectedWeapon="pulse";
-let creatorVerified=false,started=false,socket=null,myId=null;
-let score=0,health=100,ammo=30,kills=0;
-let best=Number(localStorage.getItem("abdeBest")||0);
-let yaw=0,pitch=0,vy=0,grounded=true,lastShot=0,lastMove=0;
-const keys={},remotePlayers=new Map(),crystals=[],shots=[];
-$("best").textContent=best;
+let selectedSkin = "cyber";
+let selectedWeapon = "pulse";
+let started = false;
+let socket = null;
+let myId = null;
+let yaw = 0, pitch = 0, vy = 0;
+let grounded = true;
+let lastShot = 0, lastMove = 0;
+let health = 100, ammo = 30, kills = 0, deaths = 0;
+let creatorVerified = false;
+const keys = {};
+const remotePlayers = new Map();
+const tracers = [];
 
 function makeChoices(){
- const skins=$("skinChoices");
- skins.innerHTML="";
+ const skinContainer = $("skinChoices");
+ skinContainer.innerHTML = "";
+
  for(const [id,s] of Object.entries(SKINS)){
-  if(s.exclusive)continue;
-  const el=document.createElement("div");
-  el.className="choice"+(selectedSkin===id?" selected":"");
-  el.innerHTML=`<div class="swatch" style="background:#${s.color.toString(16).padStart(6,"0")};color:#${s.color.toString(16).padStart(6,"0")}"></div><b>${s.name}</b>`;
-  el.onclick=()=>{selectedSkin=id;makeChoices()};
-  skins.appendChild(el);
+  if(id === "creator") continue;
+
+  const el = document.createElement("div");
+  el.className = "choice" + (selectedSkin === id ? " selected" : "");
+  el.innerHTML =
+   `<div class="swatch" style="background:#${s.color.toString(16).padStart(6,"0")};color:#${s.color.toString(16).padStart(6,"0")}"></div>
+   <b>${s.name}</b><p class="small">Armadura de combate</p>`;
+
+  el.onclick = () => {
+   selectedSkin = id;
+   makeChoices();
+   updateLabels();
+  };
+  skinContainer.appendChild(el);
  }
- const weapons=$("weaponChoices");
- weapons.innerHTML="";
+
+ const weaponContainer = $("weaponChoices");
+ weaponContainer.innerHTML = "";
+
  for(const [id,w] of Object.entries(WEAPONS)){
-  if(w.exclusive)continue;
-  const el=document.createElement("div");
-  el.className="choice"+(selectedWeapon===id?" selected":"");
-  el.innerHTML=`<div class="swatch" style="background:#${w.color.toString(16).padStart(6,"0")};color:#${w.color.toString(16).padStart(6,"0")}"></div><b>${w.name}</b><p class="small">Daño: ${w.damage}</p>`;
-  el.onclick=()=>{selectedWeapon=id;makeChoices()};
-  weapons.appendChild(el);
+  if(id === "creator") continue;
+
+  const el = document.createElement("div");
+  el.className = "choice" + (selectedWeapon === id ? " selected" : "");
+  el.innerHTML =
+   `<div class="swatch" style="background:#${w.color.toString(16).padStart(6,"0")};color:#${w.color.toString(16).padStart(6,"0")}"></div>
+   <b>${w.name}</b><p class="small">${w.ammo} balas</p>`;
+
+  el.onclick = () => {
+   selectedWeapon = id;
+   makeChoices();
+   updateLabels();
+  };
+  weaponContainer.appendChild(el);
  }
 }
+
+function updateLabels(){
+ $("skinName").textContent = SKINS[selectedSkin].name;
+ $("weaponName").textContent = WEAPONS[selectedWeapon].name;
+}
+
 makeChoices();
+updateLabels();
 
 if(!window.THREE){
- $("message").textContent="Error cargando Three.js.";
+ $("message").textContent = "No se pudo cargar el motor 3D. Recarga la página.";
 }else{
- const scene=new THREE.Scene();
- scene.background=new THREE.Color(0x07101e);
- scene.fog=new THREE.Fog(0x07101e,80,180);
- const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,300);
- const renderer=new THREE.WebGLRenderer({antialias:true});
+ const scene = new THREE.Scene();
+ scene.background = new THREE.Color(0x050b19);
+ scene.fog = new THREE.Fog(0x050b19,70,170);
+
+ const camera = new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,250);
+ const renderer = new THREE.WebGLRenderer({antialias:true});
  renderer.setSize(innerWidth,innerHeight);
  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
- renderer.shadowMap.enabled=true;
- renderer.outputColorSpace=THREE.SRGBColorSpace;
+ renderer.shadowMap.enabled = true;
+ renderer.outputColorSpace = THREE.SRGBColorSpace;
  document.body.appendChild(renderer.domElement);
 
  scene.add(new THREE.HemisphereLight(0xbdeaff,0x17213a,2));
- const light=new THREE.DirectionalLight(0xffffff,2);
- light.position.set(20,50,20);light.castShadow=true;scene.add(light);
 
- const mat=(color,emissive=0x000000,metalness=.4)=>new THREE.MeshStandardMaterial({color,emissive,emissiveIntensity:1.4,metalness,roughness:.3});
- const floorMat=mat(0x18283c);
- const darkMat=mat(0x101725);
- const cyanMat=mat(0x00dfff,0x00aaff);
- const pinkMat=mat(0xff35d1,0xb90078);
+ const sun = new THREE.DirectionalLight(0xffffff,2);
+ sun.position.set(20,50,20);
+ sun.castShadow = true;
+ scene.add(sun);
 
- function box(w,h,d,x,y,z,material){
-  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
-  m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;scene.add(m);return m;
+ function material(color,emissive=0x000000,metalness=.45,roughness=.28){
+  return new THREE.MeshStandardMaterial({
+   color,emissive,emissiveIntensity:1.5,metalness,roughness
+  });
  }
+
+ const floorMat = material(0x111f33);
+ const darkMat = material(0x0b1423);
+ const cyanMat = material(0x00dfff,0x00aaff);
+ const pinkMat = material(0xff35d1,0xb90078);
+ const goldMat = material(0xffc928,0xff9c00);
+
+ function box(w,h,d,x,y,z,mat){
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+  mesh.position.set(x,y,z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  scene.add(mesh);
+  return mesh;
+ }
+
+ // Arena cerrada
  box(160,1,160,0,-.5,0,floorMat);
  box(160,12,1,0,6,-80,darkMat);
  box(160,12,1,0,6,80,darkMat);
  box(1,12,160,-80,6,0,darkMat);
  box(1,12,160,80,6,0,darkMat);
- const grid=new THREE.GridHelper(158,80,0x1685ae,0x24405a);
- grid.position.y=.02;scene.add(grid);
 
+ const grid = new THREE.GridHelper(158,80,0x1685ae,0x24405a);
+ grid.position.y = .02;
+ scene.add(grid);
+
+ // Torres y coberturas
  for(let i=0;i<24;i++){
-  const a=i*Math.PI*2/24,x=Math.cos(a)*65,z=Math.sin(a)*65,h=8+(i%4)*3;
+  const a = i*Math.PI*2/24;
+  const x = Math.cos(a)*65;
+  const z = Math.sin(a)*65;
+  const h = 8+(i%4)*3;
+
   box(4,h,4,x,h/2,z,darkMat);
-  box(4.3,.2,4.3,x,h,z,i%2?cyanMat:pinkMat);
+  box(4.3,.2,4.3,x,h,z,i%2 ? cyanMat : pinkMat);
  }
+
  for(let i=0;i<10;i++){
-  const x=(i%5-2)*24,z=(Math.floor(i/5)*2-1)*25;
-  box(10,1,10,x,2,z,i%2?cyanMat:pinkMat);
+  const x = (i%5-2)*24;
+  const z = (Math.floor(i/5)*2-1)*25;
+  box(10,1,10,x,2,z,i%2 ? cyanMat : pinkMat);
  }
- function addCrystal(x,y,z){
-  const g=new THREE.Group();
-  const gem=new THREE.Mesh(new THREE.OctahedronGeometry(.7),mat(0xffdc55,0xff9900));
-  g.add(gem);
-  const ring=new THREE.Mesh(new THREE.TorusGeometry(.95,.04,8,24),cyanMat);
-  ring.rotation.x=Math.PI/2;g.add(ring);g.position.set(x,y,z);scene.add(g);
-  crystals.push({g,x,y,z,active:true,phase:Math.random()*6});
- }
- for(let i=0;i<35;i++)addCrystal((Math.random()-.5)*130,1.5+Math.random()*5,(Math.random()-.5)*130);
 
- // Arma y manos en primera persona
- const weaponGroup=new THREE.Group();
- camera.add(weaponGroup);scene.add(camera);
- const handMat=mat(0x9b654b),gunMat=mat(0x152335);
- const gunBody= new THREE.Mesh(new THREE.BoxGeometry(.22,.2,.7),gunMat);
- gunBody.position.set(.42,-.32,-.72);weaponGroup.add(gunBody);
- const gunBarrel=new THREE.Mesh(new THREE.CylinderGeometry(.055,.07,.48,12),cyanMat);
- gunBarrel.rotation.x=Math.PI/2;gunBarrel.position.set(.42,-.29,-1.12);weaponGroup.add(gunBarrel);
- const hand=new THREE.Mesh(new THREE.BoxGeometry(.16,.16,.25),handMat);
- hand.position.set(.28,-.43,-.62);weaponGroup.add(hand);
- weaponGroup.position.set(0,0,0);
+ // Arma en primera persona
+ const weaponGroup = new THREE.Group();
+ camera.add(weaponGroup);
+ scene.add(camera);
 
- const player={x:0,y:0,z:65};
+ const handMat = material(0x956044);
+ const gunBody = new THREE.Mesh(
+  new THREE.BoxGeometry(.25,.22,.72),
+  material(0x152335)
+ );
+ gunBody.position.set(.42,-.32,-.72);
+ weaponGroup.add(gunBody);
+
+ const gunBarrel = new THREE.Mesh(
+  new THREE.CylinderGeometry(.055,.075,.48,12),
+  cyanMat
+ );
+ gunBarrel.rotation.x = Math.PI/2;
+ gunBarrel.position.set(.42,-.29,-1.12);
+ weaponGroup.add(gunBarrel);
+
+ const gunTop = new THREE.Mesh(
+  new THREE.BoxGeometry(.12,.07,.45),
+  goldMat
+ );
+ gunTop.position.set(.42,-.18,-.82);
+ weaponGroup.add(gunTop);
+
+ const hand = new THREE.Mesh(
+  new THREE.BoxGeometry(.16,.16,.25),
+  handMat
+ );
+ hand.position.set(.28,-.43,-.62);
+ weaponGroup.add(hand);
+
+ const player = {x:0,y:0,z:65};
+
  function syncCamera(){
   camera.position.set(player.x,player.y+1.7,player.z);
-  camera.rotation.order="YXZ";camera.rotation.y=yaw;camera.rotation.x=pitch;
+  camera.rotation.order = "YXZ";
+  camera.rotation.y = yaw;
+  camera.rotation.x = pitch;
  }
- function updateSkinWeapon(){
-  const s=SKINS[selectedSkin],w=WEAPONS[selectedWeapon];
-  $("skinName").textContent=s.name;$("weaponName").textContent=w.name;
-  gunBarrel.material=mat(w.color,w.color);
-  gunBody.material=mat(s.armor,s.glow);
-  $("ammo").textContent=ammo;
- }
- updateSkinWeapon();
 
- function avatar(skinId){
-  const s=SKINS[skinId]||SKINS.cyber;
-  const group=new THREE.Group();
-  const armor=mat(s.armor),neon=mat(s.color,s.glow),helmet=mat(0x111a27);
-  function part(w,h,d,x,y,z,m){
-   const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);
-   o.position.set(x,y,z);o.castShadow=true;group.add(o);return o;
+ function updateWeaponAppearance(){
+  const skin = SKINS[selectedSkin];
+  const weapon = WEAPONS[selectedWeapon];
+
+  gunBarrel.material = material(weapon.color,weapon.color);
+  gunBody.material = material(skin.armor,skin.glow);
+  gunTop.material = material(skin.color,skin.glow);
+
+  updateLabels();
+  $("ammo").textContent = ammo;
+ }
+
+ function setToast(message){
+  $("toast").textContent = message;
+  setTimeout(()=>{
+   if($("toast").textContent === message) $("toast").textContent = "";
+  },1700);
+ }
+
+ function makeNameTag(name,rank,skinId){
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 128;
+  const ctx = canvas.getContext("2d");
+
+  ctx.textAlign = "center";
+  ctx.font = "bold 38px Arial";
+  ctx.fillStyle = skinId === "creator" ? "#ffd34d" : "#ffffff";
+  ctx.shadowColor = skinId === "creator" ? "#ffb900" : "#00dfff";
+  ctx.shadowBlur = 12;
+  ctx.fillText((rank === "CREADOR" ? "ABDE · " : "")+name,256,45);
+
+  ctx.shadowBlur = 0;
+  ctx.font = "bold 24px Arial";
+  ctx.fillStyle = rank === "CREADOR" ? "#ffd34d" : "#78eaff";
+  ctx.fillText(rank,256,82);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+   map:texture,transparent:true,depthTest:false
+  }));
+  sprite.scale.set(4.2,1.05,1);
+  sprite.position.y = 2.8;
+  return sprite;
+ }
+
+ function createAvatar(skinId,name,rank){
+  const s = SKINS[skinId] || SKINS.cyber;
+  const group = new THREE.Group();
+  const armor = material(s.armor);
+  const neon = material(s.color,s.glow);
+  const helmet = material(0x101827);
+
+  function part(w,h,d,x,y,z,mat){
+   const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+   mesh.position.set(x,y,z);
+   mesh.castShadow = true;
+   group.add(mesh);
+   return mesh;
   }
+
+  // Torso, casco y visor
   part(.72,.8,.42,0,1.05,0,armor);
-  part(.48,.12,.05,0,1.2,.24,neon);
   part(.52,.48,.5,0,1.68,0,helmet);
-  part(.36,.09,.06,0,1.7,.27,neon);
+  part(.40,.10,.075,0,1.72,.29,neon);
+  part(.20,.23,.08,0,1.10,.25,neon);
+  part(.42,.52,.22,0,1.15,-.30,helmet);
+
+  // Hombros, brazos y piernas
   for(const side of [-1,1]){
-   part(.24,.68,.25,side*.49,1.03,0,armor);
-   part(.3,.2,.3,side*.48,1.38,0,neon);
-   part(.27,.65,.3,side*.19,.36,0,armor);
+   part(.34,.24,.38,side*.53,1.40,0,neon);
+   part(.24,.55,.25,side*.49,1.03,0,armor);
+   part(.27,.65,.30,side*.19,.36,0,armor);
+   part(.29,.16,.32,side*.19,.66,.02,neon);
   }
-  part(.42,.55,.2,0,1.08,-.3,armor);
+
+  // Detalles exclusivos del creador
+  if(skinId === "creator"){
+   part(.9,.07,.48,0,1.48,0,goldMat);
+   part(.14,.6,.14,-.39,1,-.02,goldMat);
+   part(.14,.6,.14,.39,1,-.02,goldMat);
+  }
+
+  group.add(makeNameTag(name,rank,skinId));
   return group;
  }
 
- function setToast(t){$("toast").textContent=t;setTimeout(()=>{$("toast").textContent=""},1400)}
- function updateScore(){
-  $("score").textContent=score;
-  if(score>best){best=score;$("best").textContent=best;localStorage.setItem("abdeBest",best)}
+ function updateRemote(p){
+  if(!p || !p.id || p.id === myId) return;
+
+  const skin = SKINS[p.skin] ? p.skin : "cyber";
+  const signature = [p.name,p.rank,skin].join("|");
+
+  if(!remotePlayers.has(p.id) ||
+     remotePlayers.get(p.id).signature !== signature){
+
+   if(remotePlayers.has(p.id)){
+    scene.remove(remotePlayers.get(p.id).model);
+   }
+
+   const model = createAvatar(skin,p.name,p.rank);
+   scene.add(model);
+   remotePlayers.set(p.id,{model,signature});
+  }
+
+  const model = remotePlayers.get(p.id).model;
+  model.position.set(Number(p.x)||0,Number(p.y)||0,Number(p.z)||0);
+  model.rotation.y = Number(p.yaw)||0;
  }
+
  function connect(){
-  if(typeof io==="undefined"){$("connection").textContent="Socket.IO no disponible";return}
-  socket=io(SERVER_URL,{transports:["websocket","polling"],reconnection:true});
+  if(typeof io === "undefined"){
+   $("connection").textContent = "Socket.IO no disponible";
+   $("message").textContent = "No se pudo cargar el sistema multijugador.";
+   return;
+  }
+
+  socket = io(SERVER_URL,{
+   transports:["websocket","polling"],
+   reconnection:true
+  });
+
   socket.on("connect",()=>{
-   myId=socket.id;$("connection").textContent="Conectado";
+   myId = socket.id;
+   $("connection").textContent = "Conectado";
+
    socket.emit("joinGame",{
-    name:creatorVerified?"ABDE CREATOR":"Jugador",
+    name:$("playerName").value.trim() || "Jugador",
     x:player.x,y:player.y,z:player.z,yaw,
-    skin:selectedSkin,weapon:selectedWeapon,
+    skin:selectedSkin,
+    weapon:selectedWeapon,
     creatorKey:$("creatorKey").value
    });
   });
-  socket.on("disconnect",()=>{$("connection").textContent="Desconectado"});
-  socket.on("connect_error",()=>{$("connection").textContent="Reintentando"});
+
+  socket.on("disconnect",()=>{
+   $("connection").textContent = "Desconectado";
+  });
+
+  socket.on("connect_error",()=>{
+   $("connection").textContent = "Reintentando";
+  });
+
+  socket.on("notice",message=>setToast(String(message)));
+
+  socket.on("joined",data=>{
+   if(!data || !data.you) return;
+   const p = data.you;
+
+   // Sincroniza la posición local con la posición real del servidor
+   player.x = p.x;
+   player.y = p.y;
+   player.z = p.z;
+   yaw = p.yaw || 0;
+
+   health = p.health ?? 100;
+   ammo = p.ammo ?? ammo;
+   kills = p.kills ?? 0;
+   deaths = p.deaths ?? 0;
+
+   if(SKINS[p.skin]) selectedSkin = p.skin;
+   if(WEAPONS[p.weapon]) selectedWeapon = p.weapon;
+
+   $("health").textContent = health;
+   $("ammo").textContent = ammo;
+   $("kills").textContent = kills;
+   $("deaths").textContent = deaths;
+   $("rankName").textContent = p.rank;
+   $("brand").textContent = p.rank === "CREADOR"
+     ? "ABDE · CREADOR" : "LEGENDS OF ABDE";
+
+   updateWeaponAppearance();
+   syncCamera();
+  });
+
   socket.on("creatorVerified",data=>{
-   if(data?.ok){
-    creatorVerified=true;selectedSkin="creator";selectedWeapon="creator";
-    updateSkinWeapon();setToast("¡CREADOR VERIFICADO!");
-   }else{
-    creatorVerified=false;setToast("Clave de creador no válida");
+   creatorVerified = Boolean(data && data.ok);
+
+   if(creatorVerified){
+    selectedSkin = "creator";
+    selectedWeapon = "creator";
+    ammo = WEAPONS.creator.ammo;
+
+    $("rankName").textContent = "CREADOR";
+    $("brand").textContent = "ABDE · CREADOR";
+    $("ammo").textContent = ammo;
+
+    updateWeaponAppearance();
+    setToast("¡EQUIPAMIENTO DEL CREADOR ACTIVADO!");
+   }else if($("creatorKey").value){
+    setToast("La clave no es válida o el creador ya está conectado");
    }
   });
+
   socket.on("state",data=>{
-   const list=Array.isArray(data)?data:data?.players;
-   if(!Array.isArray(list))return;
-   const seen=new Set();
+   const list = Array.isArray(data) ? data : data?.players;
+   if(!Array.isArray(list)) return;
+
+   const seen = new Set();
+
    for(const p of list){
-    if(!p?.id||p.id===myId)continue;
-    seen.add(p.id);
-    const skin=p.skin||"cyber";
-    if(!remotePlayers.has(p.id)||remotePlayers.get(p.id).skin!==skin){
-     if(remotePlayers.has(p.id))scene.remove(remotePlayers.get(p.id).model);
-     const model=avatar(skin);scene.add(model);
-     remotePlayers.set(p.id,{model,skin});
+    if(!p || !p.id) continue;
+
+    if(p.id === myId){
+     health = p.health ?? health;
+     ammo = p.ammo ?? ammo;
+     kills = p.kills ?? kills;
+     deaths = p.deaths ?? deaths;
+
+     $("health").textContent = health;
+     $("ammo").textContent = ammo;
+     $("kills").textContent = kills;
+     $("deaths").textContent = deaths;
+     continue;
     }
-    const obj=remotePlayers.get(p.id).model;
-    obj.position.set(Number(p.x)||0,Number(p.y)||0,Number(p.z)||0);
-    obj.rotation.y=Number(p.yaw)||0;
+
+    seen.add(p.id);
+    updateRemote(p);
    }
-   for(const [id,p] of remotePlayers){
-    if(!seen.has(id)){scene.remove(p.model);remotePlayers.delete(id)}
+
+   for(const [id,item] of remotePlayers){
+    if(!seen.has(id)){
+     scene.remove(item.model);
+     remotePlayers.delete(id);
+    }
    }
-   $("players").textContent=Math.min(MAX_PLAYERS,remotePlayers.size+1)+"/"+MAX_PLAYERS;
+
+   $("players").textContent =
+    Math.min(MAX_PLAYERS,remotePlayers.size+(myId ? 1 : 0))+
+    "/"+MAX_PLAYERS;
   });
-  socket.on("hit",data=>{if(data?.health!==undefined)$("health").textContent=data.health});
-  socket.on("kill",()=>{kills++;setToast("¡ELIMINACIÓN! "+kills)});
-  socket.on("shotResult",data=>{if(data?.ammo!==undefined){ammo=data.ammo;$("ammo").textContent=ammo}});
+
+  socket.on("shotResult",data=>{
+   if(data && data.ammo !== undefined){
+    ammo = data.ammo;
+    $("ammo").textContent = ammo;
+   }
+   if(data && data.ok === false && ammo <= 0){
+    setToast("Pulsa R para recargar");
+   }
+  });
+
+  socket.on("shotEffect",data=>{
+   if(!data) return;
+
+   const start = new THREE.Vector3(data.x,data.y,data.z);
+   const direction = new THREE.Vector3(data.dx,data.dy,data.dz);
+   const end = start.clone().add(direction.multiplyScalar(data.distance || 60));
+
+   const geometry = new THREE.BufferGeometry().setFromPoints([start,end]);
+   const line = new THREE.Line(geometry,new THREE.LineBasicMaterial({
+    color:data.color || "#00dfff",
+    transparent:true,
+    opacity:.95
+   }));
+
+   scene.add(line);
+   tracers.push({line,until:performance.now()+100});
+
+   const flash = new THREE.PointLight(data.color || "#00dfff",3,3);
+   flash.position.copy(start);
+   scene.add(flash);
+   setTimeout(()=>scene.remove(flash),55);
+
+   if(data.hit) setToast("¡IMPACTO!");
+  });
+
+  socket.on("playerHit",data=>{
+   if(!data || data.id !== myId) return;
+
+   health = data.health;
+   $("health").textContent = health;
+
+   if(health <= 0){
+    setToast("¡ELIMINADO!");
+    setTimeout(()=>socket?.emit("respawn"),2700);
+   }
+  });
+
+  socket.on("elimination",data=>{
+   if(!data) return;
+
+   if(data.attacker === myId){
+    kills = data.attackerKills ?? kills+1;
+    $("kills").textContent = kills;
+    setToast("¡ELIMINACIÓN!");
+   }
+
+   if(data.victim === myId){
+    deaths++;
+    $("deaths").textContent = deaths;
+    setToast("¡TE HAN ELIMINADO!");
+   }
+  });
+
+  socket.on("respawned",p=>{
+   if(!p) return;
+
+   player.x = p.x;
+   player.y = p.y;
+   player.z = p.z;
+   health = p.health ?? 100;
+   ammo = p.ammo ?? ammo;
+   vy = 0;
+
+   $("health").textContent = health;
+   $("ammo").textContent = ammo;
+
+   syncCamera();
+   setToast("¡DE VUELTA A LA ARENA!");
+  });
+ }
+
+ function shoot(){
+  const now = performance.now();
+  const weapon = WEAPONS[selectedWeapon];
+
+  if(now-lastShot < weapon.rate) return;
+
+  if(ammo <= 0){
+   setToast("Pulsa R para recargar");
+   return;
+  }
+
+  if(!socket || !socket.connected){
+   setToast("Servidor desconectado");
+   return;
+  }
+
+  lastShot = now;
+  socket.emit("shoot",{yaw,pitch});
  }
 
  document.addEventListener("keydown",e=>{
-  keys[e.code]=true;
-  if(e.code==="KeyR"){ammo=WEAPONS[selectedWeapon].ammo;$("ammo").textContent=ammo}
-  if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code))e.preventDefault();
- });
- document.addEventListener("keyup",e=>keys[e.code]=false);
- document.addEventListener("mousemove",e=>{
-  if(!started||document.pointerLockElement!==renderer.domElement)return;
-  yaw-=e.movementX*.002;pitch-=e.movementY*.002;
-  pitch=THREE.MathUtils.clamp(pitch,-1.4,1.4);
- });
- renderer.domElement.addEventListener("click",()=>{
-  if(started&&document.pointerLockElement!==renderer.domElement)renderer.domElement.requestPointerLock();
-  else if(started)shoot();
- });
+  keys[e.code] = true;
 
- function shoot(){
-  const now=performance.now(),w=WEAPONS[selectedWeapon];
-  if(now-lastShot<w.rate)return;
-  if(ammo<=0){setToast("Pulsa R para recargar");return}
-  lastShot=now;ammo--;$("ammo").textContent=ammo;
-  const origin=camera.position.clone();
-  const direction=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
-  const ray=new THREE.Raycaster(origin,direction,0,100);
-  const targets=[...remotePlayers.values()].map(p=>p.model);
-  const hits=ray.intersectObjects(targets,true);
-  if(hits.length&&socket?.connected){
-   let obj=hits[0].object;
-   while(obj.parent&&!targets.includes(obj))obj=obj.parent;
-   const entry=[...remotePlayers.entries()].find(([,p])=>p.model===obj);
-   if(entry)socket.emit("shoot",{targetId:entry[0],damage:w.damage,weapon:selectedWeapon});
+  if(e.code === "KeyR" && started && socket?.connected){
+   socket.emit("reload");
   }
-  if(socket?.connected)socket.emit("fire",{yaw,pitch,weapon:selectedWeapon});
-  const flash=new THREE.PointLight(w.color,5,5);
-  flash.position.copy(camera.position).add(direction.clone().multiplyScalar(1.3));
-  scene.add(flash);setTimeout(()=>scene.remove(flash),60);
- }
- document.addEventListener("mousedown",e=>{if(e.button===0&&started&&document.pointerLockElement===renderer.domElement)shoot()});
 
- let last=performance.now(),frames=0,fpsTime=0;
+  if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)){
+   e.preventDefault();
+  }
+ });
+
+ document.addEventListener("keyup",e=>{
+  keys[e.code] = false;
+ });
+
+ document.addEventListener("mousemove",e=>{
+  if(!started || document.pointerLockElement !== renderer.domElement) return;
+
+  yaw -= e.movementX*.002;
+  pitch -= e.movementY*.002;
+  pitch = THREE.MathUtils.clamp(pitch,-1.4,1.4);
+ });
+
+ renderer.domElement.addEventListener("mousedown",e=>{
+  if(e.button !== 0 || !started) return;
+
+  if(document.pointerLockElement !== renderer.domElement){
+   renderer.domElement.requestPointerLock();
+  }else{
+   shoot();
+  }
+ });
+
+ let previousTime = performance.now();
+ let frameCount = 0;
+ let fpsTime = 0;
+
  function animate(now){
   requestAnimationFrame(animate);
-  const dt=Math.min((now-last)/1000,.04);last=now;
-  if(started){
-   const speed=(keys.ShiftLeft||keys.ShiftRight)?13:8;
-   const f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0);
-   const s=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);
-   const len=Math.hypot(f,s)||1;
-   player.x+=(-Math.sin(yaw)*f/len+Math.cos(yaw)*s/len)*speed*dt;
-   player.z+=(-Math.cos(yaw)*f/len-Math.sin(yaw)*s/len)*speed*dt;
-   if(keys.Space&&grounded){vy=9;grounded=false}
-   vy-=22*dt;player.y+=vy*dt;
-   if(player.y<=0){player.y=0;vy=0;grounded=true}
-   player.x=THREE.MathUtils.clamp(player.x,-77,77);
-   player.z=THREE.MathUtils.clamp(player.z,-77,77);
-   if(player.y<-10){player.x=0;player.y=0;player.z=65}
-   for(const c of crystals){
-    c.g.rotation.y+=dt*1.8;
-    c.g.position.y=c.y+Math.sin(now*.002+c.phase)*.2;
-    if(c.active&&Math.hypot(player.x-c.x,player.z-c.z)<1.5&&Math.abs(player.y+1-c.y)<2){
-     c.active=false;c.g.visible=false;score++;updateScore();setToast("+1 CRISTAL");
-     setTimeout(()=>{c.active=true;c.g.visible=true},6000);
-    }
-   }
-   syncCamera();
-   if(socket?.connected&&now-lastMove>100){
-    lastMove=now;socket.emit("move",{x:player.x,y:player.y,z:player.z,yaw,skin:selectedSkin,weapon:selectedWeapon});
+
+  const dt = Math.min((now-previousTime)/1000,.04);
+  previousTime = now;
+
+  // Eliminar trazadores antiguos
+  for(let i=tracers.length-1;i>=0;i--){
+   if(now >= tracers[i].until){
+    scene.remove(tracers[i].line);
+    tracers[i].line.geometry.dispose();
+    tracers[i].line.material.dispose();
+    tracers.splice(i,1);
    }
   }
-  frames++;fpsTime+=dt;
-  if(fpsTime>=1){$("fps").textContent=Math.round(frames/fpsTime);frames=0;fpsTime=0}
+
+  if(started){
+   const speed =
+    (keys.ShiftLeft || keys.ShiftRight) ? 13 : 8;
+
+   const forward =
+    (keys.KeyW || keys.ArrowUp ? 1 : 0) -
+    (keys.KeyS || keys.ArrowDown ? 1 : 0);
+
+   const sideways =
+    (keys.KeyD || keys.ArrowRight ? 1 : 0) -
+    (keys.KeyA || keys.ArrowLeft ? 1 : 0);
+
+   const length = Math.hypot(forward,sideways) || 1;
+
+   player.x += (
+    -Math.sin(yaw)*forward/length +
+     Math.cos(yaw)*sideways/length
+   )*speed*dt;
+
+   player.z += (
+    -Math.cos(yaw)*forward/length -
+     Math.sin(yaw)*sideways/length
+   )*speed*dt;
+
+   if(keys.Space && grounded){
+    vy = 9;
+    grounded = false;
+   }
+
+   vy -= 22*dt;
+   player.y += vy*dt;
+
+   if(player.y <= 0){
+    player.y = 0;
+    vy = 0;
+    grounded = true;
+   }
+
+   player.x = THREE.MathUtils.clamp(player.x,-77,77);
+   player.z = THREE.MathUtils.clamp(player.z,-77,77);
+
+   syncCamera();
+
+   if(socket?.connected && now-lastMove > 100){
+    lastMove = now;
+    socket.emit("move",{
+     x:player.x,y:player.y,z:player.z,yaw
+    });
+   }
+  }
+
+  frameCount++;
+  fpsTime += dt;
+
+  if(fpsTime >= 1){
+   $("fps").textContent = Math.round(frameCount/fpsTime);
+   frameCount = 0;
+   fpsTime = 0;
+  }
+
   renderer.render(scene,camera);
  }
- $("play").onclick=()=>{
-  started=true;$("start").style.display="none";
-  connect();renderer.domElement.requestPointerLock();syncCamera();
+
+ $("play").onclick = ()=>{
+  started = true;
+  $("start").style.display = "none";
+  connect();
+  syncCamera();
+  renderer.domElement.requestPointerLock();
  };
- $("play").disabled=false;$("play").textContent="JUGAR";
- $("message").textContent="Arena preparada. ¡Elige tu equipamiento!";
+
+ $("play").disabled = false;
+ $("play").textContent = "ENTRAR EN LA ARENA";
+ $("message").textContent = "Arena lista. Elige tu equipamiento.";
  requestAnimationFrame(animate);
+
  window.addEventListener("resize",()=>{
-  camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
  });
 }
 </script>
