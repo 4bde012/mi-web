@@ -3,278 +3,458 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ABDE GAMES</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080b14">
+<meta name="description" content="ABDE GAMES: juega gratis a 23 minijuegos online.">
+<title>ABDE GAMES | Arcade</title>
 <style>
+:root{--bg:#080b14;--panel:#111729;--panel2:#171f35;--line:#293651;--cyan:#53efff;--purple:#9872ff;--text:#f4f6ff;--muted:#98a6c7;--green:#55f0a2}
 *{box-sizing:border-box}
-body{margin:0;background:#080b16;color:#f4f6ff;font-family:Arial,sans-serif}
-header{text-align:center;padding:30px 15px;background:linear-gradient(135deg,#111a38,#25104a)}
-h1{font-size:clamp(34px,7vw,58px);margin:8px;color:#68f5ff}
-header p{color:#c2c9e7}
-main{max-width:1000px;margin:auto;padding:20px}
-.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
-.card{background:#141a2d;border:1px solid #303b60;border-radius:15px;padding:20px;text-align:center}
-.card .emoji{font-size:45px}
-button{background:#6246ea;color:white;border:0;border-radius:9px;padding:12px 17px;font-size:15px;font-weight:bold;cursor:pointer}
-button:hover{filter:brightness(1.2)}
-.card button{width:100%}
-#arena{margin-top:24px;background:#11172a;border:1px solid #354267;border-radius:16px;padding:18px;text-align:center}
-#gameTitle{margin-top:0;color:#68f5ff}
-#stats{margin:12px;font-size:17px}
-canvas{display:block;width:100%;max-width:600px;height:auto;aspect-ratio:3/2;background:#050816;border:1px solid #354267;border-radius:10px;margin:12px auto}
-#clickArea{padding:25px}
-#coin{font-size:80px;border-radius:50%;width:140px;height:140px;background:#34265c;border:3px solid #a68bff}
-#message{color:#aeb9dc;min-height:24px}
-.controls{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:12px}
-footer{text-align:center;padding:25px;color:#8490b5}
-[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial,sans-serif}
+button,input{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.topbar{height:76px;position:sticky;top:0;z-index:5;background:#090d18ed;backdrop-filter:blur(16px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 5%;gap:20px}
+.logo{font-weight:1000;letter-spacing:-1px;font-size:25px;white-space:nowrap}
+.logo span{color:var(--cyan)}
+.logo small{display:block;font-size:9px;letter-spacing:4px;color:var(--muted);font-weight:700}
+.topright{display:flex;gap:10px;align-items:center}
+.pill{border:1px solid var(--line);padding:10px 14px;border-radius:12px;background:var(--panel);font-size:12px;color:var(--muted)}
+.layout{display:grid;grid-template-columns:210px minmax(0,1fr);max-width:1500px;margin:auto;min-height:calc(100vh - 76px)}
+aside{padding:28px 18px;border-right:1px solid var(--line)}
+.navlabel{color:#7181a5;font-size:10px;letter-spacing:2px;font-weight:800;margin:14px 12px}
+.navbtn{width:100%;border:0;background:transparent;color:var(--muted);padding:13px 12px;border-radius:11px;text-align:left;margin:3px 0;font-weight:650}
+.navbtn:hover,.navbtn.active{background:#1d2943;color:white}
+.navbtn.active{box-shadow:inset 3px 0 var(--cyan)}
+.sidebox{margin-top:35px;padding:16px;background:linear-gradient(145deg,#192644,#20163e);border:1px solid #35436b;border-radius:15px;font-size:12px;color:var(--muted);line-height:1.6}
+main{padding:30px 4%;min-width:0}
+.hero{padding:34px;min-height:215px;display:flex;justify-content:space-between;align-items:center;gap:20px;overflow:hidden;position:relative;border:1px solid #34345f;border-radius:24px;background:radial-gradient(ellipse at 80% 15%,#5b2c8d88,transparent 42%),linear-gradient(115deg,#142342,#17132f 75%)}
+.hero:after{content:"";position:absolute;width:230px;height:230px;border:1px solid #6e70ff45;border-radius:50%;right:8%;top:-40px;box-shadow:0 0 0 25px #6e70ff0a,0 0 0 55px #6e70ff09}
+.eyebrow{color:var(--cyan);font-size:11px;font-weight:900;letter-spacing:3px}
+.hero h1{font-size:clamp(30px,4vw,48px);line-height:1.05;letter-spacing:-2px;margin:12px 0}
+.hero p{color:#aab8d8;max-width:450px;line-height:1.6;margin-bottom:20px}
+.heroart{font-size:clamp(65px,10vw,110px);filter:drop-shadow(0 0 25px #6c7dff);z-index:1;animation:float 4s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-10px) rotate(4deg)}}
+.primary{border:0;border-radius:11px;padding:12px 19px;background:linear-gradient(100deg,#36d9ee,#9a70ff);color:#090d1a;font-weight:900;box-shadow:0 5px 25px #6656ff35}
+.primary:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;gap:15px;margin:30px 0 16px}
+.sectionhead h2{margin:0;font-size:20px}
+.sectionhead p{margin:5px 0 0;color:var(--muted);font-size:12px}
+.search{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:white;width:min(280px,100%)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.filter{background:var(--panel);border:1px solid var(--line);color:var(--muted);padding:9px 14px;border-radius:20px;font-size:12px}
+.filter.active,.filter:hover{background:#243352;color:var(--cyan);border-color:#4b608c}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
+.gamecard{min-width:0;overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:17px;transition:.2s}
+.gamecard:hover{transform:translateY(-5px);border-color:#6675ae;box-shadow:0 12px 32px #0004}
+.cover{height:125px;display:grid;place-items:center;font-size:53px;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--c1),var(--c2))}
+.cover:before,.cover:after{content:"";position:absolute;border:1px solid #ffffff25;border-radius:50%;width:140px;height:140px}
+.cover:after{width:95px;height:95px}
+.cover span{z-index:1;filter:drop-shadow(0 6px 10px #0005);transition:.2s}
+.gamecard:hover .cover span{transform:scale(1.14) rotate(-5deg)}
+.cardbody{padding:14px}
+.cardtop{display:flex;align-items:center;justify-content:space-between;gap:5px}
+.cardtop h3{font-size:14px;margin:0}
+.fav{border:0;background:transparent;color:#8291b3;font-size:18px;padding:2px}
+.fav.on{color:#ff6caa}
+.tag{font-size:10px;color:var(--cyan);margin:9px 0 12px;display:block}
+.playbtn{width:100%;border:1px solid #384665;border-radius:9px;background:#202b44;color:white;padding:9px;font-size:12px;font-weight:800}
+.playbtn:hover{background:#2b3a5a}
+.empty{color:var(--muted);padding:35px;text-align:center;grid-column:1/-1}
+footer{padding:35px 10px;text-align:center;color:#6f7b9c;font-size:12px}
+#gameview{margin-top:25px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px;scroll-margin-top:90px}
+.gamehead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.gamehead h2{margin:0 0 6px;font-size:23px}
+.gamehead p{color:var(--muted);margin:0;font-size:12px}
+.backbtn{background:#202b44;color:white;border:1px solid var(--line);border-radius:10px;padding:10px 13px}
+#stage{margin-top:18px;background:#090f1e;border:1px solid #263654;border-radius:15px;min-height:300px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:13px;overflow:hidden}
+#stage canvas{width:min(100%,600px);height:auto;aspect-ratio:3/2;background:#060a16;border:1px solid #263654;border-radius:10px;touch-action:none}
+#stage input{max-width:100%;width:230px;background:#141d32;border:1px solid #425174;border-radius:10px;padding:12px;color:white;text-align:center}
+.bigemoji{font-size:65px}
+.bigscore{font-size:36px;font-weight:900;color:var(--cyan)}
+.actions{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.gamebtn{background:#1b2943;border:1px solid #39496d;color:white;padding:11px 15px;border-radius:10px}
+.gamebtn:hover{border-color:var(--cyan)}
+.gamebtn.good{background:#174735;border-color:#2fbd7d}
+.gamebtn.danger{background:#52233a;border-color:#b54c71}
+.notice{color:var(--muted);font-size:13px;line-height:1.6}
+.tilegrid{display:grid;gap:6px;width:min(100%,340px)}
+.tile{aspect-ratio:1;border-radius:8px;background:#202d49;border:1px solid #394b70;color:white;font-weight:900;font-size:clamp(16px,4vw,27px)}
+.tile:hover{background:#34496d}
+#stage .pad{min-width:68px;min-height:52px}
+@media(max-width:1050px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.layout{grid-template-columns:170px minmax(0,1fr)}}
+@media(max-width:760px){.layout{display:block}aside{padding:10px 15px;border-right:0;border-bottom:1px solid var(--line);display:flex;gap:5px;overflow:auto}aside .navlabel,aside .sidebox{display:none}.navbtn{white-space:nowrap;width:auto;margin:0;padding:10px 13px}.topbar{padding:0 4%;height:65px}.pill{display:none}main{padding:20px 4%}.hero{padding:22px}.heroart{font-size:65px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cover{height:105px}.sectionhead{align-items:flex-start;flex-direction:column}.search{width:100%}#stage{padding:12px;min-height:280px}}
+@media(max-width:380px){.grid{grid-template-columns:1fr}.heroart{display:none}}
 </style>
 </head>
 <body>
-<header>
-  <h1>🎮 ABDE GAMES</h1>
-  <p>Tu rincón de juegos. Juega, consigue puntos y bate récords.</p>
+<header class="topbar">
+  <div class="logo">ABDE<span>GAMES</span><small>ARCADE UNIVERSE</small></div>
+  <div class="topright"><span class="pill">🟢 23 JUEGOS</span><span class="pill">🏆 <b id="toprecord">0</b> puntos</span></div>
 </header>
 
+<div class="layout">
+<aside>
+  <div class="navlabel">MENÚ PRINCIPAL</div>
+  <button class="navbtn active" data-nav="all">✦ Descubrir</button>
+  <button class="navbtn" data-nav="all">🎮 Todos los juegos</button>
+  <button class="navbtn" data-nav="favorites">💜 Favoritos</button>
+  <button class="navbtn" data-nav="records">🏆 Mis récords</button>
+  <div class="sidebox">⚡ <b>¡A jugar!</b><br>Elige un juego, supera tus marcas y diviértete.<br><br>Todos los juegos son gratuitos.</div>
+</aside>
+
 <main>
-  <h2>🎯 Elige tu juego</h2>
-  <div class="games">
-    <div class="card">
-      <div class="emoji">🚀</div>
-      <h3>Space Shooter</h3>
-      <p>Esquiva enemigos y dispara.</p>
-      <button onclick="startGame('space')">JUGAR</button>
+  <section class="hero">
+    <div>
+      <div class="eyebrow">TU NUEVO UNIVERSO GAMING</div>
+      <h1>PLAY. LEVEL UP.<br><span style="color:var(--cyan)">REPEAT.</span></h1>
+      <p>Descubre minijuegos, consigue puntos y supera tus propios récords. Tu próxima partida empieza aquí.</p>
+      <button class="primary" onclick="openGame('space')">▶ JUGAR AHORA</button>
     </div>
-    <div class="card">
-      <div class="emoji">🐍</div>
-      <h3>Snake</h3>
-      <p>Come y haz crecer la serpiente.</p>
-      <button onclick="startGame('snake')">JUGAR</button>
-    </div>
-    <div class="card">
-      <div class="emoji">🪙</div>
-      <h3>Clicker</h3>
-      <p>Pulsa la moneda y bate tu récord.</p>
-      <button onclick="startGame('clicker')">JUGAR</button>
-    </div>
-  </div>
-
-  <section id="arena" hidden>
-    <h2 id="gameTitle">Juego</h2>
-    <div id="stats"></div>
-    <canvas id="canvas" width="600" height="400"></canvas>
-    <div id="clickArea" hidden>
-      <button id="coin" onclick="clickCoin()">🪙</button>
-      <p>¡Haz clic en la moneda!</p>
-    </div>
-    <p id="message">¡Buena suerte!</p>
-    <div class="controls" id="mobileControls" hidden>
-      <button onclick="moveSnake(0,-1)">⬆️</button>
-      <button onclick="moveSnake(-1,0)">⬅️</button>
-      <button onclick="moveSnake(0,1)">⬇️</button>
-      <button onclick="moveSnake(1,0)">➡️</button>
-    </div>
-    <div class="controls">
-      <button onclick="restartGame()">🔄 Reiniciar</button>
-      <button onclick="stopGame()">⬅️ Volver</button>
-    </div>
+    <div class="heroart">🚀</div>
   </section>
-</main>
 
-<footer>ABDE GAMES · Hecho para jugar 🎮</footer>
+  <div class="sectionhead">
+    <div><h2 id="listtitle">🔥 Juegos populares</h2><p>23 juegos · Gratis · Directamente en tu navegador</p></div>
+    <input class="search" id="search" placeholder="🔍 Buscar un juego..." aria-label="Buscar juegos">
+  </div>
+  <div class="filters" id="filters">
+    <button class="filter active" data-cat="Todos">Todos</button>
+    <button class="filter" data-cat="Arcade">🕹️ Arcade</button>
+    <button class="filter" data-cat="Puzzle">🧩 Puzzle</button>
+    <button class="filter" data-cat="Acción">⚡ Acción</button>
+    <button class="filter" data-cat="Casual">✨ Casual</button>
+  </div>
+  <div class="grid" id="grid"></div>
+
+  <section id="gameview" hidden>
+    <div class="gamehead">
+      <div><h2 id="gametitle">Juego</h2><p id="gamehelp"></p></div>
+      <button class="backbtn" onclick="closeGame()">✕ Volver a juegos</button>
+    </div>
+    <div id="stage"></div>
+  </section>
+  <footer>ABDE GAMES © 2026 · Creado para jugar 🎮</footer>
+</main>
+</div>
 
 <script>
-const canvas=document.getElementById('canvas');
-const ctx=canvas.getContext('2d');
-const arena=document.getElementById('arena');
-const stats=document.getElementById('stats');
-const message=document.getElementById('message');
-const clickArea=document.getElementById('clickArea');
-const mobileControls=document.getElementById('mobileControls');
+const games=[
+{id:'space',name:'Space Shooter',emoji:'🚀',cat:'Acción',desc:'Pilota una nave y destruye enemigos.',c1:'#173e70',c2:'#351c66'},
+{id:'snake',name:'Snake',emoji:'🐍',cat:'Arcade',desc:'Come y haz crecer tu serpiente.',c1:'#145b45',c2:'#173b52'},
+{id:'clicker',name:'Coin Clicker',emoji:'🪙',cat:'Casual',desc:'Haz clic y suma monedas.',c1:'#73501d',c2:'#543064'},
+{id:'reaction',name:'Reflejos',emoji:'⚡',cat:'Casual',desc:'Mide la velocidad de tus reflejos.',c1:'#174a5a',c2:'#253c78'},
+{id:'guess',name:'Adivina el número',emoji:'🔢',cat:'Puzzle',desc:'Encuentra el número secreto.',c1:'#324c82',c2:'#633a86'},
+{id:'rps',name:'Piedra, papel o tijera',emoji:'✊',cat:'Casual',desc:'¿Puedes vencer a la máquina?',c1:'#67375d',c2:'#354f86'},
+{id:'ttt',name:'Tres en raya',emoji:'❎',cat:'Puzzle',desc:'Consigue tres símbolos en línea.',c1:'#164c70',c2:'#44317b'},
+{id:'memory',name:'Memory Match',emoji:'🧠',cat:'Puzzle',desc:'Encuentra todas las parejas.',c1:'#6a3e7e',c2:'#294b80'},
+{id:'simon',name:'Simon Colors',emoji:'🌈',cat:'Puzzle',desc:'Repite la secuencia de colores.',c1:'#175e59',c2:'#4a367e'},
+{id:'math',name:'Math Rush',emoji:'➗',cat:'Puzzle',desc:'Resuelve operaciones contra reloj.',c1:'#265a83',c2:'#573d82'},
+{id:'typing',name:'Typing Speed',emoji:'⌨️',cat:'Casual',desc:'Escribe las palabras correctamente.',c1:'#344878',c2:'#25334e'},
+{id:'color',name:'Color Challenge',emoji:'🎨',cat:'Puzzle',desc:'Elige el color correcto.',c1:'#784275',c2:'#344d8b'},
+{id:'whack',name:'Golpea al topo',emoji:'🐹',cat:'Arcade',desc:'Pulsa el topo antes de que escape.',c1:'#4e6330',c2:'#244c57'},
+{id:'pong',name:'Neon Pong',emoji:'🏓',cat:'Arcade',desc:'Devuelve la pelota y gana.',c1:'#12575b',c2:'#243a76'},
+{id:'breakout',name:'Brick Breaker',emoji:'🧱',cat:'Arcade',desc:'Rompe todos los bloques.',c1:'#6a374d',c2:'#343b83'},
+{id:'flappy',name:'Flappy Rocket',emoji:'🛸',cat:'Arcade',desc:'Vuela sin chocar con los tubos.',c1:'#22617b',c2:'#413b8c'},
+{id:'dodge',name:'Dodge',emoji:'💥',cat:'Acción',desc:'Esquiva los bloques que caen.',c1:'#7a382f',c2:'#3c2f74'},
+{id:'catch',name:'Catch Stars',emoji:'⭐',cat:'Arcade',desc:'Atrapa estrellas que caen.',c1:'#75531e',c2:'#343a79'},
+{id:'2048',name:'2048',emoji:'🔢',cat:'Puzzle',desc:'Une números hasta llegar a 2048.',c1:'#715034',c2:'#46365f'},
+{id:'whack',name:'Topo Express',emoji:'🐾',cat:'Arcade',desc:'Pon a prueba tus reflejos.',c1:'#4e6330',c2:'#244c57'},
+{id:'hangman',name:'Ahorcado',emoji:'🔤',cat:'Puzzle',desc:'Adivina la palabra secreta.',c1:'#35558a',c2:'#613b7b'},
+{id:'connect',name:'Conecta 4',emoji:'🔴',cat:'Puzzle',desc:'Conecta cuatro fichas seguidas.',c1:'#244d88',c2:'#65365d'},
+{id:'mines',name:'Buscaminas',emoji:'💣',cat:'Puzzle',desc:'Descubre las casillas sin minas.',c1:'#44506a',c2:'#35356c'},
+{id:'avoid',name:'Avoid the Blocks',emoji:'🟦',cat:'Acción',desc:'Sobrevive moviéndote de lado.',c1:'#234e74',c2:'#702f61'}
+];
+// Eliminar repetición visual: hay 23 juegos diferentes, usando 23 IDs.
+games.splice(games.findIndex((g,i)=>g.id==='whack'&&i===19),1);
+games.push({id:'racer',name:'Mini Racer',emoji:'🏎️',cat:'Acción',desc:'Esquiva el tráfico y avanza.',c1:'#7a3c28',c2:'#304e83'});
 
-let game='',timer=null,score=0,over=false;
-let player,bullets,enemies,keys={},snake,food,dir,nextDir;
-let clickScore=0,spawnCount=0;
-
-function best(name){
-  return Number(localStorage.getItem('abde-'+name)||0);
+const $=s=>document.querySelector(s);
+const grid=$('#grid'),stage=$('#stage');
+let category='Todos',nav='all',current=null,cleanup=null,runId=0;
+const favoriteKey='abde_favs',recordKey='abde_records';
+const read=(key,def)=>{try{return JSON.parse(localStorage.getItem(key))||def}catch{return def}};
+const favs=read(favoriteKey,[]);
+const records=read(recordKey,{});
+function record(id,score){if(score>(records[id]||0)){records[id]=score;localStorage.setItem(recordKey,JSON.stringify(records));$('#toprecord').textContent=Object.values(records).reduce((a,b)=>a+b,0)}}
+function drawCards(){
+ const q=$('#search').value.toLowerCase();
+ const list=games.filter(g=>(category==='Todos'||g.cat===category)&&
+ (nav!=='favorites'||favs.includes(g.id))&&
+ (nav!=='records'||records[g.id])&&
+ (g.name+' '+g.desc+' '+g.cat).toLowerCase().includes(q));
+ $('#listtitle').textContent=nav==='favorites'?'💜 Mis favoritos':nav==='records'?'🏆 Mis récords':'🔥 Juegos populares';
+ grid.innerHTML='';
+ if(!list.length){grid.innerHTML='<div class="empty">No hay juegos en esta sección. Prueba otra categoría.</div>';return}
+ list.forEach(g=>{
+  const el=document.createElement('article');el.className='gamecard';
+  el.innerHTML=`<div class="cover" style="--c1:${g.c1};--c2:${g.c2}"><span>${g.emoji}</span></div>
+  <div class="cardbody"><div class="cardtop"><h3>${g.name}</h3><button class="fav ${favs.includes(g.id)?'on':''}" aria-label="Favorito">♥</button></div>
+  <span class="tag">${g.cat.toUpperCase()} · RÉCORD ${records[g.id]||0}</span>
+  <button class="playbtn">▶ JUGAR</button></div>`;
+  el.querySelector('.fav').onclick=()=>{const i=favs.indexOf(g.id);if(i>=0)favs.splice(i,1);else favs.push(g.id);localStorage.setItem(favoriteKey,JSON.stringify(favs));drawCards()};
+  el.querySelector('.playbtn').onclick=()=>openGame(g.id);
+  grid.appendChild(el);
+ });
 }
-function saveBest(name,value){
-  if(value>best(name))localStorage.setItem('abde-'+name,value);
+$('#search').addEventListener('input',drawCards);
+$('#filters').addEventListener('click',e=>{const b=e.target.closest('[data-cat]');if(!b)return;category=b.dataset.cat;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===b));drawCards()});
+document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{nav=b.dataset.nav;document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x===b));drawCards();grid.scrollIntoView({behavior:'smooth',block:'start'})});
+function btn(text,fn,cls=''){const b=document.createElement('button');b.className='gamebtn '+cls;b.textContent=text;b.onclick=fn;return b}
+function txt(text,cls='notice'){const d=document.createElement('div');d.className=cls;d.textContent=text;return d}
+function actions(){const d=document.createElement('div');d.className='actions';stage.appendChild(d);return d}
+function setup(id,title,help){
+ if(cleanup)cleanup();cleanup=null;runId++;
+ current=id;$('#gameview').hidden=false;$('#gametitle').textContent=title;$('#gamehelp').textContent=help;
+ stage.innerHTML='';$('#gameview').scrollIntoView({behavior:'smooth',block:'start'});
 }
-function startGame(name){
-  clearInterval(timer);
-  game=name;
-  arena.hidden=false;
-  clickArea.hidden=name!=='clicker';
-  canvas.hidden=name==='clicker';
-  mobileControls.hidden=name!=='snake';
-  document.getElementById('gameTitle').textContent=
-    {space:'🚀 Space Shooter',snake:'🐍 Snake',clicker:'🪙 Clicker'}[name];
-  restartGame();
-  arena.scrollIntoView({behavior:'smooth',block:'start'});
+function closeGame(){if(cleanup)cleanup();cleanup=null;current=null;$('#gameview').hidden=true;drawCards()}
+function openGame(id){
+ const g=games.find(x=>x.id===id);if(!g)return;
+ switch(id){
+ case 'space':return spaceGame();
+ case 'snake':return snakeGame();
+ case 'clicker':return clickerGame();
+ case 'reaction':return reactionGame();
+ case 'guess':return guessGame();
+ case 'rps':return rpsGame();
+ case 'ttt':return tttGame();
+ case 'memory':return memoryGame();
+ case 'simon':return simonGame();
+ case 'math':return mathGame();
+ case 'typing':return typingGame();
+ case 'color':return colorGame();
+ case 'whack':return whackGame();
+ case 'pong':return pongGame();
+ case 'breakout':return breakoutGame();
+ case 'flappy':return flappyGame();
+ case 'dodge':return dodgeGame();
+ case 'catch':return catchGame();
+ case '2048':return game2048();
+ case 'hangman':return hangmanGame();
+ case 'connect':return connectGame();
+ case 'mines':return minesGame();
+ case 'avoid':return avoidGame();
+ case 'racer':return racerGame();
+ }
 }
-function stopGame(){
-  clearInterval(timer);
-  game='';
-  arena.hidden=true;
+function clickerGame(){
+ setup('clicker','🪙 Coin Clicker','Pulsa la moneda para conseguir puntos.');
+ let s=0;stage.append(txt('Cada clic suma una moneda. ¡Supera tu récord!'));
+ const score=txt('0 monedas','bigscore');stage.append(score);
+ const b=btn('🪙 ¡PULSA AQUÍ!',()=>{s++;score.textContent=s+' monedas';record('clicker',s);b.textContent='🪙 +'+s;});
+ b.style.fontSize='25px';b.style.padding='28px';stage.append(b);
 }
-function restartGame(){
-  clearInterval(timer);
-  score=0;over=false;keys={};spawnCount=0;
-  message.textContent='¡A jugar!';
-  if(game==='space'){
-    player={x:285,y:340};
-    bullets=[];enemies=[];
-    timer=setInterval(spaceTick,30);
-    drawSpace();
-  }else if(game==='snake'){
-    snake=[{x:10,y:10},{x:9,y:10},{x:8,y:10}];
-    dir={x:1,y:0};nextDir={x:1,y:0};
-    placeFood();
-    timer=setInterval(snakeTick,130);
-    drawSnake();
-  }else if(game==='clicker'){
-    clickScore=0;
-    updateClicker();
-  }
-  updateStats();
+function reactionGame(){
+ setup('reaction','⚡ Test de reflejos','Espera a que el panel se ponga verde y pulsa lo más rápido posible.');
+ let t=null,begin=0,done=false;const b=btn('PULSA PARA EMPEZAR',start);b.style.fontSize='19px';b.style.padding='25px';stage.append(b);
+ function start(){clearTimeout(t);done=false;b.disabled=true;b.textContent='ESPERA...';b.style.background='#812b49';t=setTimeout(()=>{begin=performance.now();done=true;b.disabled=false;b.textContent='¡PULSA YA!';b.style.background='#168451'},1000+Math.random()*3000)}
+ b.onclick=()=>{if(!begin||!done){if(!done&&b.disabled)return;begin=0;start();return}let ms=Math.round(performance.now()-begin);b.textContent=ms+' ms';b.style.background='#1b2943';b.disabled=false;done=false;begin=0;record('reaction',Math.max(0,1000-ms));};
+ cleanup=()=>clearTimeout(t);
 }
-function updateStats(){
-  if(game==='clicker'){
-    stats.textContent='Monedas: '+clickScore+
-      ' | Récord: '+best('clicker');
-  }else{
-    stats.textContent='Puntos: '+score+' | Récord: '+best(game);
-  }
+function guessGame(){
+ setup('guess','🔢 Adivina el número','El número secreto está entre 1 y 100.');
+ let n=1+Math.floor(Math.random()*100),tries=0;const input=document.createElement('input');input.type='number';input.min=1;input.max=100;input.placeholder='Tu número';stage.append(input);
+ const msg=txt('¡Tienes intentos ilimitados!');stage.append(msg);const a=actions();
+ a.append(btn('PROBAR',check,'good'),btn('NUEVA PARTIDA',()=>openGame('guess')));
+ input.addEventListener('keydown',e=>{if(e.key==='Enter')check()});
+ function check(){const v=Number(input.value);if(!v||v<1||v>100){msg.textContent='Escribe un número entre 1 y 100.';return}tries++;if(v===n){msg.textContent='🎉 ¡Correcto! Lo conseguiste en '+tries+' intentos.';record('guess',Math.max(1,101-tries));}else msg.textContent=v<n?'📈 ¡Más alto!':'📉 ¡Más bajo!';input.value='';input.focus()}
 }
-function endGame(text){
-  over=true;
-  clearInterval(timer);
-  saveBest(game,score);
-  message.textContent=text+' ¡Pulsa Reiniciar para intentarlo otra vez!';
-  updateStats();
+function rpsGame(){
+ setup('rps','✊ Piedra, papel o tijera','El primero en ganar cinco rondas gana la partida.');
+ let you=0,bot=0;const score=txt('Tú 0 — 0 Máquina','bigscore'),msg=txt('Elige tu jugada.');stage.append(score,msg);const a=actions();
+ [['✊','Piedra'],['✋','Papel'],['✌️','Tijera']].forEach(([e,n])=>a.append(btn(e+' '+n,()=>play(n))));
+ function play(n){const all=['Piedra','Papel','Tijera'],b=all[Math.floor(Math.random()*3)];if(n!==b){if((n==='Piedra'&&b==='Tijera')||(n==='Papel'&&b==='Piedra')||(n==='Tijera'&&b==='Papel'))you++;else bot++}msg.textContent='Tú: '+n+' · Máquina: '+b;if(you===5||bot===5){msg.textContent+=(you===5?' ¡Has ganado!':' ¡Gana la máquina!');if(you===5)record('rps',you)}score.textContent='Tú '+you+' — '+bot+' Máquina';if(you===5||bot===5)a.querySelectorAll('button').forEach(x=>x.disabled=true)}
 }
-
-// SPACE SHOOTER
-function spaceTick(){
-  if(over)return;
-  if(keys.ArrowLeft||keys.a)player.x-=5;
-  if(keys.ArrowRight||keys.d)player.x+=5;
-  if(keys.ArrowUp||keys.w)player.y-=5;
-  if(keys.ArrowDown||keys.s)player.y+=5;
-  player.x=Math.max(15,Math.min(585,player.x));
-  player.y=Math.max(20,Math.min(385,player.y));
-
-  if(keys[' ']&&spawnCount%5===0){
-    bullets.push({x:player.x,y:player.y-15});
-  }
-  spawnCount++;
-  bullets.forEach(b=>b.y-=8);
-  bullets=bullets.filter(b=>b.y>-10);
-
-  if(Math.random()<0.035){
-    enemies.push({x:20+Math.random()*560,y:-15});
-  }
-  enemies.forEach(e=>e.y+=2.6);
-
-  for(let i=enemies.length-1;i>=0;i--){
-    let e=enemies[i];
-    let hit=false;
-    for(let j=bullets.length-1;j>=0;j--){
-      let b=bullets[j];
-      if(Math.hypot(e.x-b.x,e.y-b.y)<19){
-        enemies.splice(i,1);bullets.splice(j,1);
-        score++;hit=true;break;
-      }
-    }
-    if(!hit&&(Math.hypot(e.x-player.x,e.y-player.y)<24||e.y>410)){
-      drawSpace();
-      endGame('¡Fin de la partida! Puntuación: '+score+'.');
-      return;
-    }
-  }
-  drawSpace();updateStats();
+function tttGame(){
+ setup('ttt','❎ Tres en raya','Juega con X. La máquina juega con O.');
+ let board=Array(9).fill(''),over=false;const wrap=document.createElement('div');wrap.className='tilegrid';wrap.style.gridTemplateColumns='repeat(3,1fr)';stage.append(wrap);const msg=txt('Tu turno: X');stage.append(msg);
+ function win(p){return [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]].some(line=>line.every(i=>board[i]===p))}
+ function draw(){wrap.innerHTML='';board.forEach((v,i)=>{const b=btn(v||' ',()=>move(i));b.className='tile';wrap.append(b)})}
+ function move(i){if(over||board[i])return;board[i]='X';if(win('X')){finish('¡Has ganado!');record('ttt',1);return}if(board.every(Boolean)){finish('Empate.');return}
+ let free=board.map((v,i)=>v?null:i).filter(v=>v!==null);
+ // La máquina intenta ganar o bloquear.
+ let choice=free.find(i=>{board[i]='O';let w=win('O');board[i]='';return w});
+ if(choice===undefined)choice=free.find(i=>{board[i]='X';let w=win('X');board[i]='';return w});
+ if(choice===undefined)choice=free[Math.floor(Math.random()*free.length)];
+ board[choice]='O';if(win('O')){finish('La máquina ha ganado.');return}if(board.every(Boolean)){finish('Empate.');return}draw()}
+ function finish(t){over=true;draw();msg.textContent=t}
+ draw();stage.append(btn('REINICIAR',()=>openGame('ttt')));
 }
-function drawSpace(){
-  ctx.fillStyle='#050816';ctx.fillRect(0,0,600,400);
-  for(let i=0;i<65;i++){
-    ctx.fillStyle='#7187bb';
-    ctx.fillRect((i*97)%600,(i*53+spawnCount*1.5)%400,2,2);
-  }
-  ctx.font='27px Arial';ctx.textAlign='center';
-  ctx.fillText('🚀',player.x,player.y+10);
-  bullets.forEach(b=>{ctx.fillStyle='#6dfbff';ctx.fillRect(b.x-2,b.y,4,12)});
-  enemies.forEach(e=>{ctx.font='25px Arial';ctx.fillText('👾',e.x,e.y+8)});
+function memoryGame(){
+ setup('memory','🧠 Memory Match','Encuentra las 6 parejas.');
+ const icons=['🚀','🎮','⭐','👾','💎','🔥'];let cards=[...icons,...icons].sort(()=>Math.random()-.5),opened=[],matched=[],moves=0,lock=false;
+ const wrap=document.createElement('div');wrap.className='tilegrid';wrap.style.gridTemplateColumns='repeat(4,1fr)';stage.append(wrap);
+ const msg=txt('Movimientos: 0');stage.append(msg);
+ cards.forEach((v,i)=>{const b=btn('?',()=>flip(i));b.className='tile';wrap.append(b)});
+ function flip(i){if(lock||matched.includes(i)||opened.includes(i))return;opened.push(i);draw();if(opened.length===2){moves++;msg.textContent='Movimientos: '+moves;lock=true;setTimeout(()=>{if(cards[opened[0]]===cards[opened[1]])matched.push(...opened);opened=[];lock=false;draw();if(matched.length===12){msg.textContent='¡Completado en '+moves+' movimientos!';record('memory',Math.max(1,100-moves))}},650)}}
+ function draw(){[...wrap.children].forEach((b,i)=>{b.textContent=matched.includes(i)||opened.includes(i)?cards[i]:'?';b.disabled=matched.includes(i)})}
+ stage.append(btn('NUEVA PARTIDA',()=>openGame('memory')));
 }
-
-// SNAKE
-function placeFood(){
-  do{
-    food={x:Math.floor(Math.random()*20),y:Math.floor(Math.random()*13)};
-  }while(snake.some(s=>s.x===food.x&&s.y===food.y));
+function simonGame(){
+ setup('simon','🌈 Simon Colors','Memoriza la secuencia y repítela.');
+ const colors=[['🔴','#bd344c'],['🔵','#2865cb'],['🟢','#188b61'],['🟡','#b28a20']];
+ let seq=[],pos=0,score=0,playing=false;const msg=txt('Pulsa empezar.');stage.append(msg);
+ const wrap=document.createElement('div');wrap.className='tilegrid';wrap.style.gridTemplateColumns='repeat(2,100px)';stage.append(wrap);
+ colors.forEach(([e,c],i)=>{const b=btn(e,()=>tap(i));b.className='tile';b.style.background=c;b.style.height='95px';wrap.append(b)});
+ stage.append(btn('EMPEZAR',next));
+ function next(){seq.push(Math.floor(Math.random()*4));pos=0;playing=false;msg.textContent='Memoriza '+seq.length+' colores';let i=0;const id=setInterval(()=>{if(i>=seq.length){clearInterval(id);playing=true;msg.textContent='¡Tu turno!';return}wrap.children[seq[i]].style.filter='brightness(1.8)';setTimeout(()=>wrap.children[seq[i]]&&(wrap.children[seq[i]].style.filter=''),180);i++},420);cleanup=()=>clearInterval(id)}
+ function tap(i){if(!playing)return;if(seq[pos]!==i){msg.textContent='¡Fin! Nivel alcanzado: '+score;record('simon',score);playing=false;return}pos++;if(pos===seq.length){score++;msg.textContent='¡Correcto! Nivel '+score;playing=false;setTimeout(next,650)}}
 }
-function moveSnake(x,y){
-  if(game!=='snake'||over)return;
-  if(x!==-dir.x||y!==-dir.y)nextDir={x,y};
+function mathGame(){
+ setup('math','➗ Math Rush','Resuelve tantas operaciones como puedas.');
+ let score=0,remaining=30,answer=0,ended=false;const q=txt('30 segundos','bigscore'),question=txt('Pulsa empezar');stage.append(q,question);
+ const input=document.createElement('input');input.type='number';input.placeholder='Tu respuesta';stage.append(input);
+ const a=actions();const start=btn('EMPEZAR',begin);a.append(start,btn('RESPONDER',check,'good'));
+ let timer=null;cleanup=()=>clearInterval(timer);
+ function newQ(){let x=Math.floor(Math.random()*12)+1,y=Math.floor(Math.random()*12)+1,op=Math.floor(Math.random()*3);if(op===0){answer=x+y;question.textContent=x+' + '+y+' = ?'}else if(op===1){answer=x*y;question.textContent=x+' × '+y+' = ?'}else{if(x<y)[x,y]=[y,x];answer=x-y;question.textContent=x+' − '+y+' = ?'}input.value=''}
+ function begin(){clearInterval(timer);score=0;remaining=30;ended=false;newQ();timer=setInterval(()=>{remaining--;q.textContent=remaining+' segundos · Puntos '+score;if(remaining<=0){clearInterval(timer);ended=true;question.textContent='¡Tiempo terminado! Puntos: '+score;record('math',score)}},1000);input.focus()}
+ function check(){if(ended||!timer)return;if(Number(input.value)===answer){score++;newQ()}else input.value='';q.textContent=remaining+' segundos · Puntos '+score}
+ input.onkeydown=e=>{if(e.key==='Enter')check()};
 }
-function snakeTick(){
-  if(over)return;
-  dir=nextDir;
-  const head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
-  if(head.x<0||head.x>=20||head.y<0||head.y>=13||
-     snake.some(s=>s.x===head.x&&s.y===head.y)){
-    drawSnake();endGame('¡La serpiente ha chocado! Puntos: '+score+'.');return;
-  }
-  snake.unshift(head);
-  if(head.x===food.x&&head.y===food.y){
-    score++;placeFood();
-  }else snake.pop();
-  drawSnake();updateStats();
+function typingGame(){
+ setup('typing','⌨️ Typing Speed','Escribe la palabra exacta lo más rápido posible.');
+ const words=['galaxia','cohete','videojuego','estrella','planeta','teclado','aventura','velocidad','jugador','arcade','victoria','energia','misterio','fantasia'];
+ let score=0,sec=30,word='',started=false;const q=txt('30 segundos','bigscore'),w=txt('Pulsa empezar');stage.append(q,w);
+ const input=document.createElement('input');input.placeholder='Escribe aquí';stage.append(input);const a=actions();a.append(btn('EMPEZAR',begin),btn('COMPROBAR',check,'good'));
+ let timer=null;cleanup=()=>clearInterval(timer);
+ function next(){word=words[Math.floor(Math.random()*words.length)];w.textContent=word;input.value='';input.focus()}
+ function begin(){clearInterval(timer);score=0;sec=30;started=true;next();timer=setInterval(()=>{sec--;q.textContent=sec+' s · '+score+' puntos';if(sec<=0){clearInterval(timer);started=false;w.textContent='¡Tiempo! Puntuación: '+score;record('typing',score)}},1000)}
+ function check(){if(started&&input.value.trim()===word){score++;next();q.textContent=sec+' s · '+score+' puntos'}}
+ input.onkeydown=e=>{if(e.key==='Enter')check()};
 }
-function drawSnake(){
-  ctx.fillStyle='#050816';ctx.fillRect(0,0,600,400);
-  ctx.font='25px Arial';ctx.textAlign='center';
-  ctx.fillText('🍎',food.x*30+15,food.y*30+25);
-  snake.forEach((s,i)=>{
-    ctx.fillStyle=i===0?'#8cff72':'#29c76f';
-    ctx.fillRect(s.x*30+2,s.y*30+2,26,26);
-  });
+function colorGame(){
+ setup('color','🎨 Color Challenge','Pulsa el botón que coincide con el nombre del color.');
+ const colors=[['ROJO','#f04462'],['AZUL','#4088ff'],['VERDE','#31ce8b'],['AMARILLO','#f5ca4b'],['MORADO','#b17bff']];
+ let score=0,round=0;const title=txt('Puntos: 0','bigscore'),target=txt('');stage.append(title,target);const a=actions();
+ function next(){round++;const c=colors[Math.floor(Math.random()*colors.length)];target.textContent=c[0];target.style.color=c[1];a.innerHTML='';colors.slice().sort(()=>Math.random()-.5).forEach(([n,col])=>{const b=btn(n,()=>{if(n===c[0]){score++;title.textContent='Puntos: '+score}else{score=Math.max(0,score-1);title.textContent='Puntos: '+score}next()});b.style.background=col;b.style.color='#10121a';a.append(b)})}
+ next();stage.append(btn('REINICIAR',()=>openGame('color')));
 }
-
-// CLICKER
-function clickCoin(){
-  if(game!=='clicker')return;
-  clickScore++;
-  saveBest('clicker',clickScore);
-  updateClicker();
+function whackGame(){
+ setup('whack','🐹 Golpea al topo','Pulsa el topo que aparece. Tienes 30 segundos.');
+ let score=0,sec=30,active=-1;const title=txt('30 s · 0 puntos','bigscore');stage.append(title);
+ const wrap=document.createElement('div');wrap.className='tilegrid';wrap.style.gridTemplateColumns='repeat(3,80px)';stage.append(wrap);
+ for(let i=0;i<9;i++){const b=btn('·',()=>{if(i===active){score++;active=-1;draw()}});b.className='tile';wrap.append(b)}
+ function draw(){[...wrap.children].forEach((b,i)=>b.textContent=i===active?'🐹':'·');title.textContent=sec+' s · '+score+' puntos'}
+ const id=setInterval(()=>{sec--;active=Math.floor(Math.random()*9);draw();if(sec<=0){clearInterval(id);active=-1;draw();record('whack',score);stage.append(txt('¡Partida terminada!'))}},800);cleanup=()=>clearInterval(id);
+ stage.append(btn('REINICIAR',()=>openGame('whack')));
 }
-function updateClicker(){
-  stats.textContent='Monedas: '+clickScore+' | Récord: '+best('clicker');
-  message.textContent='¡Sigue haciendo clic para conseguir monedas!';
-  ctx.clearRect(0,0,600,400);
+function snakeGame(){
+ setup('snake','🐍 Snake','Usa las flechas o los botones. Come la fruta.');
+ const c=document.createElement('canvas');c.width=480;c.height=360;stage.append(c);const x=c.getContext('2d');
+ let s=[{x:7,y:7},{x:6,y:7},{x:5,y:7}],d={x:1,y:0},food={x:12,y:7},score=0,dead=false;
+ const msg=txt('Puntos: 0');stage.append(msg);
+ function draw(){x.fillStyle='#080d19';x.fillRect(0,0,480,360);x.fillStyle='#ff637e';x.fillRect(food.x*24,food.y*24,22,22);s.forEach((p,i)=>{x.fillStyle=i?'#39c988':'#8cffbf';x.fillRect(p.x*24+1,p.y*24+1,22,22)})}
+ function move(dx,dy){if(dx!==-d.x||dy!==-d.y)d={x:dx,y:dy}}
+ const key=e=>{if(current!=='snake')return;if(e.key==='ArrowUp')move(0,-1);if(e.key==='ArrowDown')move(0,1);if(e.key==='ArrowLeft')move(-1,0);if(e.key==='ArrowRight')move(1,0)};
+ document.addEventListener('keydown',key);
+ const a=actions();[['⬆️',0,-1],['⬅️',-1,0],['⬇️',0,1],['➡️',1,0]].forEach(([t,dx,dy])=>a.append(btn(t,()=>move(dx,dy))));
+ const id=setInterval(()=>{if(dead)return;const h={x:s[0].x+d.x,y:s[0].y+d.y};if(h.x<0||h.x>=20||h.y<0||h.y>=15||s.some(p=>p.x===h.x&&p.y===h.y)){dead=true;clearInterval(id);msg.textContent='¡Fin! Puntos: '+score;record('snake',score);return}s.unshift(h);if(h.x===food.x&&h.y===food.y){score++;food={x:Math.floor(Math.random()*20),y:Math.floor(Math.random()*15)};msg.textContent='Puntos: '+score}else s.pop();draw()},130);
+ cleanup=()=>{clearInterval(id);document.removeEventListener('keydown',key)};draw();
 }
-
-// CONTROLES
-document.addEventListener('keydown',e=>{
-  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();
-  keys[e.key]=true;
-  if(game==='snake'){
-    if(e.key==='ArrowUp'||e.key==='w')moveSnake(0,-1);
-    if(e.key==='ArrowDown'||e.key==='s')moveSnake(0,1);
-    if(e.key==='ArrowLeft'||e.key==='a')moveSnake(-1,0);
-    if(e.key==='ArrowRight'||e.key==='d')moveSnake(1,0);
-  }
-});
-document.addEventListener('keyup',e=>{keys[e.key]=false});
-canvas.addEventListener('click',e=>{
-  if(game!=='space'||over)return;
-  const r=canvas.getBoundingClientRect();
-  bullets.push({
-    x:(e.clientX-r.left)*600/r.width,
-    y:(e.clientY-r.top)*400/r.height
-  });
-});
+function canvasGame(id,title,help,init){
+ setup(id,title,help);const c=document.createElement('canvas');c.width=600;c.height=400;stage.append(c);const ctx=c.getContext('2d');const msg=txt('¡Buena suerte!');stage.append(msg);const api={c,ctx,msg,stage,btn,actions,record,done:false};const stop=init(api);cleanup=()=>{api.done=true;if(stop)stop()}; 
+}
+function spaceGame(){
+ canvasGame('space','🚀 Space Shooter','Mueve la nave con las flechas. Pulsa espacio o toca el juego para disparar.',api=>{
+ const {c,ctx,msg}=api;let px=300,bul=[],en=[],score=0,dead=false,keys={},spawn=0;
+ const kd=e=>{keys[e.key]=true;if(e.key===' ')e.preventDefault()},ku=e=>keys[e.key]=false;
+ const fire=()=>bul.push({x:px,y:340});
+ c.addEventListener('pointerdown',fire);document.addEventListener('keydown',kd);document.addEventListener('keyup',ku);
+ const id=setInterval(()=>{if(dead)return;spawn++;if(keys.ArrowLeft||keys.a)px-=6;if(keys.ArrowRight||keys.d)px+=6;px=Math.max(15,Math.min(585,px));if(keys[' ']&&spawn%6===0)fire();if(spawn%28===0)en.push({x:20+Math.random()*560,y:-15});
+ bul.forEach(b=>b.y-=8);en.forEach(e=>e.y+=2.5);
+ for(let i=en.length-1;i>=0;i--){let j=bul.findIndex(b=>Math.hypot(b.x-en[i].x,b.y-en[i].y)<20);if(j>=0){en.splice(i,1);bul.splice(j,1);score++;}else if(en[i].y>390){dead=true;clearInterval(id);msg.textContent='Fin de partida · Puntos: '+score;record('space',score);}}
+ ctx.fillStyle='#060a16';ctx.fillRect(0,0,600,400);for(let i=0;i<55;i++){ctx.fillStyle='#7189c5';ctx.fillRect(i*73%600,(i*59+spawn*1.4)%400,2,2)}
+ ctx.font='28px Arial';ctx.textAlign='center';ctx.fillText('🚀',px,365);bul.forEach(b=>{ctx.fillStyle='#59f4ff';ctx.fillRect(b.x-2,b.y,4,12)});en.forEach(e=>ctx.fillText('👾',e.x,e.y));msg.textContent='Puntos: '+score;
+ },30);return()=>{clearInterval(id);document.removeEventListener('keydown',kd);document.removeEventListener('keyup',ku);c.removeEventListener('pointerdown',fire)};
+ });
+}
+function pongGame(){
+ canvasGame('pong','🏓 Neon Pong','Mueve la pala con el ratón o el dedo. La máquina devuelve la pelota.',api=>{
+ const {c,ctx,msg}=api;let y=180,ball={x:300,y:200,vx:4,vy:3},score=0,dead=false;
+ const move=e=>{const r=c.getBoundingClientRect();y=(e.clientY-r.top)*400/r.height};c.addEventListener('pointermove',move);
+ const id=setInterval(()=>{if(dead)return;ball.x+=ball.vx;ball.y+=ball.vy;if(ball.y<5||ball.y>395)ball.vy*=-1;if(ball.vx<0&&ball.x<30&&Math.abs(ball.y-y)<55){ball.vx*=-1;score++}if(ball.x>570&&ball.vx>0&&Math.abs(ball.y-200)<65)ball.vx*=-1;if(ball.x<0||ball.x>610){dead=true;clearInterval(id);record('pong',score);msg.textContent='Fin de partida · '+score+' puntos'}
+ ctx.fillStyle='#070d19';ctx.fillRect(0,0,600,400);ctx.fillStyle='#53efff';ctx.fillRect(15,y-45,12,90);ctx.fillStyle='#a17bff';ctx.fillRect(573,155,12,90);ctx.beginPath();ctx.arc(ball.x,ball.y,8,0,7);ctx.fill();msg.textContent='Devoluciones: '+score;
+ },25);return()=>{clearInterval(id);c.removeEventListener('pointermove',move)};
+ });
+}
+function breakoutGame(){
+ canvasGame('breakout','🧱 Brick Breaker','Mueve la pala con el ratón o el dedo. Rompe los bloques.',api=>{
+ const {c,ctx,msg}=api;let x=300,ball={x:300,y:300,vx:3,vy:-4},paddle=250,score=0,dead=false,bricks=[];
+ for(let r=0;r<4;r++)for(let col=0;col<9;col++)bricks.push({x:10+col*65,y:25+r*27,alive:true});
+ const move=e=>{const r=c.getBoundingClientRect();paddle=(e.clientX-r.left)*600/r.width-50};c.addEventListener('pointermove',move);
+ const id=setInterval(()=>{if(dead)return;ball.x+=ball.vx;ball.y+=ball.vy;if(ball.x<5||ball.x>595)ball.vx*=-1;if(ball.y<5)ball.vy*=-1;if(ball.y>365&&ball.x>paddle&&ball.x<paddle+100)ball.vy=-Math.abs(ball.vy);if(ball.y>405){dead=true;clearInterval(id);record('breakout',score);msg.textContent='Fin de partida · '+score;return}
+ for(const b of bricks)if(b.alive&&ball.x>b.x&&ball.x<b.x+58&&ball.y>b.y&&ball.y<b.y+18){b.alive=false;ball.vy*=-1;score++;break}
+ ctx.fillStyle='#080d19';ctx.fillRect(0,0,600,400);bricks.filter(b=>b.alive).forEach((b,i)=>{ctx.fillStyle=['#5de9ff','#9876ff','#ff638c','#58dfa3'][Math.floor(b.y/27)];ctx.fillRect(b.x,b.y,58,18)});ctx.fillStyle='#fff';ctx.fillRect(paddle,370,100,12);ctx.beginPath();ctx.arc(ball.x,ball.y,7,0,7);ctx.fill();msg.textContent='Bloques: '+score;if(bricks.every(b=>!b.alive)){dead=true;clearInterval(id);record('breakout',score);msg.textContent='¡Has ganado!'}
+ },25);return()=>{clearInterval(id);c.removeEventListener('pointermove',move)};
+ });
+}
+function flappyGame(){
+ canvasGame('flappy','🛸 Flappy Rocket','Pulsa espacio o toca la pantalla para volar entre los tubos.',api=>{
+ const {c,ctx,msg}=api;let y=200,vy=0,pipe=[],score=0,frame=0,dead=false;
+ const flap=e=>{if(e)e.preventDefault();if(dead)return;vy=-5.5};const kd=e=>{if(e.key===' '||e.key==='ArrowUp')flap(e)};
+ c.addEventListener('pointerdown',flap);document.addEventListener('keydown',kd);
+ const id=setInterval(()=>{if(dead)return;frame++;vy+=.28;y+=vy;if(frame%95===0){let top=55+Math.random()*180;pipe.push({x:610,top,pass:false})}pipe.forEach(p=>p.x-=3);pipe=pipe.filter(p=>p.x>-50);
+ if(y<0||y>400||pipe.some(p=>p.x<315&&p.x+45>285&&(y<p.top||y>p.top+125))){dead=true;clearInterval(id);record('flappy',score);msg.textContent='Fin de partida · Puntos: '+score}
+ pipe.forEach(p=>{if(!p.pass&&p.x<285){p.pass=true;score++}});
+ ctx.fillStyle='#0a1930';ctx.fillRect(0,0,600,400);ctx.fillStyle='#45dba0';pipe.forEach(p=>{ctx.fillRect(p.x,0,45,p.top);ctx.fillRect(p.x,p.top+125,45,400)});ctx.font='30px Arial';ctx.fillText('🛸',285,y+10);msg.textContent='Puntos: '+score;
+ },25);return()=>{clearInterval(id);c.removeEventListener('pointerdown',flap);document.removeEventListener('keydown',kd)};
+ });
+}
+function dodgeGame(){fallingGame('dodge','💥 Dodge','Muévete con las flechas y evita los bloques rojos.',false)}
+function catchGame(){fallingGame('catch','⭐ Catch Stars','Muévete de lado y atrapa las estrellas.',true)}
+function avoidGame(){fallingGame('avoid','🟦 Avoid the Blocks','Esquiva los bloques que caen con las flechas.',false)}
+function racerGame(){fallingGame('racer','🏎️ Mini Racer','Con las flechas, cambia de carril para evitar el tráfico.',false)}
+function fallingGame(id,title,help,catchMode){
+ canvasGame(id,title,help,api=>{
+ const {c,ctx,msg}=api;let px=300,items=[],score=0,frame=0,dead=false,keys={};
+ const kd=e=>keys[e.key]=true,ku=e=>keys[e.key]=false;document.addEventListener('keydown',kd);document.addEventListener('keyup',ku);
+ const pointer=e=>{const r=c.getBoundingClientRect();px=(e.clientX-r.left)*600/r.width};c.addEventListener('pointermove',pointer);
+ const timer=setInterval(()=>{if(dead)return;frame++;if(keys.ArrowLeft||keys.a)px-=6;if(keys.ArrowRight||keys.d)px+=6;px=Math.max(20,Math.min(580,px));if(frame%32===0)items.push({x:20+Math.random()*560,y:-10});
+ items.forEach(o=>o.y+=3+Math.min(4,score*.04));items=items.filter(o=>o.y<420);
+ for(let i=items.length-1;i>=0;i--){if(Math.abs(items[i].x-px)<25&&Math.abs(items[i].y-350)<22){if(catchMode){items.splice(i,1);score++;}else{dead=true;clearInterval(timer);record(id,score);msg.textContent='Fin de partida · Puntos: '+score;break}}}
+ ctx.fillStyle='#080d19';ctx.fillRect(0,0,600,400);ctx.font='28px Arial';ctx.textAlign='center';ctx.fillText(catchMode?'🧺':id==='racer'?'🏎️':'🟦',px,370);items.forEach(o=>ctx.fillText(catchMode?'⭐':id==='racer'?'🚙':'🟥',o.x,o.y));score+=catchMode?0:1;msg.textContent=catchMode?'Estrellas: '+score:'Tiempo: '+Math.floor(frame/40)+' · Sobrevive';
+ },30);return()=>{clearInterval(timer);document.removeEventListener('keydown',kd);document.removeEventListener('keyup',ku);c.removeEventListener('pointermove',pointer)};
+ });
+}
+function game2048(){
+ setup('2048','🔢 2048','Usa las flechas para unir números iguales.');
+ let b=Array(16).fill(0),score=0,over=false;const wrap=document.createElement('div');wrap.className='tilegrid';wrap.style.gridTemplateColumns='repeat(4,1fr)';wrap.style.width='min(100%,340px)';stage.append(wrap);const msg=txt('Puntos: 0');stage.append(msg);
+ function add(){let f=b.map((v,i)=>v?null:i).filter(v=>v!==null);if(f.length)b[f[Math.floor(Math.random()*f.length)]]=Math.random()<.9?2:4}
+ function draw(){wrap.innerHTML='';b.forEach(v=>{let z=btn(v||'',()=>{});z.className='tile';z.style.background=v?'#'+({2:'283b5a',4:'36577b',8:'6850a2',16:'a04d85',32:'bf554d',64:'d17b3f',128:'b8a33b',256:'46a58d',512:'328a9b',1024:'4163c4',2048:'44b884'}[v]||'7c529e'):'#131d31';wrap.append(z)});msg.textContent='Puntos: '+score}
+ function move(d){if(over)return;let old=b.join(',');for(let line=0;line<4;line++){let ids=[];for(let k=0;k<4;k++)ids.push(d==='left'?line*4+k:d==='right'?line*4+3-k:d==='up'?k*4+line:(3-k)*4+line);let vals=ids.map(i=>b[i]).filter(Boolean),out=[];for(let i=0;i<vals.length;i++){if(vals[i]===vals[i+1]){out.push(vals[i]*2);score+=vals[i]*2;i++}else out.push(vals[i])}ids.forEach((id,k)=>b[id]=out[k]||0)}
+ if(old!==b.join(','))add();draw();if(b.includes(2048)){over=true;msg.textContent='¡Has llegado a 2048!';record('2048',score)}}
+ const kd=e=>{let m={'ArrowLeft':'left','ArrowRight':'right','ArrowUp':'up','ArrowDown':'down'};if(m[e.key]&&current==='2048'){e.preventDefault();move(m[e.key])}};document.addEventListener('keydown',kd);
+ add();add();draw();const a=actions();[['⬅️','left'],['➡️','right'],['⬆️','up'],['⬇️','down']].forEach(([t,d])=>a.append(btn(t,()=>move(d))));stage.append(btn('REINICIAR',()=>openGame('2048')));cleanup=()=>document.removeEventListener('keydown',kd);
+}
+function hangmanGame(){
+ setup('hangman','🔤 Ahorcado','Adivina la palabra, letra por letra.');
+ const words=['COHETE','PLANETA','VIDEOJUEGO','ESTRELLA','GALAXIA','ARCADE','TECLADO'];let word=words[Math.floor(Math.random()*words.length)],used=[],mistakes=0,over=false;
+ const show=txt('');show.className='bigscore';stage.append(show);const status=txt('Errores: 0 / 6');stage.append(status);const a=actions();stage.append(a);
+ function draw(){show.textContent=[...word].map(c=>used.includes(c)?c:'_').join(' ');status.textContent='Errores: '+mistakes+' / 6';a.innerHTML='';'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('').forEach(c=>a.append(btn(c,()=>play(c))))}
+ function play(c){if(over||used.includes(c))return;used.push(c);if(!word.includes(c))mistakes++;if(mistakes>=6){over=true;show.textContent=word;status.textContent='¡Fin! La palabra era '+word;record('hangman',Math.max(0,6-mistakes))}else if([...word].every(c=>used.includes(c))){over=true;status.textContent='¡Has ganado!';record('hangman',6-mistakes)}draw();if(over)status.textContent=mistakes>=6?'¡Fin! La palabra era '+word:'¡Has ganado!'}
+ draw();stage.append(btn('NUEVA PALABRA',()=>openGame('hangman')));
+}
+function connectGame(){
+ setup('connect','🔴 Conecta 4','Tú eres 🔴 y la máquina 🟡. Conecta cuatro fichas.');
+ let b=Array.from({length:6},()=>Array(7).fill('')),turn='R',over=false;const wrap=document.createElement('div');wrap.className='tilegrid';wrap.style.gridTemplateColumns='repeat(7,minmax(30px,42px))';stage.append(wrap);const msg=txt('Tu turno');stage.append(msg);
+ function won(p){for(let r=0;r<6;r++)for(let c=0;c<7;c++)if(p&&[[0,1],[1,0],[1,1],[1,-1]].some(([dr,dc])=>[0,1,2,3].every(k=>b[r+dr*k]?.[c+dc*k]===p)))return true;return false}
+ function draw(){wrap.innerHTML='';for(let c=0;c<7;c++){wrap.append(btn('↓',()=>move(c)))}for(let r=0;r<6;r++)for(let c=0;c<7;c++){const z=btn(b[r][c]==='R'?'🔴':b[r][c]==='Y'?'🟡':'·',()=>move(c));z.className='tile';wrap.append(z)}}
+ function drop(c,p){for(let r=5;r>=0;r--)if(!b[r][c]){b[r][c]=p;return true}return false}
+ function move(c){if(over||turn!=='R'||!drop(c,'R'))return;if(won('R')){over=true;msg.textContent='¡Has ganado!';record('connect',1);draw();return}turn='Y';let choices=[0,1,2,3,4,5,6].filter(c=>!b[0][c]);if(!choices.length){over=true;msg.textContent='Empate';return}let col=choices.find(c=>{drop(c,'Y');let w=won('Y');for(let r=5;r>=0;r--)if(b[r][c]==='Y'){b[r][c]='';break}return w});if(col===undefined)col=choices[Math.floor(Math.random()*choices.length)];drop(col,'Y');if(won('Y')){over=true;msg.textContent='La máquina ha ganado'}else{turn='R';msg.textContent='Tu turno'}draw()}
+ draw();stage.append(btn('REINICIAR',()=>openGame('connect')));
+}
+function minesGame(){
+ setup('mines','💣 Buscaminas','Descubre todas las casillas seguras. ¡Evita las minas!');
+ let mines=new Set(),opened=new Set(),over=false;while(mines.size<8)mines.add(Math.floor(Math.random()*64));const wrap=document.createElement('div');wrap.className='tilegrid';wrap.style.gridTemplateColumns='repeat(8,minmax(25px,35px))';stage.append(wrap);const msg=txt('Minas: 8');stage.append(msg);
+ function draw(){wrap.innerHTML='';for(let i=0;i<64;i++){const b=btn(opened.has(i)?(mines.has(i)?'💣':count(i)||'·'):'?',()=>open(i));b.className='tile';b.style.fontSize='15px';wrap.append(b)}}
+ function count(i){let r=Math.floor(i/8),c=i%8,n=0;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){let rr=r+dr,cc=c+dc;if(rr>=0&&rr<8&&cc>=0&&cc<8&&mines.has(rr*8+cc))n++}return n}
+ function open(i){if(over||opened.has(i))return;opened.add(i);if(mines.has(i)){over=true;msg.textContent='¡Has encontrado una mina!';mines.forEach(x=>opened.add(x))}else if(opened.size===56){over=true;msg.textContent='¡Has ganado!';record('mines',1)}else msg.textContent='Casillas seguras: '+(opened.size-mines.size);draw()}
+ draw();stage.append(btn('NUEVA PARTIDA',()=>openGame('mines')));
+}
+drawCards();
+$('#toprecord').textContent=Object.values(records).reduce((a,b)=>a+b,0);
 </script>
 </body>
 </html>
