@@ -656,43 +656,70 @@ document.addEventListener("mousedown", e => {
   if (e.button === 0) attack();
 });
 
+
 function update(dt) {
   if (!started) return;
-  const fast = keys.ShiftLeft || keys.ShiftRight;
-  const speed = fast ? 10.5 : 6.5;
-  let forward = 0, side = 0;
+
+  const speed = (keys.ShiftLeft || keys.ShiftRight) ? 10.5 : 6.5;
+
+  let forward = 0;
+  let side = 0;
+
   if (keys.KeyW || keys.ArrowUp) forward += 1;
   if (keys.KeyS || keys.ArrowDown) forward -= 1;
   if (keys.KeyD || keys.ArrowRight) side += 1;
   if (keys.KeyA || keys.ArrowLeft) side -= 1;
-  const len = Math.hypot(forward, side) || 1;
-  forward /= len; side /= len;
-  const dx = (-Math.sin(player.yaw) * forward +
-              Math.cos(player.yaw) * side) * speed * dt;
-  const dz = (-Math.cos(player.yaw) * forward -
-              Math.sin(player.yaw) * side) * speed * dt;
-  if (!blockedAt(player.x + dx, player.z)) player.x += dx;
-  if (!blockedAt(player.x, player.z + dz)) player.z += dz;
+
+  const length = Math.hypot(forward, side) || 1;
+  forward /= length;
+  side /= length;
+
+  const dx = (
+    -Math.sin(player.yaw) * forward +
+     Math.cos(player.yaw) * side
+  ) * speed * dt;
+
+  const dz = (
+    -Math.cos(player.yaw) * forward -
+     Math.sin(player.yaw) * side
+  ) * speed * dt;
+
+  if (!blockedAt(player.x + dx, player.z)) {
+    player.x += dx;
+  }
+
+  if (!blockedAt(player.x, player.z + dz)) {
+    player.z += dz;
+  }
 
   if (keys.Space && grounded) {
     velocityY = 8.5;
     grounded = false;
   }
+
   velocityY -= 22 * dt;
   player.y += velocityY * dt;
+
   const floor = heightAt(player.x, player.z);
+
   if (player.y <= floor && velocityY <= 0) {
     player.y = floor;
     velocityY = 0;
     grounded = true;
-  } else grounded = false;
+  } else {
+    grounded = false;
+  }
 
   syncCamera();
+
   const now = performance.now();
+
   if (socket && socket.connected && now - lastMoveSent > 70) {
     lastMoveSent = now;
     socket.emit("move", {
-      x: player.x, y: player.y, z: player.z,
+      x: player.x,
+      y: player.y,
+      z: player.z,
       rotationY: player.yaw
     });
   }
