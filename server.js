@@ -7,207 +7,199 @@ const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: { origin: "*" },
-  transports: ["websocket", "polling"]
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
 });
 
-const players = new Map();
-const grenadeTimers = new Map();
-
-const COLORS = [0x4dbbff, 0x9b75ff, 0x43e0b0, 0xffbd55];
-let colorIndex = 0;
-let nextGrenadeId = 1;
+const PORT = process.env.PORT || 3000;
 
 app.get("/", (req, res) => {
   res.send("ABDE STRIKE server is running.");
 });
 
-io.on("connection", socket => {
-  console.log("Conectado:", socket.id);
+const players = {};
 
-  socket.on("joinGame", data => {
-    const name = String(data?.name || "Jugador")
-      .replace(/[<>]/g, "")
-      .slice(0, 16);
-
-    players.set(socket.id, {
-      name,
-      x: (Math.random() - 0.5) * 8,
-      y: 0,
-      z: (Math.random() - 0.5) * 8,
-      yaw: 0,
-      color: COLORS[colorIndex++ % COLORS.length],
-      lastPulse: 0,
-      lastGrenade: 0
-    });
-
-    broadcastState();
-  });
-
-  socket.on("move", data => {
-    const p = players.get(socket.id);
-    if (!p || !data) return;
-
-    p.x = clamp(Number(data.x) || 0, -20.5, 20.5);
-    p.y = clamp(Number(data.y) || 0, 0, 12);
-    p.z = clamp(Number(data.z) || 0, -20.5, 20.5);
-    p.yaw = clamp(Number(data.yaw) || 0, -1000, 1000);
-
-    broadcastState();
-  });
-
-  socket.on("firePulse", data => {
-    const p = players.get(socket.id);
-    if (!p || !data) return;
-
-    const now = Date.now();
-    if (now - p.lastPulse < 280) return;
-    p.lastPulse = now;
-
-    let dx = Number(data.dx) || 0;
-    let dy = Number(data.dy) || 0;
-    let dz = Number(data.dz) || -1;
-    const length = Math.hypot(dx, dy, dz) || 1;
-
-    dx /= length;
-    dy /= length;
-    dz /= length;
-
-    const origin = {
-      x: clamp(Number(data.x) || p.x, -25, 25),
-      y: clamp(Number(data.y) || 1.7, 0, 15),
-      z: clamp(Number(data.z) || p.z, -25, 25)
-    };
-
-    io.emit("pulse", {
-      ...origin, dx, dy, dz, owner: socket.id
-    });
-
-    // Comprobación básica de impactos en el servidor.
-    let closest = null;
-    let closestDistance = Infinity;
-
-    for (const [id, target] of players.entries()) {
-      if (id === socket.id) continue;
-
-      const tx = target.x - origin.x;
-      const ty = target.y + 1.2 - origin.y;
-      const tz = target.z - origin.z;
-
-      const along = tx * dx + ty * dy + tz * dz;
-      if (along < 0 || along > 22) continue;
-
-      const nearX = tx - dx * along;
-      const nearY = ty - dy * along;
-      const nearZ = tz - dz * along;
-      const distance = Math.hypot(nearX, nearY, nearZ);
-
-      if (distance < 1.25 && along < closestDistance) {
-        closest = id;
-        closestDistance = along;
-      }
-    }
-
-    if (closest) {
-      io.emit("tag", {
-        scorer: socket.id,
-        target: closest
-      });
-    }
-  });
-
-  socket.on("throwGrenade", data => {
-    const p = players.get(socket.id);
-    if (!p || !data) return;
-
-    const now = Date.now();
-    if (now - p.lastGrenade < 700) return;
-    p.lastGrenade = now;
-
-    const x = clamp(Number(data.x) || p.x, -25, 25);
-    const y = clamp(Number(data.y) || 1.7, 0, 15);
-    const z = clamp(Number(data.z) || p.z, -25, 25);
-
-    const vx = clamp(Number(data.vx) || 0, -15, 15);
-    const vy = clamp(Number(data.vy) || 5, -15, 15);
-    const vz = clamp(Number(data.vz) || -8, -15, 15);
-
-    const id = nextGrenadeId++;
-
-    io.emit("grenadeThrown", {
-      id, owner: socket.id, x, y, z, vx, vy, vz
-    });
-
-    // El servidor controla el momento de la explosión.
-    const timer = setTimeout(() => {
-      grenadeTimers.delete(id);
-
-      // Estimación de la posición al explotar.
-      const t = 2;
-      const end = {
-        x: clamp(x + vx * t, -22, 22),
-        y: Math.max(0.18, Math.min(8, y + vy * t - 4.9 * t * t)),
-        z: clamp(z + vz * t, -22, 22)
-      };
-
-      let points = 0;
-
-      // Daño simplificado por proximidad.
-      for (const [playerId, target] of players.entries()) {
-        if (playerId === socket.id) continue;
-
-        const distance = Math.hypot(
-          target.x - end.x,
-          (target.y + 1) - end.y,
-          target.z - end.z
-        );
-
-        if (distance <= 4) points++;
-      }
-
-      io.emit("grenadeExplode", {
-        id,
-        scorer: socket.id,
-        x: end.x,
-        y: end.y,
-        z: end.z,
-        points
-      });
-    }, 2000);
-
-    grenadeTimers.set(id, timer);
-  });
-
-  socket.on("disconnect", () => {
-    players.delete(socket.id);
-    console.log("Desconectado:", socket.id);
-    broadcastState();
-  });
-});
-
-function broadcastState() {
-  const state = {};
-
-  for (const [id, p] of players.entries()) {
-    state[id] = {
-      name: p.name,
-      x: p.x,
-      y: p.y,
-      z: p.z,
-      yaw: p.yaw,
-      color: p.color
-    };
-  }
-
-  io.emit("state", state);
-}
+const MAX_HEALTH = 100;
+const ARENA_LIMIT = 37;
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
-const PORT = process.env.PORT || 3000;
+function publicPlayers() {
+  const result = {};
+
+  for (const id in players) {
+    const p = players[id];
+
+    result[id] = {
+      id,
+      name: p.name,
+      x: p.x,
+      y: p.y,
+      z: p.z,
+      yaw: p.yaw,
+      pitch: p.pitch,
+      health: p.health,
+      score: p.score,
+      alive: p.alive
+    };
+  }
+
+  return result;
+}
+
+function sendState() {
+  io.emit("state", {
+    players: publicPlayers()
+  });
+}
+
+function respawnPlayer(p) {
+  p.x = Math.random() * 20 - 10;
+  p.y = 0;
+  p.z = Math.random() * 20 - 10;
+  p.health = MAX_HEALTH;
+  p.alive = true;
+}
+
+function damagePlayer(attackerId, targetId, damage, weapon) {
+  const attacker = players[attackerId];
+  const target = players[targetId];
+
+  if (!attacker || !target) return;
+  if (!attacker.alive || !target.alive) return;
+  if (attackerId === targetId) return;
+
+  const amount = clamp(Number(damage) || 0, 0, 100);
+
+  if (amount <= 0) return;
+
+  target.health = Math.max(0, target.health - amount);
+
+  io.to(targetId).emit("hit", {
+    attacker: attackerId,
+    target: targetId,
+    damage: amount,
+    weapon,
+    health: target.health
+  });
+
+  if (target.health <= 0) {
+    target.alive = false;
+    attacker.score += 1;
+
+    io.emit("playerDied", {
+      id: targetId,
+      killer: attackerId,
+      score: attacker.score
+    });
+
+    setTimeout(() => {
+      if (players[targetId]) {
+        respawnPlayer(players[targetId]);
+        sendState();
+      }
+    }, 2500);
+  }
+
+  sendState();
+}
+
+io.on("connection", (socket) => {
+  console.log("Jugador conectado:", socket.id);
+
+  socket.on("joinGame", (data = {}) => {
+    players[socket.id] = {
+      id: socket.id,
+      name: String(data.name || "Jugador").slice(0, 18),
+      x: Math.random() * 12 - 6,
+      y: 0,
+      z: Math.random() * 12 - 6,
+      yaw: 0,
+      pitch: 0,
+      health: MAX_HEALTH,
+      score: 0,
+      alive: true,
+      lastAttack: 0
+    };
+
+    socket.emit("joined", {
+      id: socket.id,
+      health: MAX_HEALTH
+    });
+
+    sendState();
+  });
+
+  socket.on("move", (data = {}) => {
+    const p = players[socket.id];
+    if (!p || !p.alive) return;
+
+    const x = Number(data.x);
+    const y = Number(data.y);
+    const z = Number(data.z);
+    const yaw = Number(data.yaw);
+    const pitch = Number(data.pitch);
+
+    if (Number.isFinite(x)) p.x = clamp(x, -ARENA_LIMIT, ARENA_LIMIT);
+    if (Number.isFinite(y)) p.y = clamp(y, 0, 30);
+    if (Number.isFinite(z)) p.z = clamp(z, -ARENA_LIMIT, ARENA_LIMIT);
+    if (Number.isFinite(yaw)) p.yaw = yaw;
+    if (Number.isFinite(pitch)) p.pitch = pitch;
+
+    sendState();
+  });
+
+  socket.on("attack", (data = {}) => {
+    const attacker = players[socket.id];
+    if (!attacker || !attacker.alive) return;
+
+    const now = Date.now();
+    if (now - attacker.lastAttack < 180) return;
+    attacker.lastAttack = now;
+
+    const weapon = String(data.weapon || "pistol");
+    const allowedWeapons = ["pistol", "shotgun", "machete"];
+
+    if (!allowedWeapons.includes(weapon)) return;
+
+    const damageByWeapon = {
+      pistol: 20,
+      shotgun: 35,
+      machete: 45
+    };
+
+    const damage = damageByWeapon[weapon];
+    const targetId = String(data.target || "");
+
+    // El cliente indica el objetivo al que apunta.
+    // Para producción habría que validar también la distancia
+    // y la dirección del disparo en el servidor.
+    if (!players[targetId]) return;
+
+    const target = players[targetId];
+
+    const dx = target.x - attacker.x;
+    const dz = target.z - attacker.z;
+    const distance = Math.sqrt(dx * dx + dz * dz);
+
+    const maxDistance = weapon === "machete" ? 3 : weapon === "shotgun" ? 22 : 55;
+
+    if (distance > maxDistance) return;
+
+    damagePlayer(socket.id, targetId, damage, weapon);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Jugador desconectado:", socket.id);
+    delete players[socket.id];
+    sendState();
+  });
+});
 
 server.listen(PORT, "0.0.0.0", () => {
-  console.log("ABDE STRIKE escuchando en el puerto", PORT);
+  console.log(`ABDE STRIKE activo en el puerto ${PORT}`);
 });
