@@ -93,7 +93,7 @@ io.on("connection", (socket) => {
       player.weapon = data.weapon.slice(0, 20);
     }
 
-    socket.broadcast.emit("move", {
+   sendState();
       id: socket.id,
       ...player
     });
