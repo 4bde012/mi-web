@@ -7,54 +7,71 @@
 <title>LEGENDS OF ABDE</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#101827;color:white;font-family:Arial,sans-serif}
+body{margin:0;overflow:hidden;background:#07101d;color:#fff;font-family:Arial,sans-serif}
 canvas{display:block}
 #hud{position:fixed;inset:0;pointer-events:none;z-index:2}
-.panel{background:#101827df;border:1px solid #36d9ff;padding:9px 13px;border-radius:9px;box-shadow:0 0 12px #00bfff22}
-#brand{position:absolute;top:16px;left:16px;color:#42e8ff;font-size:22px;font-weight:900;text-shadow:0 0 12px #00bfff}
-#stats{position:absolute;top:58px;left:16px;display:grid;gap:7px}
-#rightStats{position:absolute;top:16px;right:16px;display:grid;gap:7px;text-align:right}
-#crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:25px;color:white;text-shadow:0 0 8px #00d9ff}
-#help{position:absolute;bottom:16px;left:16px;color:#d5eaff;font-size:12px;line-height:1.7}
-#notice{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#8defff;font-size:18px;text-shadow:0 0 12px #00bfff}
-#startScreen{position:fixed;inset:0;z-index:5;background:radial-gradient(ellipse,#17324bea,#07101bf5);display:flex;align-items:center;justify-content:center;text-align:center}
-#card{width:min(500px,92%);padding:30px;border:1px solid #39dcff;border-radius:16px;background:#101c2bf0;box-shadow:0 0 45px #00bfff44}
-h1{color:#48eaff;letter-spacing:3px;margin-top:0}
-button{background:#09bce8;color:#03101a;border:0;border-radius:8px;padding:14px 28px;font-size:16px;font-weight:bold;cursor:pointer}
-button:hover{background:#70edff}
-#message{color:#9cecff;min-height:22px}
-@media(max-width:600px){#brand{font-size:16px}#help{font-size:10px}#stats,#rightStats{font-size:11px}.panel{padding:7px}}
+#brand{position:absolute;top:16px;left:18px;color:#48eaff;font-size:25px;font-weight:900;letter-spacing:2px;text-shadow:0 0 18px #00bfff}
+#tagline{font-size:10px;letter-spacing:4px;color:#c6f7ff;margin-top:5px}
+.panel{background:#101827dc;border:1px solid #36d9ff;padding:10px 14px;border-radius:10px;box-shadow:0 0 15px #00bfff20}
+#stats{position:absolute;top:85px;left:18px;display:grid;gap:8px}
+#rightStats{position:absolute;top:16px;right:16px;display:grid;gap:8px;text-align:right}
+#crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:25px;color:#fff;text-shadow:0 0 10px #00dfff}
+#help{position:absolute;bottom:16px;left:16px;padding:10px 13px;background:#08121ccc;border-radius:10px;border:1px solid #ffffff20;color:#d8f4ff;font-size:12px;line-height:1.8}
+#notice{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);color:#8defff;font-size:18px;text-align:center;text-shadow:0 0 12px #00bfff}
+#startScreen{position:fixed;inset:0;z-index:5;background:radial-gradient(ellipse at center,#173d60ee,#050914f7 75%);display:flex;align-items:center;justify-content:center;text-align:center;padding:18px}
+#card{width:min(560px,95%);padding:32px 24px;border:1px solid #39dcff;border-radius:20px;background:#101c2bf0;box-shadow:0 0 60px #00bfff35}
+#logo{font-size:clamp(28px,6vw,48px);font-weight:1000;letter-spacing:3px;color:#48eaff;text-shadow:0 0 25px #00bfff;margin:0}
+#subtitle{color:#d4f7ff;letter-spacing:5px;font-size:11px;margin:10px 0 25px}
+#message{color:#9cecff;min-height:22px;font-size:13px}
+button{background:linear-gradient(100deg,#00b8e8,#64edff);color:#03101a;border:0;border-radius:10px;padding:15px 32px;font-size:16px;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5;cursor:wait}
+button:hover:not(:disabled){filter:brightness(1.15)}
+.small{color:#abc8da;font-size:12px;line-height:1.8}
+#toast{position:absolute;top:62%;left:50%;transform:translateX(-50%);font-weight:bold;color:#ffe87c;text-shadow:0 0 15px #ffb700;font-size:20px}
+@media(max-width:600px){
+ #brand{font-size:17px}
+ #tagline{font-size:8px}
+ #help{font-size:10px;max-width:220px}
+ #rightStats{font-size:11px}
+ .panel{padding:7px 9px}
+}
 </style>
 </head>
 <body>
 <div id="hud">
-  <div id="brand">LEGENDS OF ABDE</div>
+  <div id="brand">LEGENDS OF ABDE<div id="tagline">EXPLORE · JUMP · COLLECT</div></div>
   <div id="stats">
-    <div class="panel">❤️ VIDA: <span id="health">100</span></div>
-    <div class="panel">🏆 PUNTOS: <span id="score">0</span></div>
+    <div class="panel">💎 CRISTALES: <span id="score">0</span></div>
+    <div class="panel">🏁 RÉCORD LOCAL: <span id="best">0</span></div>
   </div>
   <div id="rightStats">
     <div class="panel">FPS: <span id="fps">0</span></div>
-    <div class="panel">JUGADORES: <span id="players">1</span></div>
-    <div class="panel">ESTADO: <span id="connection">Preparando...</span></div>
+    <div class="panel">JUGADORES: <span id="players">1/40</span></div>
+    <div class="panel">SERVIDOR: <span id="connection">Conectando...</span></div>
   </div>
   <div id="crosshair">+</div>
   <div id="help">
-    WASD: moverse · Ratón: mirar<br>
-    ESPACIO: saltar · SHIFT: correr<br>
+    <b>CONTROLES</b><br>
+    WASD / FLECHAS: moverte<br>
+    RATÓN: mirar alrededor<br>
+    ESPACIO: saltar<br>
+    SHIFT: correr<br>
     ESC: liberar el ratón<br>
-    Haz clic en la pantalla para recuperar el control
+    Recoge cristales para ganar puntos.
   </div>
   <div id="notice"></div>
+  <div id="toast"></div>
 </div>
 
 <div id="startScreen">
   <div id="card">
-    <h1>LEGENDS OF ABDE</h1>
-    <p>La leyenda nunca termina.</p>
-    <p>Explora la arena, sube las plataformas y juega con tus amigos.</p>
-    <p id="message">Cargando motor gráfico...</p>
-    <button id="startButton" disabled>ESPERA...</button>
+    <h1 id="logo">LEGENDS OF ABDE</h1>
+    <div id="subtitle">MULTIPLAYER ARENA</div>
+    <p>Explora una enorme arena futurista con tus amigos.</p>
+    <p class="small">160 × 160 · Plataformas · Torres · Cristales · Hasta 40 jugadores</p>
+    <p id="message">Preparando el mundo 3D...</p>
+    <button id="startButton" disabled>PREPARANDO...</button>
+    <p class="small">Consejo: haz clic en el juego para controlar la cámara.</p>
   </div>
 </div>
 
@@ -68,468 +85,546 @@ const $ = id => document.getElementById(id);
 const startButton = $("startButton");
 const message = $("message");
 
+const SERVER_URL = "https://mi-web-poxe.onrender.com";
+const MAX_PLAYERS = 40;
+
 if (!window.THREE) {
-  message.textContent = "No se pudo cargar el motor 3D. Recarga la página.";
+  message.textContent = "No se pudo cargar Three.js. Recarga la página.";
   startButton.textContent = "RECARGAR";
   startButton.disabled = false;
   startButton.onclick = () => location.reload();
   return;
 }
 
-/* ESCENA */
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x101d30);
-scene.fog = new THREE.Fog(0x101d30, 65, 130);
+scene.background = new THREE.Color(0x07101e);
+scene.fog = new THREE.Fog(0x07101e, 100, 230);
 
-const camera = new THREE.PerspectiveCamera(
-  75, innerWidth / innerHeight, 0.1, 250
-);
-
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, .1, 400);
+const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(innerWidth, innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
-/* ILUMINACIÓN */
-scene.add(new THREE.HemisphereLight(0xb9dcff, 0x26334b, 2));
+scene.add(new THREE.HemisphereLight(0xaedfff, 0x17213a, 2));
 
-const sun = new THREE.DirectionalLight(0xffffff, 2.2);
-sun.position.set(12, 30, 10);
+const sun = new THREE.DirectionalLight(0xffffff, 2.3);
+sun.position.set(30, 60, 15);
 sun.castShadow = true;
+sun.shadow.mapSize.set(1024,1024);
+sun.shadow.camera.left = -100;
+sun.shadow.camera.right = 100;
+sun.shadow.camera.top = 100;
+sun.shadow.camera.bottom = -100;
 scene.add(sun);
 
-const blueLight = new THREE.PointLight(0x00aaff, 40, 65);
-blueLight.position.set(-20, 8, -12);
+const blueLight = new THREE.PointLight(0x00aaff, 100, 100);
+blueLight.position.set(-35, 18, -35);
 scene.add(blueLight);
 
-const purpleLight = new THREE.PointLight(0xa020ff, 35, 60);
-purpleLight.position.set(22, 7, 20);
-scene.add(purpleLight);
+const pinkLight = new THREE.PointLight(0xd020ff, 100, 100);
+pinkLight.position.set(35, 16, 35);
+scene.add(pinkLight);
 
-/* MATERIALES */
 const materials = {
-  floor: new THREE.MeshStandardMaterial({
-    color: 0x28394e, roughness: 0.8, metalness: 0.3
-  }),
-  wall: new THREE.MeshStandardMaterial({
-    color: 0x354963, roughness: 0.75, metalness: 0.35
-  }),
-  blue: new THREE.MeshStandardMaterial({
-    color: 0x087fa8, emissive: 0x00334c, metalness: 0.5
-  }),
-  purple: new THREE.MeshStandardMaterial({
-    color: 0x6326a0, emissive: 0x230044, metalness: 0.5
-  }),
-  neonBlue: new THREE.MeshStandardMaterial({
-    color: 0x00dfff, emissive: 0x00aaff, emissiveIntensity: 1.6
-  }),
-  neonPink: new THREE.MeshStandardMaterial({
-    color: 0xff35d1, emissive: 0xb90078, emissiveIntensity: 1.4
-  }),
-  dark: new THREE.MeshStandardMaterial({
-    color: 0x121a27, metalness: 0.65, roughness: 0.4
-  })
+  floor: new THREE.MeshStandardMaterial({color:0x18283c,roughness:.8,metalness:.25}),
+  wall: new THREE.MeshStandardMaterial({color:0x263b55,roughness:.65,metalness:.4}),
+  dark: new THREE.MeshStandardMaterial({color:0x101725,roughness:.45,metalness:.65}),
+  blue: new THREE.MeshStandardMaterial({color:0x087fa8,emissive:0x003047,metalness:.5}),
+  purple: new THREE.MeshStandardMaterial({color:0x6326a0,emissive:0x220044,metalness:.5}),
+  cyan: new THREE.MeshStandardMaterial({color:0x00dfff,emissive:0x00aaff,emissiveIntensity:1.8}),
+  pink: new THREE.MeshStandardMaterial({color:0xff35d1,emissive:0xb90078,emissiveIntensity:1.5}),
+  gold: new THREE.MeshStandardMaterial({color:0xffdc55,emissive:0xff9900,emissiveIntensity:1.8}),
+  white: new THREE.MeshStandardMaterial({color:0xdafaff,emissive:0x2677aa,emissiveIntensity:.3})
 };
 
 const colliders = [];
 const platforms = [];
+const decorations = [];
+const crystals = [];
 const remotePlayers = new Map();
+const keys = {};
 
-function box(w, h, d, x, y, z, material, solid = false) {
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
-  mesh.position.set(x, y, z);
+function box(w,h,d,x,y,z,material,solid=false) {
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
+  mesh.position.set(x,y,z);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   scene.add(mesh);
 
-  if (solid) {
-    colliders.push({
-      x, z, w, d,
-      minY: y - h / 2,
-      maxY: y + h / 2
-    });
-  }
+  if (solid) colliders.push({
+    x,z,w,d,minY:y-h/2,maxY:y+h/2
+  });
   return mesh;
 }
 
-function makePlatform(w, h, d, x, y, z, material) {
-  box(w, h, d, x, y, z, material, true);
-  platforms.push({ x, z, w, d, top: y + h / 2 });
+function platform(w,h,d,x,y,z,material) {
+  box(w,h,d,x,y,z,material,true);
+  platforms.push({x,z,w,d,top:y+h/2});
 }
 
-/* ARENA */
-box(80, 1, 80, 0, -0.5, 0, materials.floor, true);
-box(80, 8, 1, 0, 4, -40, materials.wall, true);
-box(80, 8, 1, 0, 4, 40, materials.wall, true);
-box(1, 8, 80, -40, 4, 0, materials.wall, true);
-box(1, 8, 80, 40, 4, 0, materials.wall, true);
+function addNeonRing(x,y,z,radius,color) {
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(radius,.08,8,48),
+    color
+  );
+  ring.position.set(x,y,z);
+  ring.rotation.x=Math.PI/2;
+  scene.add(ring);
+  decorations.push(ring);
+}
 
-/* BORDES LUMINOSOS */
-box(78, .12, .15, 0, 1, -38.8, materials.neonBlue);
-box(78, .12, .15, 0, 1, 38.8, materials.neonPink);
-box(.15, .12, 78, -38.8, 1, 0, materials.neonPink);
-box(.15, .12, 78, 38.8, 1, 0, materials.neonBlue);
+function addCrystal(x,y,z) {
+  const group = new THREE.Group();
 
-/* PILARES: se dejan espacios para circular */
-for (let x = -24; x <= 24; x += 12) {
-  for (let z = -24; z <= 24; z += 12) {
-    if (Math.abs(x) < 8 && Math.abs(z) < 8) continue;
-    box(2.5, 7, 2.5, x, 3.5, z, materials.dark, true);
-    box(2.65, .18, 2.65, x, 6.8, z, materials.neonBlue);
+  const gem = new THREE.Mesh(
+    new THREE.OctahedronGeometry(.7,0),
+    materials.gold
+  );
+  gem.castShadow = true;
+  group.add(gem);
+
+  const halo = new THREE.Mesh(
+    new THREE.TorusGeometry(.95,.035,6,24),
+    materials.cyan
+  );
+  halo.rotation.x=Math.PI/2;
+  group.add(halo);
+
+  group.position.set(x,y,z);
+  scene.add(group);
+  crystals.push({group,active:true,phase:Math.random()*6.28,x,y,z});
+}
+
+/* MAPA GIGANTE: 160 x 160 */
+box(160,1,160,0,-.5,0,materials.floor,true);
+box(160,12,1,0,6,-80,materials.wall,true);
+box(160,12,1,0,6,80,materials.wall,true);
+box(1,12,160,-80,6,0,materials.wall,true);
+box(1,12,160,80,6,0,materials.wall,true);
+
+/* BORDES NEÓN */
+box(158,.2,.2,0,1,-78.8,materials.cyan);
+box(158,.2,.2,0,1,78.8,materials.pink);
+box(.2,.2,158,-78.8,1,0,materials.pink);
+box(.2,.2,158,78.8,1,0,materials.cyan);
+
+/* SUELO CON CUADRÍCULA */
+const grid = new THREE.GridHelper(158,80,0x1685ae,0x24405a);
+grid.position.y=.025;
+scene.add(grid);
+
+/* PILARES REPARTIDOS POR LA ARENA */
+for(let x=-60;x<=60;x+=20){
+  for(let z=-60;z<=60;z+=20){
+    if(Math.abs(x)<15&&Math.abs(z)<15) continue;
+    box(3,9,3,x,4.5,z,materials.dark,true);
+    box(3.2,.22,3.2,x,9.1,z,(x+z)%2===0?materials.cyan:materials.pink);
+    addNeonRing(x,1.3,z,2,(x+z)%2===0?materials.cyan:materials.pink);
   }
 }
 
-/* PLATAFORMAS PRINCIPALES */
-makePlatform(10, 1, 8, -18, 2, -12, materials.blue);
-makePlatform(10, 1, 8, 18, 3, 12, materials.purple);
-makePlatform(8, 1, 10, 0, 4, -25, materials.blue);
-makePlatform(8, 1, 10, 0, 2, 25, materials.purple);
+/* PLATAFORMAS E ISLAS */
+const islandData = [
+  [-35,3,-30,12,8,materials.blue],
+  [35,5,30,12,8,materials.purple],
+  [0,7,-48,14,12,materials.blue],
+  [0,4,48,14,12,materials.purple],
+  [-50,4,10,12,12,materials.purple],
+  [50,6,-10,12,12,materials.blue],
+  [-30,8,48,12,10,materials.blue],
+  [30,8,-48,12,10,materials.purple],
+  [-52,3,-42,10,10,materials.blue],
+  [52,3,42,10,10,materials.purple]
+];
 
-/* ESCALERAS CON PELDAÑOS SÓLIDOS */
-function makeStep(x, z, height, material) {
-  makePlatform(3.2, height, 3.2, x, height / 2, z, material);
+for(const [x,y,z,w,d,mat] of islandData){
+  platform(w,1,d,x,y,z,mat);
+  box(w+.4,.15,d+.4,x,y+.58,z,mat);
 }
 
-for (let i = 1; i <= 4; i++) {
-  makeStep(-18 + i * 2, -12, i * .6, materials.blue);
-  makeStep(18 - i * 2, 12, i * .75, materials.purple);
+/* ESCALERAS DE SALTO */
+for(let i=1;i<=7;i++){
+  const h=i*.75;
+  platform(4,h,4,-35+i*2,-.5+h/2,-30,materials.blue);
+  platform(4,h,4,35-i*2,1+h/2,30,materials.purple);
+  platform(4,h,4,0,-.5+h/2,-48+i*2,materials.blue);
+  platform(4,h,4,0,-.5+h/2,48-i*2,materials.purple);
 }
 
-for (let i = 1; i <= 6; i++) {
-  makeStep(0, -25 + i * 1.7, i * .65, materials.blue);
-  makeStep(0, 25 - i * 1.7, i * .35, materials.purple);
+/* TORRES DECORATIVAS */
+for(let i=0;i<24;i++){
+  const a=i/24*Math.PI*2;
+  const radius=66;
+  const x=Math.cos(a)*radius;
+  const z=Math.sin(a)*radius;
+  const h=8+(i%4)*3;
+  const mat=i%2?materials.blue:materials.purple;
+
+  box(5,h,5,x,h/2,z,materials.dark);
+  box(5.3,.25,5.3,x,h,z,mat);
+  box(5.4,.12,.12,x,h+1,z-2.4,materials.cyan);
+  addNeonRing(x,1.2,z,3,i%2?materials.cyan:materials.pink);
 }
 
-/* DECORACIÓN PERIMETRAL */
-for (let i = 0; i < 12; i++) {
-  const a = i / 12 * Math.PI * 2;
-  const x = Math.cos(a) * 33;
-  const z = Math.sin(a) * 33;
+/* EDIFICIOS EN LOS CUATRO SECTORES */
+for(let i=0;i<12;i++){
+  const x=(i%4-1.5)*32;
+  const z=(Math.floor(i/4)-1)*38;
+  if(Math.abs(x)<12&&Math.abs(z)<12) continue;
 
-  box(2, 3, 2, x, 1.5, z, i % 2 ? materials.blue : materials.purple);
+  const h=7+(i%3)*3;
+  box(10,h,10,x,h/2,z,materials.dark);
+  box(10.3,.25,10.3,x,h,z,i%2?materials.cyan:materials.pink);
+  for(let k=-1;k<=1;k++){
+    box(.18,2,.18,x+k*2,2,z+5.08,materials.cyan);
+  }
+}
 
-  const lamp = new THREE.PointLight(
-    i % 2 ? 0x00dfff : 0xff35d1, 8, 12
+/* PUENTES ENTRE ZONAS */
+platform(8,1,24,-17,2,-17,materials.blue);
+platform(8,1,24,17,3,17,materials.purple);
+platform(24,1,7,-25,5,8,materials.purple);
+platform(24,1,7,25,5,-8,materials.blue);
+platform(7,1,25,-48,2,-15,materials.blue);
+platform(7,1,25,48,2,15,materials.purple);
+
+/* CRISTALES COLECCIONABLES */
+const crystalSpots = [
+  [-10,1,-10],[10,1,-10],[-10,1,10],[10,1,10],
+  [-35,4,-30],[35,6,30],[0,8,-48],[0,5,48],
+  [-50,5,10],[50,7,-10],[-30,9,48],[30,9,-48],
+  [-52,4,-42],[52,4,42],[-20,1,-35],[20,1,35],
+  [-45,1,0],[45,1,0],[0,1,-60],[0,1,60],
+  [-60,1,25],[60,1,-25],[-25,1,60],[25,1,-60]
+];
+for(const [x,y,z] of crystalSpots) addCrystal(x,y,z);
+
+/* DECORACIÓN FLOTANTE */
+for(let i=0;i<42;i++){
+  const x=(Math.random()-.5)*145;
+  const z=(Math.random()-.5)*145;
+  const mesh=new THREE.Mesh(
+    new THREE.OctahedronGeometry(.4+Math.random()*.7),
+    i%2?materials.cyan:materials.pink
   );
-  lamp.position.set(x, 3, z);
-  scene.add(lamp);
+  mesh.position.set(x,2+Math.random()*12,z);
+  mesh.rotation.set(Math.random(),Math.random(),Math.random());
+  scene.add(mesh);
+  decorations.push(mesh);
 }
 
 /* JUGADOR LOCAL */
-const playerHeight = 1.7;
-const playerRadius = .4;
-const player = { x: 0, y: 0, z: 32, yaw: 0, pitch: 0 };
+const playerHeight=1.7;
+const playerRadius=.4;
+const player={x:0,y:0,z:65,yaw:0,pitch:0};
+let velocityY=0;
+let grounded=true;
+let score=0;
+let best=Number(localStorage.getItem("abdeBest")||0);
+let started=false;
+let socket=null;
+let myId=null;
+let lastMoveSent=0;
+let lastStateUpdate=0;
+let lastFrame=performance.now();
+let fpsFrames=0;
+let fpsTime=0;
 
-let velocityY = 0;
-let grounded = true;
-let health = 100;
-let score = 0;
-let started = false;
-let lastMoveSent = 0;
-let lastScoreTime = 0;
-let socket = null;
-let myId = null;
+$("best").textContent=best;
 
-const keys = {};
-
-function floorAt(x, z) {
-  let height = 0;
-
-  for (const p of platforms) {
-    const inside =
-      Math.abs(x - p.x) < p.w / 2 - .15 &&
-      Math.abs(z - p.z) < p.d / 2 - .15;
-
-    if (inside) height = Math.max(height, p.top);
+function floorAt(x,z){
+  let height=0;
+  for(const p of platforms){
+    if(Math.abs(x-p.x)<p.w/2-.15&&Math.abs(z-p.z)<p.d/2-.15){
+      height=Math.max(height,p.top);
+    }
   }
   return height;
 }
 
-function blockedAt(x, z) {
-  if (x < -38 || x > 38 || z < -38 || z > 38) return true;
+function blockedAt(x,z){
+  if(x < -78 || x > 78 || z < -78 || z > 78) return true;
 
-  for (const c of colliders) {
-    const nearX = Math.abs(x - c.x) < c.w / 2 + playerRadius;
-    const nearZ = Math.abs(z - c.z) < c.d / 2 + playerRadius;
-    const vertical = player.y < c.maxY - .05 &&
-      player.y + playerHeight > c.minY;
-
-    if (nearX && nearZ && vertical) return true;
+  for(const c of colliders){
+    const nearX=Math.abs(x-c.x)<c.w/2+playerRadius;
+    const nearZ=Math.abs(z-c.z)<c.d/2+playerRadius;
+    const vertical=player.y<c.maxY-.05&&player.y+playerHeight>c.minY;
+    if(nearX&&nearZ&&vertical) return true;
   }
   return false;
 }
 
-function syncCamera() {
-  camera.position.set(player.x, player.y + playerHeight, player.z);
-  camera.rotation.order = "YXZ";
-  camera.rotation.y = player.yaw;
-  camera.rotation.x = player.pitch;
+function syncCamera(){
+  camera.position.set(player.x,player.y+playerHeight,player.z);
+  camera.rotation.order="YXZ";
+  camera.rotation.y=player.yaw;
+  camera.rotation.x=player.pitch;
 }
 
-/* PERSONAJES MULTIJUGADOR */
-function makeAvatar(color = 0xff4ccf) {
-  const group = new THREE.Group();
+function updateScore(){
+  $("score").textContent=score;
+  if(score>best){
+    best=score;
+    $("best").textContent=best;
+    try{localStorage.setItem("abdeBest",String(best));}catch(e){}
+  }
+}
 
-  const bodyMaterial = new THREE.MeshStandardMaterial({
-    color, emissive: color, emissiveIntensity: .12
+function showToast(text){
+  $("toast").textContent=text;
+  clearTimeout(showToast.timer);
+  showToast.timer=setTimeout(()=>$("toast").textContent="",1300);
+}
+
+/* AVATARES MULTIJUGADOR */
+function makeAvatar(color){
+  const group=new THREE.Group();
+  const bodyMat=new THREE.MeshStandardMaterial({
+    color:color||0x42e8ff,emissive:color||0x42e8ff,emissiveIntensity:.12
   });
-
-  const body = new THREE.Mesh(new THREE.BoxGeometry(.7, 1.1, .45), bodyMaterial);
-  body.position.y = .75;
-  body.castShadow = true;
+  const body=new THREE.Mesh(new THREE.BoxGeometry(.7,1.1,.45),bodyMat);
+  body.position.y=.8;
+  body.castShadow=true;
   group.add(body);
 
-  const head = new THREE.Mesh(
-    new THREE.SphereGeometry(.25, 16, 12),
-    new THREE.MeshStandardMaterial({ color: 0xffc9a8 })
+  const head=new THREE.Mesh(
+    new THREE.SphereGeometry(.25,12,10),
+    new THREE.MeshStandardMaterial({color:0xffc9a8})
   );
-  head.position.y = 1.48;
+  head.position.y=1.5;
   group.add(head);
 
-  const marker = new THREE.Mesh(
-    new THREE.BoxGeometry(.9, .07, .07),
-    materials.neonBlue
-  );
-  marker.position.y = 1.95;
+  const marker=new THREE.Mesh(new THREE.BoxGeometry(.9,.07,.07),materials.cyan);
+  marker.position.y=1.95;
   group.add(marker);
 
   scene.add(group);
   return group;
 }
 
-/* INTERFAZ */
-function updateHUD() {
-  $("health").textContent = health;
-  $("score").textContent = score;
+function setConnection(text){
+  $("connection").textContent=text;
 }
 
-function setConnection(value) {
-  $("connection").textContent = value;
-}
-
-/* MULTIJUGADOR: cliente y servidor comparten los mismos nombres */
-function connectMultiplayer() {
-  if (typeof io === "undefined") {
+function connectMultiplayer(){
+  if(typeof io==="undefined"){
     setConnection("Socket.IO no disponible");
     return;
   }
 
-  socket = io("https://mi-web-poxe.onrender.com", {
-    transports: ["websocket", "polling"],
-    reconnection: true,
-    timeout: 12000
+  socket=io(SERVER_URL,{
+    transports:["polling","websocket"],
+    reconnection:true,
+    timeout:20000
   });
 
-  socket.on("connect", () => {
-    myId = socket.id;
+  socket.on("connect",()=>{
+    myId=socket.id;
     setConnection("Conectado");
-
-    socket.emit("joinGame", {
-      name: "Jugador",
-      x: player.x,
-      y: player.y,
-      z: player.z,
-      yaw: player.yaw
+    socket.emit("joinGame",{
+      name:"Jugador",
+      x:player.x,y:player.y,z:player.z,yaw:player.yaw
     });
   });
 
-  socket.on("disconnect", () => {
+  socket.on("disconnect",()=>{
     setConnection("Desconectado");
   });
 
-  socket.on("connect_error", error => {
-    setConnection("Error de servidor");
-    console.error("Socket.IO:", error.message);
+  socket.on("connect_error",err=>{
+    setConnection("Reintentando...");
+    console.warn("Multijugador:",err.message);
   });
 
-  socket.on("state", data => {
-    const list = Array.isArray(data) ? data : data?.players;
-    if (!Array.isArray(list)) return;
+  socket.on("serverFull",data=>{
+    setConnection("Partida llena");
+    showToast(data?.message||"La partida está llena");
+  });
 
-    const seen = new Set();
+  socket.on("state",data=>{
+    const list=Array.isArray(data)?data:data?.players;
+    if(!Array.isArray(list)) return;
 
-    for (const p of list) {
-      if (!p || !p.id || p.id === myId) continue;
-
+    const seen=new Set();
+    for(const p of list){
+      if(!p||!p.id||p.id===myId) continue;
       seen.add(p.id);
 
-      if (!remotePlayers.has(p.id)) {
-        const avatar = makeAvatar(p.color || 0xff4ccf);
-        remotePlayers.set(p.id, avatar);
+      if(!remotePlayers.has(p.id)){
+        remotePlayers.set(p.id,makeAvatar(p.color));
       }
 
-      const avatar = remotePlayers.get(p.id);
+      const avatar=remotePlayers.get(p.id);
       avatar.position.set(
-        Number(p.x) || 0,
-        Number(p.y) || 0,
-        Number(p.z) || 0
+        Number(p.x)||0,
+        Number(p.y)||0,
+        Number(p.z)||0
       );
-      avatar.rotation.y = Number(p.yaw ?? p.rotationY) || 0;
+      avatar.rotation.y=Number(p.yaw??p.rotationY)||0;
     }
 
-    for (const [id, avatar] of remotePlayers) {
-      if (!seen.has(id)) {
+    for(const [id,avatar] of remotePlayers){
+      if(!seen.has(id)){
         scene.remove(avatar);
         remotePlayers.delete(id);
       }
     }
 
-    $("players").textContent = String(remotePlayers.size + 1);
+    $("players").textContent=Math.min(MAX_PLAYERS,remotePlayers.size+1)+"/"+MAX_PLAYERS;
   });
 }
 
 /* CONTROLES */
-document.addEventListener("keydown", event => {
-  keys[event.code] = true;
-
-  if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.code)) {
-    event.preventDefault();
+document.addEventListener("keydown",e=>{
+  keys[e.code]=true;
+  if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)){
+    e.preventDefault();
   }
 });
+document.addEventListener("keyup",e=>keys[e.code]=false);
 
-document.addEventListener("keyup", event => {
-  keys[event.code] = false;
-});
-
-renderer.domElement.addEventListener("click", () => {
-  if (started && document.pointerLockElement !== renderer.domElement) {
+renderer.domElement.addEventListener("click",()=>{
+  if(started&&document.pointerLockElement!==renderer.domElement){
     renderer.domElement.requestPointerLock();
   }
 });
 
-document.addEventListener("mousemove", event => {
-  if (!started || document.pointerLockElement !== renderer.domElement) return;
-
-  player.yaw -= event.movementX * .002;
-  player.pitch -= event.movementY * .002;
-  player.pitch = THREE.MathUtils.clamp(player.pitch, -1.5, 1.5);
+document.addEventListener("mousemove",e=>{
+  if(!started||document.pointerLockElement!==renderer.domElement) return;
+  player.yaw-=e.movementX*.002;
+  player.pitch-=e.movementY*.002;
+  player.pitch=THREE.MathUtils.clamp(player.pitch,-1.45,1.45);
   syncCamera();
 });
 
-startButton.addEventListener("click", () => {
-  started = true;
-  $("startScreen").style.display = "none";
+startButton.addEventListener("click",()=>{
+  started=true;
+  $("startScreen").style.display="none";
   connectMultiplayer();
   renderer.domElement.requestPointerLock();
   syncCamera();
 });
 
-/* MOVIMIENTO Y SALTO */
-function update(dt, now) {
-  if (!started) return;
+/* MOVIMIENTO, SALTO Y COLECCIÓN */
+function update(dt,now){
+  if(!started) return;
 
-  const speed = keys.ShiftLeft || keys.ShiftRight ? 10 : 6;
-  let forward = (keys.KeyW || keys.ArrowUp ? 1 : 0)
-              - (keys.KeyS || keys.ArrowDown ? 1 : 0);
-  let side = (keys.KeyD || keys.ArrowRight ? 1 : 0)
-           - (keys.KeyA || keys.ArrowLeft ? 1 : 0);
+  const speed=(keys.ShiftLeft||keys.ShiftRight)?13:8;
+  let forward=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0);
+  let side=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);
+  const len=Math.hypot(forward,side)||1;
+  forward/=len;
+  side/=len;
 
-  const len = Math.hypot(forward, side) || 1;
-  forward /= len;
-  side /= len;
+  const dx=(-Math.sin(player.yaw)*forward+Math.cos(player.yaw)*side)*speed*dt;
+  const dz=(-Math.cos(player.yaw)*forward-Math.sin(player.yaw)*side)*speed*dt;
 
-  const dx = (
-    -Math.sin(player.yaw) * forward +
-     Math.cos(player.yaw) * side
-  ) * speed * dt;
+  if(!blockedAt(player.x+dx,player.z)) player.x+=dx;
+  if(!blockedAt(player.x,player.z+dz)) player.z+=dz;
 
-  const dz = (
-    -Math.cos(player.yaw) * forward -
-     Math.sin(player.yaw) * side
-  ) * speed * dt;
-
-  if (!blockedAt(player.x + dx, player.z)) player.x += dx;
-  if (!blockedAt(player.x, player.z + dz)) player.z += dz;
-
-  if (keys.Space && grounded) {
-    velocityY = 8.5;
-    grounded = false;
+  if(keys.Space&&grounded){
+    velocityY=10;
+    grounded=false;
   }
 
-  const oldY = player.y;
-  velocityY -= 22 * dt;
-  player.y += velocityY * dt;
+  const oldY=player.y;
+  velocityY-=24*dt;
+  player.y+=velocityY*dt;
+  const floor=floorAt(player.x,player.z);
 
-  const floor = floorAt(player.x, player.z);
-
-  if (velocityY <= 0 && oldY >= floor && player.y <= floor) {
-    player.y = floor;
-    velocityY = 0;
-    grounded = true;
-  } else {
-    grounded = false;
+  if(velocityY<=0&&oldY>=floor&&player.y<=floor){
+    player.y=floor;
+    velocityY=0;
+    grounded=true;
+  }else{
+    grounded=false;
   }
 
-  /* Caer fuera del mapa devuelve al jugador al inicio */
-  if (player.y < -12) {
-    player.x = 0;
-    player.y = 0;
-    player.z = 32;
-    velocityY = 0;
-    health = Math.max(1, health - 10);
-    $("notice").textContent = "¡Has caído! Vuelves a la arena";
-    setTimeout(() => $("notice").textContent = "", 1500);
-    updateHUD();
+  if(player.y < -15){
+    player.x=0;
+    player.y=0;
+    player.z=65;
+    velocityY=0;
+    showToast("¡Vuelta al punto de inicio!");
   }
 
-  /* Puntos por tiempo jugando, sin recoger objetos */
-  if (now - lastScoreTime > 10000) {
-    score++;
-    lastScoreTime = now;
-    updateHUD();
+  /* RECOGER CRISTALES */
+  for(const crystal of crystals){
+    if(!crystal.active) continue;
+    const dx=player.x-crystal.x;
+    const dz=player.z-crystal.z;
+    const dy=(player.y+1)-crystal.y;
+
+    if(dx*dx+dz*dz<3.2&&Math.abs(dy)<2.5){
+      crystal.active=false;
+      crystal.group.visible=false;
+      score++;
+      updateScore();
+      showToast("+1 CRISTAL 💎");
+      setTimeout(()=>{
+        crystal.active=true;
+        crystal.group.visible=true;
+      },6000);
+    }
+  }
+
+  for(const c of crystals){
+    if(c.active){
+      c.group.rotation.y+=dt*1.8;
+      c.group.position.y=c.y+Math.sin(now*.002+c.phase)*.22;
+    }
   }
 
   syncCamera();
 
-  if (socket?.connected && now - lastMoveSent > 60) {
-    lastMoveSent = now;
-    socket.emit("move", {
-      x: player.x,
-      y: player.y,
-      z: player.z,
-      yaw: player.yaw
+  if(socket?.connected&&now-lastMoveSent>100){
+    lastMoveSent=now;
+    socket.emit("move",{
+      x:player.x,y:player.y,z:player.z,yaw:player.yaw
     });
   }
 }
 
-/* BUCLE PRINCIPAL */
-let lastTime = performance.now();
-let frames = 0;
-let fpsElapsed = 0;
-
-function animate(now) {
+/* BUCLE GRÁFICO */
+function animate(now){
   requestAnimationFrame(animate);
+  const dt=Math.min((now-lastFrame)/1000,.04);
+  lastFrame=now;
 
-  const dt = Math.min((now - lastTime) / 1000, .05);
-  lastTime = now;
+  update(dt,now);
 
-  update(dt, now);
-
-  frames++;
-  fpsElapsed += dt;
-
-  if (fpsElapsed >= 1) {
-    $("fps").textContent = String(Math.round(frames / fpsElapsed));
-    frames = 0;
-    fpsElapsed = 0;
+  for(const item of decorations){
+    if(item.geometry.type==="OctahedronGeometry"){
+      item.rotation.x+=dt*.15;
+      item.rotation.y+=dt*.3;
+    }
   }
 
-  renderer.render(scene, camera);
+  fpsFrames++;
+  fpsTime+=dt;
+  if(fpsTime>=1){
+    $("fps").textContent=Math.round(fpsFrames/fpsTime);
+    fpsFrames=0;
+    fpsTime=0;
+  }
+
+  renderer.render(scene,camera);
 }
 
-window.addEventListener("resize", () => {
-  camera.aspect = innerWidth / innerHeight;
+window.addEventListener("resize",()=>{
+  camera.aspect=innerWidth/innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
+  renderer.setSize(innerWidth,innerHeight);
 });
 
 syncCamera();
-updateHUD();
-message.textContent = "Juego preparado. Pulsa JUGAR.";
-startButton.disabled = false;
-startButton.textContent = "JUGAR";
+message.textContent="¡Mundo preparado! Pulsa JUGAR.";
+startButton.disabled=false;
+startButton.textContent="JUGAR";
 requestAnimationFrame(animate);
 })();
 </script>
