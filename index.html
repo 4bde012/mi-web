@@ -399,23 +399,41 @@ if(!window.THREE){
    return;
   }
 
-  socket = io(SERVER_URL,{
-   transports:["websocket","polling"],
-   reconnection:true
-  });
+  
+const SERVER_URL = "https://mi-web-poxe.onrender.com";
 
-  socket.on("connect",()=>{
-   myId = socket.id;
-   $("connection").textContent = "Conectado";
+socket = io(SERVER_URL, {
+  autoConnect: false,
+  reconnection: true,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
+  timeout: 20000,
+  transports: ["polling", "websocket"]
+});
 
-   socket.emit("joinGame",{
-    name:$("playerName").value.trim() || "Jugador",
-    x:player.x,y:player.y,z:player.z,yaw,
-    skin:selectedSkin,
-    weapon:selectedWeapon,
-    creatorKey:$("creatorKey").value
-   });
+socket.on("connect", () => {
+  console.log("Socket.IO conectado:", socket.id);
+  $("connection").textContent = "Conectado";
+
+  socket.emit("joinGame", {
+    name: $("playerName").value || "Jugador",
+    creatorKey: $("creatorKey").value || "",
+    weapon: selectedWeapon,
+    skin: selectedSkin
   });
+});
+
+socket.on("disconnect", (reason) => {
+  console.warn("Socket.IO desconectado:", reason);
+  $("connection").textContent = "Desconectado";
+});
+
+socket.on("connect_error", (err) => {
+  console.error("Error Socket.IO:", err.message);
+  $("connection").textContent = "Reintentando";
+});
+
 
   socket.on("disconnect",()=>{
    $("connection").textContent = "Desconectado";
