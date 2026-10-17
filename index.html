@@ -2,24 +2,279 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mi primera web</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111827;
-      color: white;
-      text-align: center;
-      padding: 80px 20px;
-    }
-    h1 { color: #38bdf8; }
-    a { color: #38bdf8; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABDE GAMES</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080b16;color:#f4f6ff;font-family:Arial,sans-serif}
+header{text-align:center;padding:30px 15px;background:linear-gradient(135deg,#111a38,#25104a)}
+h1{font-size:clamp(34px,7vw,58px);margin:8px;color:#68f5ff}
+header p{color:#c2c9e7}
+main{max-width:1000px;margin:auto;padding:20px}
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.card{background:#141a2d;border:1px solid #303b60;border-radius:15px;padding:20px;text-align:center}
+.card .emoji{font-size:45px}
+button{background:#6246ea;color:white;border:0;border-radius:9px;padding:12px 17px;font-size:15px;font-weight:bold;cursor:pointer}
+button:hover{filter:brightness(1.2)}
+.card button{width:100%}
+#arena{margin-top:24px;background:#11172a;border:1px solid #354267;border-radius:16px;padding:18px;text-align:center}
+#gameTitle{margin-top:0;color:#68f5ff}
+#stats{margin:12px;font-size:17px}
+canvas{display:block;width:100%;max-width:600px;height:auto;aspect-ratio:3/2;background:#050816;border:1px solid #354267;border-radius:10px;margin:12px auto}
+#clickArea{padding:25px}
+#coin{font-size:80px;border-radius:50%;width:140px;height:140px;background:#34265c;border:3px solid #a68bff}
+#message{color:#aeb9dc;min-height:24px}
+.controls{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:12px}
+footer{text-align:center;padding:25px;color:#8490b5}
+[hidden]{display:none!important}
+</style>
 </head>
 <body>
-  <h1>¡Bienvenido a mi web!</h1>
-  <p>He creado esta página gratis con GitHub Pages.</p>
-  <p>¡Puede visitarla todo el mundo!</p>
+<header>
+  <h1>🎮 ABDE GAMES</h1>
+  <p>Tu rincón de juegos. Juega, consigue puntos y bate récords.</p>
+</header>
+
+<main>
+  <h2>🎯 Elige tu juego</h2>
+  <div class="games">
+    <div class="card">
+      <div class="emoji">🚀</div>
+      <h3>Space Shooter</h3>
+      <p>Esquiva enemigos y dispara.</p>
+      <button onclick="startGame('space')">JUGAR</button>
+    </div>
+    <div class="card">
+      <div class="emoji">🐍</div>
+      <h3>Snake</h3>
+      <p>Come y haz crecer la serpiente.</p>
+      <button onclick="startGame('snake')">JUGAR</button>
+    </div>
+    <div class="card">
+      <div class="emoji">🪙</div>
+      <h3>Clicker</h3>
+      <p>Pulsa la moneda y bate tu récord.</p>
+      <button onclick="startGame('clicker')">JUGAR</button>
+    </div>
+  </div>
+
+  <section id="arena" hidden>
+    <h2 id="gameTitle">Juego</h2>
+    <div id="stats"></div>
+    <canvas id="canvas" width="600" height="400"></canvas>
+    <div id="clickArea" hidden>
+      <button id="coin" onclick="clickCoin()">🪙</button>
+      <p>¡Haz clic en la moneda!</p>
+    </div>
+    <p id="message">¡Buena suerte!</p>
+    <div class="controls" id="mobileControls" hidden>
+      <button onclick="moveSnake(0,-1)">⬆️</button>
+      <button onclick="moveSnake(-1,0)">⬅️</button>
+      <button onclick="moveSnake(0,1)">⬇️</button>
+      <button onclick="moveSnake(1,0)">➡️</button>
+    </div>
+    <div class="controls">
+      <button onclick="restartGame()">🔄 Reiniciar</button>
+      <button onclick="stopGame()">⬅️ Volver</button>
+    </div>
+  </section>
+</main>
+
+<footer>ABDE GAMES · Hecho para jugar 🎮</footer>
+
+<script>
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
+const arena=document.getElementById('arena');
+const stats=document.getElementById('stats');
+const message=document.getElementById('message');
+const clickArea=document.getElementById('clickArea');
+const mobileControls=document.getElementById('mobileControls');
+
+let game='',timer=null,score=0,over=false;
+let player,bullets,enemies,keys={},snake,food,dir,nextDir;
+let clickScore=0,spawnCount=0;
+
+function best(name){
+  return Number(localStorage.getItem('abde-'+name)||0);
+}
+function saveBest(name,value){
+  if(value>best(name))localStorage.setItem('abde-'+name,value);
+}
+function startGame(name){
+  clearInterval(timer);
+  game=name;
+  arena.hidden=false;
+  clickArea.hidden=name!=='clicker';
+  canvas.hidden=name==='clicker';
+  mobileControls.hidden=name!=='snake';
+  document.getElementById('gameTitle').textContent=
+    {space:'🚀 Space Shooter',snake:'🐍 Snake',clicker:'🪙 Clicker'}[name];
+  restartGame();
+  arena.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function stopGame(){
+  clearInterval(timer);
+  game='';
+  arena.hidden=true;
+}
+function restartGame(){
+  clearInterval(timer);
+  score=0;over=false;keys={};spawnCount=0;
+  message.textContent='¡A jugar!';
+  if(game==='space'){
+    player={x:285,y:340};
+    bullets=[];enemies=[];
+    timer=setInterval(spaceTick,30);
+    drawSpace();
+  }else if(game==='snake'){
+    snake=[{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+    dir={x:1,y:0};nextDir={x:1,y:0};
+    placeFood();
+    timer=setInterval(snakeTick,130);
+    drawSnake();
+  }else if(game==='clicker'){
+    clickScore=0;
+    updateClicker();
+  }
+  updateStats();
+}
+function updateStats(){
+  if(game==='clicker'){
+    stats.textContent='Monedas: '+clickScore+
+      ' | Récord: '+best('clicker');
+  }else{
+    stats.textContent='Puntos: '+score+' | Récord: '+best(game);
+  }
+}
+function endGame(text){
+  over=true;
+  clearInterval(timer);
+  saveBest(game,score);
+  message.textContent=text+' ¡Pulsa Reiniciar para intentarlo otra vez!';
+  updateStats();
+}
+
+// SPACE SHOOTER
+function spaceTick(){
+  if(over)return;
+  if(keys.ArrowLeft||keys.a)player.x-=5;
+  if(keys.ArrowRight||keys.d)player.x+=5;
+  if(keys.ArrowUp||keys.w)player.y-=5;
+  if(keys.ArrowDown||keys.s)player.y+=5;
+  player.x=Math.max(15,Math.min(585,player.x));
+  player.y=Math.max(20,Math.min(385,player.y));
+
+  if(keys[' ']&&spawnCount%5===0){
+    bullets.push({x:player.x,y:player.y-15});
+  }
+  spawnCount++;
+  bullets.forEach(b=>b.y-=8);
+  bullets=bullets.filter(b=>b.y>-10);
+
+  if(Math.random()<0.035){
+    enemies.push({x:20+Math.random()*560,y:-15});
+  }
+  enemies.forEach(e=>e.y+=2.6);
+
+  for(let i=enemies.length-1;i>=0;i--){
+    let e=enemies[i];
+    let hit=false;
+    for(let j=bullets.length-1;j>=0;j--){
+      let b=bullets[j];
+      if(Math.hypot(e.x-b.x,e.y-b.y)<19){
+        enemies.splice(i,1);bullets.splice(j,1);
+        score++;hit=true;break;
+      }
+    }
+    if(!hit&&(Math.hypot(e.x-player.x,e.y-player.y)<24||e.y>410)){
+      drawSpace();
+      endGame('¡Fin de la partida! Puntuación: '+score+'.');
+      return;
+    }
+  }
+  drawSpace();updateStats();
+}
+function drawSpace(){
+  ctx.fillStyle='#050816';ctx.fillRect(0,0,600,400);
+  for(let i=0;i<65;i++){
+    ctx.fillStyle='#7187bb';
+    ctx.fillRect((i*97)%600,(i*53+spawnCount*1.5)%400,2,2);
+  }
+  ctx.font='27px Arial';ctx.textAlign='center';
+  ctx.fillText('🚀',player.x,player.y+10);
+  bullets.forEach(b=>{ctx.fillStyle='#6dfbff';ctx.fillRect(b.x-2,b.y,4,12)});
+  enemies.forEach(e=>{ctx.font='25px Arial';ctx.fillText('👾',e.x,e.y+8)});
+}
+
+// SNAKE
+function placeFood(){
+  do{
+    food={x:Math.floor(Math.random()*20),y:Math.floor(Math.random()*13)};
+  }while(snake.some(s=>s.x===food.x&&s.y===food.y));
+}
+function moveSnake(x,y){
+  if(game!=='snake'||over)return;
+  if(x!==-dir.x||y!==-dir.y)nextDir={x,y};
+}
+function snakeTick(){
+  if(over)return;
+  dir=nextDir;
+  const head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+  if(head.x<0||head.x>=20||head.y<0||head.y>=13||
+     snake.some(s=>s.x===head.x&&s.y===head.y)){
+    drawSnake();endGame('¡La serpiente ha chocado! Puntos: '+score+'.');return;
+  }
+  snake.unshift(head);
+  if(head.x===food.x&&head.y===food.y){
+    score++;placeFood();
+  }else snake.pop();
+  drawSnake();updateStats();
+}
+function drawSnake(){
+  ctx.fillStyle='#050816';ctx.fillRect(0,0,600,400);
+  ctx.font='25px Arial';ctx.textAlign='center';
+  ctx.fillText('🍎',food.x*30+15,food.y*30+25);
+  snake.forEach((s,i)=>{
+    ctx.fillStyle=i===0?'#8cff72':'#29c76f';
+    ctx.fillRect(s.x*30+2,s.y*30+2,26,26);
+  });
+}
+
+// CLICKER
+function clickCoin(){
+  if(game!=='clicker')return;
+  clickScore++;
+  saveBest('clicker',clickScore);
+  updateClicker();
+}
+function updateClicker(){
+  stats.textContent='Monedas: '+clickScore+' | Récord: '+best('clicker');
+  message.textContent='¡Sigue haciendo clic para conseguir monedas!';
+  ctx.clearRect(0,0,600,400);
+}
+
+// CONTROLES
+document.addEventListener('keydown',e=>{
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();
+  keys[e.key]=true;
+  if(game==='snake'){
+    if(e.key==='ArrowUp'||e.key==='w')moveSnake(0,-1);
+    if(e.key==='ArrowDown'||e.key==='s')moveSnake(0,1);
+    if(e.key==='ArrowLeft'||e.key==='a')moveSnake(-1,0);
+    if(e.key==='ArrowRight'||e.key==='d')moveSnake(1,0);
+  }
+});
+document.addEventListener('keyup',e=>{keys[e.key]=false});
+canvas.addEventListener('click',e=>{
+  if(game!=='space'||over)return;
+  const r=canvas.getBoundingClientRect();
+  bullets.push({
+    x:(e.clientX-r.left)*600/r.width,
+    y:(e.clientY-r.top)*400/r.height
+  });
+});
+</script>
 </body>
 </html>
