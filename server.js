@@ -1,4 +1,6 @@
 
+"use strict";
+
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -10,109 +12,107 @@ const io = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"]
-  }
+  },
+  transports: ["websocket", "polling"]
 });
 
 const PORT = process.env.PORT || 3000;
 const players = new Map();
 
-const clamp = (value, min, max) =>
-  Math.max(min, Math.min(max, Number(value) || 0));
+function clamp(value, min, max) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return min;
+  return Math.max(min, Math.min(max, number));
+}
+
+function publicPlayer(id, player) {
+  return {
+    id,
+    name: player.name,
+    x: player.x,
+    y: player.y,
+    z: player.z,
+    yaw: player.yaw,
+    color: player.color,
+    score: player.score
+  };
+}
 
 function sendState() {
-  io.emit("state", Array.from(players.values()));
+  const state = Array.from(players, ([id, player]) =>
+    publicPlayer(id, player)
+  );
+  io.emit("state", state);
 }
 
 app.get("/", (req, res) => {
-  res.status(200).send("LEGENDS OF ABDE: servidor activo");
+  res.status(200).send("LEGENDS OF ABDE: servidor multijugador activo");
 });
 
 app.get("/health", (req, res) => {
-  res.json({ status: "ok", players: players.size });
+  res.status(200).json({
+    status: "ok",
+    players: players.size
+  });
 });
 
-io.on("connection", (socket) => {
+io.on("connection", socket => {
   console.log("Conectado:", socket.id);
 
   socket.on("joinGame", (data = {}) => {
-    if (!players.has(socket.id)) {
-      players.set(socket.id, {
-        id: socket.id,
-        x: 0,
-        y: 0,
-        z: 32,
-        rotationY: 0,
-        health: 100
-      });
-    }
+    if (players.has(socket.id)) return;
 
-    const player = players.get(socket.id);
+    const colors = [
+      0x29c7ff,
+      0xff8a32,
+      0x65e572,
+      0xd477ff,
+      0xffdc55,
+      0xff5f7d
+    ];
 
-    player.x = clamp(data.x, -38, 38);
-    player.y = clamp(data.y, 0, 15);
-    player.z = clamp(data.z ?? 32, -38, 38);
-    player.rotationY = clamp(data.rotationY, -1000, 1000);
+    players.set(socket.id, {
+      name: String(data.name || "Jugador").slice(0, 16),
+      x: clamp(data.x, -38, 38),
+      y: clamp(data.y, 0, 15),
+      z: clamp(data.z, -38, 38),
+      yaw: clamp(data.yaw ?? data.rotationY, -1000, 1000),
+      color: colors[players.size % colors.length],
+      score: 0
+    });
 
     socket.emit("joined", { id: socket.id });
+    console.log("Jugador dentro de la partida:", socket.id);
     sendState();
-
-    console.log("Jugador en partida:", socket.id);
   });
 
   socket.on("move", (data = {}) => {
-    let player = players.get(socket.id);
-
-    if (!player) {
-      player = {
-        id: socket.id,
-        x: 0,
-        y: 0,
-        z: 32,
-        rotationY: 0,
-        health: 100
-      };
-      players.set(socket.id, player);
-    }
+    const player = players.get(socket.id);
+    if (!player || !data || typeof data !== "object") return;
 
     player.x = clamp(data.x, -38, 38);
     player.y = clamp(data.y, 0, 15);
     player.z = clamp(data.z, -38, 38);
-    player.rotationY = clamp(
-      data.rotationY ?? data.yaw ?? data.rotation,
-      -1000,
-      1000
-    );
+    player.yaw = clamp(data.yaw ?? data.rotationY, -1000, 1000);
 
     sendState();
   });
 
-  socket.on("attack", (data = {}) => {
-    const targetId = data.target;
-    const target = players.get(targetId);
+  socket.on("score", value => {
+    const player = players.get(socket.id);
+    if (!player) return;
 
-    if (!target || targetId === socket.id) return;
-
-    const damage = clamp(data.damage, 0, 50);
-    if (damage <= 0) return;
-
-    target.health = Math.max(0, target.health - damage);
-
-    io.to(targetId).emit("hit", {
-      target: targetId,
-      id: targetId,
-      damage
-    });
-
+    player.score = clamp(value, 0, 100000);
     sendState();
   });
 
-  socket.on("disconnect", () => {
+  socket.on("disconnect", reason => {
     players.delete(socket.id);
-    console.log("Desconectado:", socket.id);
+    console.log("Desconectado:", socket.id, reason);
     sendState();
   });
 });
 
 server.listen(PORT, "0.0.0.0", () => {
-  console.log("LEGENDS OF ABDE activo en el puerto", PORT);
+  console.log(`LEGENDS OF ABDE escuchando en el puerto ${PORT}`);
 });
