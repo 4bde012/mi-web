@@ -1,0 +1,15 @@
+
+{
+  "name": "abde-strike",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Servidor multijugador de ABDE STRIKE",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "socket.io": "^4.8.1"
+  }
+}
