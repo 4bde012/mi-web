@@ -5,41 +5,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LEGENDS OF ABDE</title>
-
 <style>
 *{box-sizing:border-box}
 body{margin:0;overflow:hidden;background:#101827;color:white;font-family:Arial,sans-serif}
 canvas{display:block}
-#hud{position:fixed;inset:0;pointer-events:none;z-index:5}
-.panel{background:#101827dd;border:1px solid #36d9ff;padding:10px 14px;border-radius:8px}
-#brand{position:absolute;top:16px;left:16px;font-size:22px;font-weight:bold;color:#42e8ff;text-shadow:0 0 12px #00bfff}
-#stats{position:absolute;top:58px;left:16px;display:grid;gap:7px}
-#rightStats{position:absolute;top:16px;right:16px;display:grid;gap:7px;text-align:right}
-#crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:26px;color:#fff;text-shadow:0 0 8px #00d9ff}
-#weaponName{position:absolute;bottom:25px;right:25px;font-size:22px;text-align:right;text-shadow:0 0 8px #00d9ff}
-#help{position:absolute;bottom:18px;left:18px;color:#d5eaff;font-size:12px;line-height:1.7}
-#startScreen{position:fixed;inset:0;z-index:10;background:linear-gradient(#07101bd9,#111a2be8);display:flex;justify-content:center;align-items:center;text-align:center}
-#startCard{padding:35px;width:min(480px,90%);border:1px solid #39dcff;border-radius:14px;background:#101c2bed;box-shadow:0 0 35px #00bfff44}
-h1{color:#48eaff;letter-spacing:3px}
+#hud{position:fixed;inset:0;pointer-events:none;z-index:2}
+.panel{background:#101827dd;border:1px solid #36d9ff;padding:10px 13px;border-radius:8px}
+#brand{position:absolute;top:15px;left:15px;font-weight:bold;font-size:22px;color:#42e8ff}
+#stats{position:absolute;top:55px;left:15px;display:grid;gap:7px}
+#rightStats{position:absolute;top:15px;right:15px;display:grid;gap:7px;text-align:right}
+#crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:25px;color:white}
+#help{position:absolute;bottom:15px;left:15px;font-size:12px;line-height:1.7;color:#d5eaff}
+#startScreen{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(#07101be8,#111a2bf2)}
+#startCard{padding:30px;width:min(480px,92%);border:1px solid #39dcff;border-radius:14px;background:#101c2bed;box-shadow:0 0 35px #00bfff44}
+h1{color:#48eaff;letter-spacing:2px}
 button{background:#09bce8;color:#03101a;border:0;border-radius:7px;padding:13px 24px;font-size:16px;font-weight:bold;cursor:pointer}
-button:hover{background:#70edff}
-#message{color:#9cecff;min-height:20px}
-#damageFlash{position:fixed;inset:0;border:0 solid #ff263b;pointer-events:none;z-index:4}
-@media(max-width:600px){
- #brand{font-size:17px}
- #help{font-size:10px}
- #weaponName{font-size:17px}
-}
+#message{color:#9cecff;min-height:22px}
+@media(max-width:600px){#brand{font-size:16px}#help{font-size:10px}#rightStats{font-size:12px}}
 </style>
 </head>
-
 <body>
 <div id="hud">
   <div id="brand">LEGENDS OF ABDE</div>
   <div id="stats">
-    <div class="panel">❤️ VIDA: <span id="health">100</span></div>
-    <div class="panel">🏆 PUNTOS: <span id="score">0</span></div>
-    <div class="panel">🔫 MUNICIÓN: <span id="ammo">12 / 12</span></div>
+    <div class="panel">💎 PUNTOS: <span id="score">0</span></div>
+    <div class="panel">🪜 PLATAFORMAS: <span id="platformCount">0</span></div>
   </div>
   <div id="rightStats">
     <div class="panel">FPS: <span id="fps">0</span></div>
@@ -47,801 +37,376 @@ button:hover{background:#70edff}
     <div class="panel">ESTADO: <span id="connection">Preparando...</span></div>
   </div>
   <div id="crosshair">+</div>
-  <div id="weaponName">PISTOLA</div>
   <div id="help">
-    WASD: Moverse · Ratón: Mirar<br>
-    ESPACIO: Saltar · SHIFT: Correr<br>
-    CLIC IZQUIERDO: Atacar · R: Recargar<br>
-    1: Pistola · 2: Escopeta · 3: Machete<br>
-    ESC: Liberar ratón
+    WASD: moverse · Ratón: mirar<br>
+    ESPACIO: saltar · SHIFT: correr<br>
+    Recoge los cristales brillantes para sumar puntos.<br>
+    ESC: liberar el ratón
   </div>
 </div>
-
-<div id="damageFlash"></div>
 
 <div id="startScreen">
   <div id="startCard">
     <h1>LEGENDS OF ABDE</h1>
-    <p>La leyenda nunca termina</p>
-    <p>Entra en la arena y demuestra tus habilidades.</p>
-    <p id="message">Cargando motor gráfico...</p>
+    <p>Explora la arena, sube las plataformas y recoge cristales.</p>
+    <p id="message">Cargando el juego...</p>
     <button id="startButton" disabled>ESPERA...</button>
   </div>
 </div>
 
-<!-- CARGA DE THREE.JS CON RESPALDO -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script>
-if (typeof THREE === "undefined") {
-  document.write('<script src="https://unpkg.com/three@0.160.0/build/three.min.js"><\/script>');
-}
-</script>
-
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script>
 (() => {
 "use strict";
 
-const message = document.getElementById("message");
-const startButton = document.getElementById("startButton");
+const $ = id => document.getElementById(id);
+const startButton = $("startButton");
+const message = $("message");
 
-if (typeof THREE === "undefined") {
-  message.textContent = "No se pudo cargar Three.js. Comprueba tu conexión e inténtalo de nuevo.";
+if (!window.THREE) {
+  message.textContent = "No se ha podido cargar Three.js. Recarga la página.";
   startButton.textContent = "RECARGAR";
   startButton.disabled = false;
   startButton.onclick = () => location.reload();
   return;
 }
 
-startButton.disabled = false;
-startButton.textContent = "JUGAR";
-message.textContent = "Juego preparado. Pulsa JUGAR.";
-
-try {
-
-/* ==================== ESCENA ==================== */
-
+const SERVER_URL = "https://mi-web-poxe.onrender.com";
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x18283d);
-scene.fog = new THREE.FogExp2(0x18283d, 0.008);
+scene.background = new THREE.Color(0x142238);
+scene.fog = new THREE.Fog(0x142238, 55, 115);
 
-const camera = new THREE.PerspectiveCamera(
-  75, window.innerWidth / window.innerHeight, 0.1, 500
-);
-
+const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 250);
 const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
-/* ==================== ILUMINACIÓN ==================== */
+scene.add(new THREE.HemisphereLight(0xb9dcff, 0x26334b, 2));
+const sun = new THREE.DirectionalLight(0xffffff, 2);
+sun.position.set(12, 30, 10);
+sun.castShadow = true;
+scene.add(sun);
 
-scene.add(new THREE.HemisphereLight(0xb9dcff, 0x28334b, 2));
+const blueMat = new THREE.MeshStandardMaterial({
+  color:0x087fa8, emissive:0x00334c, metalness:0.5, roughness:0.35
+});
+const purpleMat = new THREE.MeshStandardMaterial({
+  color:0x6326a0, emissive:0x230044, metalness:0.4, roughness:0.4
+});
+const darkMat = new THREE.MeshStandardMaterial({
+  color:0x172538, metalness:0.45, roughness:0.55
+});
+const neonBlue = new THREE.MeshStandardMaterial({
+  color:0x00dfff, emissive:0x00aaff, emissiveIntensity:1.7
+});
+const neonPink = new THREE.MeshStandardMaterial({
+  color:0xff35d1, emissive:0xb90078, emissiveIntensity:1.4
+});
+const floorMat = new THREE.MeshStandardMaterial({
+  color:0x28394e, roughness:0.85, metalness:0.2
+});
 
-const mainLight = new THREE.DirectionalLight(0xffffff, 2.2);
-mainLight.position.set(12, 30, 10);
-mainLight.castShadow = true;
-scene.add(mainLight);
-
-const blueLight = new THREE.PointLight(0x00aaff, 45, 65);
-blueLight.position.set(-20, 8, -12);
-scene.add(blueLight);
-
-const purpleLight = new THREE.PointLight(0xa020ff, 35, 60);
-purpleLight.position.set(22, 7, 20);
-scene.add(purpleLight);
-
-/* ==================== MAPA ==================== */
-
-const colliders = [];
 const platforms = [];
 const remotePlayers = new Map();
+const crystals = [];
+const keys = {};
 
-const materials = {
-  floor: new THREE.MeshStandardMaterial({
-    color:0x28394e, roughness:0.8, metalness:0.3
-  }),
-  wall: new THREE.MeshStandardMaterial({
-    color:0x354963, roughness:0.75, metalness:0.35
-  }),
-  metal: new THREE.MeshStandardMaterial({
-    color:0x647b95, metalness:0.8, roughness:0.3
-  }),
-  blue: new THREE.MeshStandardMaterial({
-    color:0x087fa8, emissive:0x00334c, metalness:0.6
-  }),
-  purple: new THREE.MeshStandardMaterial({
-    color:0x6326a0, emissive:0x230044, metalness:0.5
-  }),
-  neonBlue: new THREE.MeshStandardMaterial({
-    color:0x00dfff, emissive:0x00aaff, emissiveIntensity:2
-  }),
-  neonPink: new THREE.MeshStandardMaterial({
-    color:0xff35d1, emissive:0xb90078, emissiveIntensity:1.7
-  }),
-  dark: new THREE.MeshStandardMaterial({
-    color:0x121a27, metalness:0.7, roughness:0.4
-  })
-};
-
-function box(w,h,d,x,y,z,material,solid=false) {
-  const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(w,h,d), material
-  );
+function makeBox(w,h,d,x,y,z,material,platform=false) {
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), material);
   mesh.position.set(x,y,z);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   scene.add(mesh);
-
-  if (solid) {
-    colliders.push({
-      x,z,w,d,
-      minY:y-h/2,
-      maxY:y+h/2
-    });
-  }
+  if (platform) platforms.push({x,yTop:y+h/2,z,w,d});
   return mesh;
 }
 
-box(80,1,80,0,-0.5,0,materials.floor,true);
+/* Suelo y paredes de la arena */
+makeBox(80,1,80,0,-0.5,0,floorMat,true);
+makeBox(80,8,1,0,4,-40,darkMat);
+makeBox(80,8,1,0,4,40,darkMat);
+makeBox(1,8,80,-40,4,0,darkMat);
+makeBox(1,8,80,40,4,0,darkMat);
 
-box(80,8,1,0,4,-40,materials.wall,true);
-box(80,8,1,0,4,40,materials.wall,true);
-box(1,8,80,-40,4,0,materials.wall,true);
-box(1,8,80,40,4,0,materials.wall,true);
+makeBox(78,.12,.18,0,1,-38.8,neonBlue);
+makeBox(78,.12,.18,0,1,38.8,neonPink);
+makeBox(.18,.12,78,-38.8,1,0,neonPink);
+makeBox(.18,.12,78,38.8,1,0,neonBlue);
 
-box(78,0.12,0.15,0,1,-38.8,materials.neonBlue);
-box(78,0.12,0.15,0,1,38.8,materials.neonPink);
-box(0.15,0.12,78,-38.8,1,0,materials.neonPink);
-box(0.15,0.12,78,38.8,1,0,materials.neonBlue);
-
-for (let x=-24; x<=24; x+=12) {
-  for (let z=-24; z<=24; z+=12) {
-    if (Math.abs(x)<8 && Math.abs(z)<8) continue;
-    box(2.5,7,2.5,x,3.5,z,materials.dark,true);
-    box(2.65,0.18,2.65,x,6.8,z,materials.neonBlue);
+/* Pilares decorativos */
+for(let x=-24;x<=24;x+=12){
+  for(let z=-24;z<=24;z+=12){
+    if(Math.abs(x)<8 && Math.abs(z)<8) continue;
+    makeBox(2.5,6,2.5,x,3,z,darkMat);
+    makeBox(2.7,.15,2.7,x,6.1,z,neonBlue);
   }
 }
 
-function makePlatform(w,h,d,x,y,z,material) {
-  box(w,h,d,x,y,z,material,true);
-  platforms.push({x,z,w,d,top:y+h/2});
+/* Plataformas principales */
+makeBox(10,1,8,-18,2,-12,blueMat,true);
+makeBox(10,1,8,18,3,12,purpleMat,true);
+makeBox(8,1,10,0,4,-25,blueMat,true);
+makeBox(8,1,10,0,2,25,purpleMat,true);
+
+/* Escaleras: cada escalón tiene una superficie de aterrizaje */
+function step(x,z,height,material) {
+  makeBox(3,height,3,x,height/2,z,material,true);
 }
-
-makePlatform(10,1,8,-18,2,-12,materials.blue);
-makePlatform(10,1,8,18,3,12,materials.purple);
-makePlatform(8,1,10,0,4,-25,materials.blue);
-makePlatform(8,1,10,0,2,25,materials.purple);
-
-for (let i=0; i<12; i++) {
-  const angle = i/12*Math.PI*2;
-  const x = Math.cos(angle)*33;
-  const z = Math.sin(angle)*33;
-
-  box(2,3,2,x,1.5,z,i%2 ? materials.blue : materials.purple);
-
-  const light = new THREE.PointLight(
-    i%2 ? 0x00dfff : 0xff35d1, 9, 12
-  );
-  light.position.set(x,3,z);
-  scene.add(light);
+for(let i=1;i<=4;i++){
+  step(-8-i*2,-12,i*.6,blueMat);
+  step(8+i*2,12,i*.65,purpleMat);
 }
+for(let i=1;i<=6;i++){
+  step(0,-14-i*2,i*.65,blueMat);
+  step(0,14+i*2,i*.4,purpleMat);
+}
+$("platformCount").textContent = platforms.length;
 
-/* ==================== JUGADOR ==================== */
+/* Cristales para recoger */
+const crystalGeo = new THREE.OctahedronGeometry(.65);
+function addCrystal(x,y,z){
+  const crystal = new THREE.Mesh(crystalGeo,neonBlue);
+  crystal.position.set(x,y,z);
+  crystal.userData.baseY = y;
+  crystal.userData.taken = false;
+  scene.add(crystal);
+  crystals.push(crystal);
+}
+[
+  [-8,1,-5],[8,1,-5],[-8,1,7],[8,1,7],
+  [-18,3,-12],[18,4,12],[0,5,-25],[0,3,25],
+  [-20,1,20],[20,1,-20],[0,1,0],[25,1,0]
+].forEach(p=>addCrystal(...p));
 
+/* Jugador local */
+const player = {x:0,y:0,z:32,yaw:0,pitch:0};
 const playerHeight = 1.7;
-const playerRadius = 0.45;
-
-const player = {
-  x:0, y:0, z:32,
-  yaw:0, pitch:0
-};
-
 let velocityY = 0;
 let grounded = true;
-let health = 100;
-let score = 0;
 let started = false;
-let lastAttack = 0;
-let lastMoveSent = 0;
-let lastDamage = 0;
-let reloading = false;
-
-const keys = {};
-
-function heightAt(x,z) {
-  let height = 0;
-  for (const p of platforms) {
-    if (
-      Math.abs(x-p.x) < p.w/2-playerRadius &&
-      Math.abs(z-p.z) < p.d/2-playerRadius
-    ) {
-      height = Math.max(height,p.top);
-    }
-  }
-  return height;
-}
-
-function blockedAt(x,z) {
-  if (x < -38 || x > 38 || z < -38 || z > 38) return true;
-
-  for (const c of colliders) {
-    const nearX = Math.abs(x-c.x) < c.w/2+playerRadius;
-    const nearZ = Math.abs(z-c.z) < c.d/2+playerRadius;
-
-    const overlap =
-      player.y < c.maxY &&
-      player.y+playerHeight > c.minY;
-
-    if (nearX && nearZ && overlap) return true;
-  }
-  return false;
-}
-
-function syncCamera() {
-  camera.position.set(
-    player.x,
-    player.y+playerHeight,
-    player.z
-  );
-  camera.rotation.order = "YXZ";
-  camera.rotation.y = player.yaw;
-  camera.rotation.x = player.pitch;
-}
-
-/* ==================== ARMAS ==================== */
-
-const weapons = [
-  {
-    name:"PISTOLA", damage:25, ammo:12, maxAmmo:12,
-    reserve:72, delay:280, range:65
-  },
-  {
-    name:"ESCOPETA", damage:12, ammo:6, maxAmmo:6,
-    reserve:36, delay:750, range:28
-  },
-  {
-    name:"MACHETE", damage:45, ammo:Infinity, maxAmmo:Infinity,
-    reserve:Infinity, delay:480, range:3.5
-  }
-];
-
-let weaponIndex = 0;
-const weaponGroup = new THREE.Group();
-camera.add(weaponGroup);
-scene.add(camera);
-
-function clearWeaponModel() {
-  while (weaponGroup.children.length) {
-    const child = weaponGroup.children[0];
-    weaponGroup.remove(child);
-    child.geometry?.dispose();
-
-    if (Array.isArray(child.material)) {
-      child.material.forEach(m=>m.dispose());
-    } else {
-      child.material?.dispose();
-    }
-  }
-}
-
-function addWeaponPart(geometry,material,x,y,z) {
-  const mesh = new THREE.Mesh(geometry,material);
-  mesh.position.set(x,y,z);
-  mesh.castShadow = true;
-  weaponGroup.add(mesh);
-  return mesh;
-}
-
-function buildWeapon() {
-  clearWeaponModel();
-
-  if (weaponIndex===0) {
-    addWeaponPart(
-      new THREE.BoxGeometry(0.18,0.16,0.48),
-      materials.dark,0.34,-0.25,-0.65
-    );
-    addWeaponPart(
-      new THREE.BoxGeometry(0.11,0.12,0.34),
-      materials.metal,0.34,-0.19,-0.94
-    );
-    addWeaponPart(
-      new THREE.BoxGeometry(0.13,0.25,0.14),
-      materials.dark,0.34,-0.42,-0.52
-    );
-    addWeaponPart(
-      new THREE.BoxGeometry(0.08,0.05,0.06),
-      materials.neonBlue,0.34,-0.16,-0.77
-    );
-  } else if (weaponIndex===1) {
-    addWeaponPart(
-      new THREE.BoxGeometry(0.22,0.18,0.85),
-      materials.dark,0.32,-0.25,-0.76
-    );
-    const barrel = addWeaponPart(
-      new THREE.CylinderGeometry(0.045,0.045,0.8,12),
-      materials.metal,0.32,-0.19,-1.2
-    );
-    barrel.rotation.x = Math.PI/2;
-    addWeaponPart(
-      new THREE.BoxGeometry(0.16,0.15,0.3),
-      materials.blue,0.32,-0.39,-0.48
-    );
-  } else {
-    addWeaponPart(
-      new THREE.BoxGeometry(0.13,0.22,0.16),
-      materials.dark,0.34,-0.39,-0.55
-    );
-    const blade = addWeaponPart(
-      new THREE.BoxGeometry(0.1,0.09,0.8),
-      materials.metal,0.34,-0.27,-0.98
-    );
-    blade.rotation.x = -0.15;
-    addWeaponPart(
-      new THREE.BoxGeometry(0.12,0.11,0.08),
-      materials.neonPink,0.34,-0.28,-0.66
-    );
-  }
-
-  document.getElementById("weaponName").textContent =
-    weapons[weaponIndex].name;
-  updateHUD();
-}
-
-function chooseWeapon(index) {
-  if (index<0 || index>=weapons.length) return;
-  weaponIndex = index;
-  buildWeapon();
-}
-
-function updateHUD() {
-  document.getElementById("health").textContent = health;
-  document.getElementById("score").textContent = score;
-
-  const weapon = weapons[weaponIndex];
-  document.getElementById("ammo").textContent =
-    weapon.ammo===Infinity
-      ? "∞"
-      : `${weapon.ammo} / ${weapon.reserve}`;
-}
-
-buildWeapon();
-
-/* ==================== MULTIJUGADOR ==================== */
-
-const SERVER_URL = "https://mi-web-poxe.onrender.com/";
+let score = 0;
 let socket = null;
-let mySocketId = null;
+let myId = null;
+let lastMoveSent = 0;
 
-function setConnection(text) {
-  document.getElementById("connection").textContent = text;
+function makeAvatar(color=0xff4ccf){
+  const group = new THREE.Group();
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(.7,1.1,.45),
+    new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.12})
+  );
+  body.position.y=.75;
+  body.castShadow=true;
+  group.add(body);
+
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(.25,16,12),
+    new THREE.MeshStandardMaterial({color:0xffc9a8})
+  );
+  head.position.y=1.48;
+  group.add(head);
+
+  const marker = new THREE.Mesh(
+    new THREE.BoxGeometry(.85,.08,.08),
+    neonBlue
+  );
+  marker.position.y=1.9;
+  group.add(marker);
+  scene.add(group);
+  return group;
 }
 
-function connectMultiplayer() {
-  if (typeof io==="undefined") {
+function syncCamera(){
+  camera.position.set(player.x,player.y+playerHeight,player.z);
+  camera.rotation.order="YXZ";
+  camera.rotation.y=player.yaw;
+  camera.rotation.x=player.pitch;
+}
+
+function floorAt(x,z,previousY,nextY){
+  let best=0;
+  for(const p of platforms){
+    const inside =
+      Math.abs(x-p.x)<p.w/2-.25 &&
+      Math.abs(z-p.z)<p.d/2-.25;
+    const crossed =
+      previousY>=p.yTop-.02 && nextY<=p.yTop;
+    if(inside && crossed) best=Math.max(best,p.yTop);
+  }
+  return best;
+}
+
+function setConnection(text){ $("connection").textContent=text; }
+
+function connectMultiplayer(){
+  if(!window.io){
     setConnection("Socket.IO no disponible");
     return;
   }
 
-  try {
-    socket = io(SERVER_URL,{
-      transports:["websocket","polling"],
-      reconnection:true,
-      reconnectionAttempts:Infinity,
-      timeout:10000
+  socket=io(SERVER_URL,{transports:["websocket","polling"],timeout:12000});
+  socket.on("connect",()=>{
+    myId=socket.id;
+    setConnection("Conectado");
+    socket.emit("joinGame",{
+      x:player.x,y:player.y,z:player.z,yaw:player.yaw
     });
+  });
+  socket.on("disconnect",()=>setConnection("Desconectado"));
+  socket.on("connect_error",err=>{
+    setConnection("Error de servidor");
+    console.error("Conexión multijugador:",err.message);
+  });
 
-    socket.on("connect",()=>{
-      mySocketId = socket.id;
-      setConnection("Conectado");
+  socket.on("state",data=>{
+    const list=Array.isArray(data)?data:(data?.players||[]);
+    if(!Array.isArray(list)) return;
+    const seen=new Set();
 
-      socket.emit("joinGame",{
-        x:player.x,y:player.y,z:player.z,
-        rotationY:player.yaw
-      });
-    });
+    for(const p of list){
+      if(!p || !p.id || p.id===myId) continue;
+      seen.add(p.id);
 
-    socket.on("disconnect",()=>{
-      setConnection("Desconectado");
-    });
-
-    socket.on("connect_error",()=>{
-      setConnection("Servidor no disponible");
-    });
-
-    socket.on("state",data=>{
-      if (!data) return;
-
-      const list = Array.isArray(data) ? data : (data.players || data);
-      if (!list || typeof list!=="object") return;
-
-      const entries = Array.isArray(list)
-        ? list.map((p,i)=>[p.id || String(i),p])
-        : Object.entries(list);
-
-      const seen = new Set();
-
-      for (const [id,p] of entries) {
-        if (!p || id===mySocketId || id===socket.id) continue;
-        seen.add(id);
-
-        if (!remotePlayers.has(id)) {
-          const group = new THREE.Group();
-
-          const body = new THREE.Mesh(
-            new THREE.BoxGeometry(0.7,1.2,0.45),
-            new THREE.MeshStandardMaterial({
-              color:0xff3dbb,emissive:0x550022
-            })
-          );
-          body.position.y=0.6;
-          group.add(body);
-
-          const head = new THREE.Mesh(
-            new THREE.SphereGeometry(0.24,12,12),
-            new THREE.MeshStandardMaterial({color:0xffc9a8})
-          );
-          head.position.y=1.45;
-          group.add(head);
-
-          scene.add(group);
-          remotePlayers.set(id,group);
-        }
-
-        const remote = remotePlayers.get(id);
-        remote.position.set(
-          Number(p.x)||0,
-          Number(p.y)||0,
-          Number(p.z)||0
-        );
-        remote.rotation.y = Number(p.rotationY ?? p.yaw)||0;
+      if(!remotePlayers.has(p.id)){
+        const avatar=makeAvatar(p.color || 0xff4ccf);
+        remotePlayers.set(p.id,avatar);
       }
-
-      for (const [id,group] of remotePlayers) {
-        if (!seen.has(id)) {
-          scene.remove(group);
-          remotePlayers.delete(id);
-        }
-      }
-
-      document.getElementById("players").textContent =
-        String(remotePlayers.size+1);
-    });
-
-    socket.on("hit",data=>{
-      if (!data) return;
-      if (data.target===socket.id || data.id===socket.id) {
-        takeDamage(Number(data.damage)||10);
-      }
-    });
-  } catch (error) {
-    setConnection("Error de conexión");
-    console.error("Multijugador:",error);
-  }
-}
-
-/* ==================== COMBATE ==================== */
-
-const raycaster = new THREE.Raycaster();
-
-function attack() {
-  if (!started || document.pointerLockElement!==renderer.domElement) return;
-
-  const now = performance.now();
-  const weapon = weapons[weaponIndex];
-
-  if (now-lastAttack<weapon.delay || reloading) return;
-  lastAttack = now;
-
-  if (weapon.ammo!==Infinity && weapon.ammo<=0) {
-    reload();
-    return;
-  }
-
-  if (weapon.ammo!==Infinity) weapon.ammo--;
-
-  const targets = [];
-  for (const group of remotePlayers.values()) {
-    targets.push(...group.children);
-  }
-
-  const shots = weaponIndex===1 ? 5 : 1;
-  const targetHits = new Map();
-
-  for (let i=0;i<shots;i++) {
-    const spread = weaponIndex===1 ? 0.12 : 0;
-
-    const ray = new THREE.Raycaster();
-    ray.setFromCamera(
-      new THREE.Vector2(
-        (Math.random()-0.5)*spread,
-        (Math.random()-0.5)*spread
-      ),
-      camera
-    );
-    ray.far = weapon.range;
-
-    const hits = ray.intersectObjects(targets,true);
-    if (!hits.length) continue;
-
-    let object = hits[0].object;
-
-    while (
-      object.parent &&
-      ![...remotePlayers.values()].includes(object)
-    ) {
-      object = object.parent;
+      const avatar=remotePlayers.get(p.id);
+      avatar.position.set(Number(p.x)||0,Number(p.y)||0,Number(p.z)||0);
+      avatar.rotation.y=Number(p.yaw ?? p.rotationY)||0;
     }
 
-    const id = [...remotePlayers.entries()]
-      .find(([,group])=>group===object)?.[0];
+    for(const [id,avatar] of remotePlayers){
+      if(!seen.has(id)){
+        scene.remove(avatar);
+        remotePlayers.delete(id);
+      }
+    }
+    $("players").textContent=String(remotePlayers.size+1);
+  });
+}
 
-    if (id) {
-      targetHits.set(
-        id,
-        (targetHits.get(id)||0)+weapon.damage
-      );
+function updateScore(){
+  $("score").textContent=String(score);
+  if(socket?.connected) socket.emit("score",score);
+}
+
+function collectCrystals(){
+  for(const c of crystals){
+    if(c.userData.taken) continue;
+    const distance=Math.hypot(player.x-c.position.x,player.y+1-c.position.y,player.z-c.position.z);
+    if(distance<1.5){
+      c.userData.taken=true;
+      scene.remove(c);
+      score+=1;
+      updateScore();
     }
   }
-
-  if (socket && socket.connected) {
-    for (const [target,damage] of targetHits) {
-      socket.emit("attack",{
-        target,
-        damage,
-        weapon:weapon.name
-      });
-    }
-  }
-
-  weaponGroup.position.z = 0.08;
-  setTimeout(()=>{weaponGroup.position.z=0;},80);
-  updateHUD();
 }
 
-function reload() {
-  const weapon = weapons[weaponIndex];
-
-  if (
-    reloading ||
-    weapon.ammo===Infinity ||
-    weapon.ammo>=weapon.maxAmmo ||
-    weapon.reserve<=0
-  ) return;
-
-  reloading = true;
-  message.textContent = "Recargando...";
-
-  setTimeout(()=>{
-    const needed = weapon.maxAmmo-weapon.ammo;
-    const loaded = Math.min(needed,weapon.reserve);
-
-    weapon.ammo += loaded;
-    weapon.reserve -= loaded;
-    reloading = false;
-
-    message.textContent = "Juego preparado";
-    updateHUD();
-  },1000);
-}
-
-function takeDamage(amount) {
-  const now = performance.now();
-  if (now-lastDamage<250) return;
-  lastDamage = now;
-
-  health = Math.max(0,health-amount);
-  updateHUD();
-
-  const flash = document.getElementById("damageFlash");
-  flash.style.border = "12px solid #ff263b";
-
-  setTimeout(()=>{
-    flash.style.border = "0 solid #ff263b";
-  },150);
-
-  if (health<=0) resetPlayer();
-}
-
-function resetPlayer() {
-  health=100;
-  player.x=0;
-  player.y=0;
-  player.z=32;
-  player.yaw=0;
-  player.pitch=0;
-  velocityY=0;
-  grounded=true;
-  syncCamera();
-  updateHUD();
-}
-
-/* ==================== CONTROLES ==================== */
-
-document.addEventListener("keydown",event=>{
-  keys[event.code]=true;
-
-  if ([
-    "Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"
-  ].includes(event.code)) {
-    event.preventDefault();
-  }
-
-  if (event.code==="Digit1") chooseWeapon(0);
-  if (event.code==="Digit2") chooseWeapon(1);
-  if (event.code==="Digit3") chooseWeapon(2);
-  if (event.code==="KeyR") reload();
+document.addEventListener("keydown",e=>{
+  keys[e.code]=true;
+  if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)) e.preventDefault();
 });
-
-document.addEventListener("keyup",event=>{
-  keys[event.code]=false;
-});
+document.addEventListener("keyup",e=>keys[e.code]=false);
 
 renderer.domElement.addEventListener("click",()=>{
-  if (
-    started &&
-    document.pointerLockElement!==renderer.domElement
-  ) {
+  if(started && document.pointerLockElement!==renderer.domElement){
     renderer.domElement.requestPointerLock();
   }
 });
-
-document.addEventListener("mousedown",event=>{
-  if (event.button===0) attack();
-});
-
-document.addEventListener("mousemove",event=>{
-  if (!started || document.pointerLockElement!==renderer.domElement) return;
-
-  player.yaw -= event.movementX*0.002;
-  player.pitch -= event.movementY*0.002;
-
-  player.pitch = Math.max(
-    -Math.PI/2+0.05,
-    Math.min(Math.PI/2-0.05,player.pitch)
-  );
-
+document.addEventListener("mousemove",e=>{
+  if(!started || document.pointerLockElement!==renderer.domElement) return;
+  player.yaw-=e.movementX*.002;
+  player.pitch-=e.movementY*.002;
+  player.pitch=Math.max(-1.5,Math.min(1.5,player.pitch));
   syncCamera();
 });
 
 startButton.addEventListener("click",()=>{
-  if (typeof THREE==="undefined") {
-    location.reload();
-    return;
-  }
-
   started=true;
-  document.getElementById("startScreen").style.display="none";
+  $("startScreen").style.display="none";
   renderer.domElement.requestPointerLock();
   connectMultiplayer();
   syncCamera();
 });
 
-document.addEventListener("pointerlockchange",()=>{
-  if (!document.pointerLockElement && started) {
-    message.textContent="Haz clic en el juego para volver a jugar";
-  }
-});
+function update(dt,time){
+  if(!started) return;
 
-/* ==================== MOVIMIENTO ==================== */
-
-function update(dt) {
-  if (!started) return;
-
-  const speed =
-    (keys.ShiftLeft || keys.ShiftRight) ? 10.5 : 6.5;
-
-  let forward=0;
-  let side=0;
-
-  if (keys.KeyW || keys.ArrowUp) forward+=1;
-  if (keys.KeyS || keys.ArrowDown) forward-=1;
-  if (keys.KeyD || keys.ArrowRight) side+=1;
-  if (keys.KeyA || keys.ArrowLeft) side-=1;
-
+  const speed=(keys.ShiftLeft||keys.ShiftRight)?10:6;
+  let forward=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0);
+  let side=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);
   const len=Math.hypot(forward,side)||1;
-  forward/=len;
-  side/=len;
+  forward/=len; side/=len;
 
-  const dx=(
-    -Math.sin(player.yaw)*forward+
-     Math.cos(player.yaw)*side
-  )*speed*dt;
+  const dx=(-Math.sin(player.yaw)*forward+Math.cos(player.yaw)*side)*speed*dt;
+  const dz=(-Math.cos(player.yaw)*forward-Math.sin(player.yaw)*side)*speed*dt;
+  player.x=THREE.MathUtils.clamp(player.x+dx,-38,38);
+  player.z=THREE.MathUtils.clamp(player.z+dz,-38,38);
 
-  const dz=(
-    -Math.cos(player.yaw)*forward-
-     Math.sin(player.yaw)*side
-  )*speed*dt;
-
-  if (!blockedAt(player.x+dx,player.z)) {
-    player.x+=dx;
-  }
-
-  if (!blockedAt(player.x,player.z+dz)) {
-    player.z+=dz;
-  }
-
-  if (keys.Space && grounded) {
-    velocityY=8.5;
+  if(keys.Space && grounded){
+    velocityY=8;
     grounded=false;
   }
 
+  const oldY=player.y;
   velocityY-=22*dt;
   player.y+=velocityY*dt;
+  const floor=floorAt(player.x,player.z,oldY,player.y);
 
-  const floor=heightAt(player.x,player.z);
-
-  if (player.y<=floor && velocityY<=0) {
+  if(velocityY<=0 && player.y<=floor){
     player.y=floor;
     velocityY=0;
     grounded=true;
-  } else {
+  }else{
     grounded=false;
   }
 
+  for(const c of crystals){
+    if(!c.userData.taken){
+      c.rotation.y+=dt*1.5;
+      c.position.y=c.userData.baseY+Math.sin(time*.002+c.position.x)*.12;
+    }
+  }
+  collectCrystals();
   syncCamera();
 
-  const now=performance.now();
-
-  if (socket && socket.connected && now-lastMoveSent>70) {
-    lastMoveSent=now;
+  if(socket?.connected && performance.now()-lastMoveSent>60){
+    lastMoveSent=performance.now();
     socket.emit("move",{
-      x:player.x,
-      y:player.y,
-      z:player.z,
-      rotationY:player.yaw
+      x:player.x,y:player.y,z:player.z,yaw:player.yaw
     });
   }
 }
 
-/* ==================== FPS Y BUCLE ==================== */
-
-let lastTime=performance.now();
-let fpsFrames=0;
-let fpsTime=0;
-
-function animate(now) {
+let lastTime=performance.now(), frames=0, fpsTime=0;
+function animate(now){
   requestAnimationFrame(animate);
-
-  const dt=Math.min((now-lastTime)/1000,0.05);
+  const dt=Math.min((now-lastTime)/1000,.05);
   lastTime=now;
-
-  update(dt);
-
-  fpsFrames++;
+  update(dt,now);
+  frames++;
   fpsTime+=dt;
-
-  if (fpsTime>=1) {
-    document.getElementById("fps").textContent=
-      String(Math.round(fpsFrames/fpsTime));
-    fpsFrames=0;
-    fpsTime=0;
+  if(fpsTime>=1){
+    $("fps").textContent=String(Math.round(frames/fpsTime));
+    frames=0;fpsTime=0;
   }
-
   renderer.render(scene,camera);
 }
-
-window.addEventListener("resize",()=>{
-  camera.aspect=window.innerWidth/window.innerHeight;
+addEventListener("resize",()=>{
+  camera.aspect=innerWidth/innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth,window.innerHeight);
+  renderer.setSize(innerWidth,innerHeight);
 });
-
 syncCamera();
-updateHUD();
+startButton.disabled=false;
+startButton.textContent="JUGAR";
+message.textContent="Juego listo. Pulsa JUGAR para entrar.";
 requestAnimationFrame(animate);
-
-} catch (error) {
-  console.error("Error al iniciar LEGENDS OF ABDE:",error);
-  message.textContent="Error al iniciar el juego. Abre F12 y mira Console.";
-  startButton.disabled=false;
-  startButton.textContent="RECARGAR";
-  startButton.onclick=()=>location.reload();
-}
-
 })();
 </script>
 </body>
