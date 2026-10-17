@@ -1,0 +1,14 @@
+
+{
+  "name": "legends-of-abde",
+  "version": "1.0.0",
+  "description": "Servidor multijugador de Legends of Abde",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  }
+}
