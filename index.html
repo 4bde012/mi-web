@@ -202,7 +202,7 @@ function connect(){
     status.textContent="Servidor sin configurar";
     return;
   }
-  socket=io(SERVER_URL,{transports:["websocket","polling"]});
+  socket=io(SERVER_URL);
   socket.on("connect",()=>{
     status.textContent="Conectado · "+socket.id.slice(0,6);
     notice.textContent="Servidor conectado. ¡Ya puedes entrar!";
