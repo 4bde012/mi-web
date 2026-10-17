@@ -7,626 +7,366 @@
 <title>LEGENDS OF ABDE</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#07101d;color:#fff;font-family:Arial,sans-serif}
+body{margin:0;overflow:hidden;background:#050914;color:white;font-family:Arial,sans-serif}
 canvas{display:block}
-#hud{position:fixed;inset:0;pointer-events:none;z-index:2}
-#brand{position:absolute;top:16px;left:18px;color:#48eaff;font-size:25px;font-weight:900;letter-spacing:2px;text-shadow:0 0 18px #00bfff}
-#tagline{font-size:10px;letter-spacing:4px;color:#c6f7ff;margin-top:5px}
-.panel{background:#101827dc;border:1px solid #36d9ff;padding:10px 14px;border-radius:10px;box-shadow:0 0 15px #00bfff20}
-#stats{position:absolute;top:85px;left:18px;display:grid;gap:8px}
-#rightStats{position:absolute;top:16px;right:16px;display:grid;gap:8px;text-align:right}
-#crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:25px;color:#fff;text-shadow:0 0 10px #00dfff}
-#help{position:absolute;bottom:16px;left:16px;padding:10px 13px;background:#08121ccc;border-radius:10px;border:1px solid #ffffff20;color:#d8f4ff;font-size:12px;line-height:1.8}
-#notice{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);color:#8defff;font-size:18px;text-align:center;text-shadow:0 0 12px #00bfff}
-#startScreen{position:fixed;inset:0;z-index:5;background:radial-gradient(ellipse at center,#173d60ee,#050914f7 75%);display:flex;align-items:center;justify-content:center;text-align:center;padding:18px}
-#card{width:min(560px,95%);padding:32px 24px;border:1px solid #39dcff;border-radius:20px;background:#101c2bf0;box-shadow:0 0 60px #00bfff35}
-#logo{font-size:clamp(28px,6vw,48px);font-weight:1000;letter-spacing:3px;color:#48eaff;text-shadow:0 0 25px #00bfff;margin:0}
-#subtitle{color:#d4f7ff;letter-spacing:5px;font-size:11px;margin:10px 0 25px}
-#message{color:#9cecff;min-height:22px;font-size:13px}
-button{background:linear-gradient(100deg,#00b8e8,#64edff);color:#03101a;border:0;border-radius:10px;padding:15px 32px;font-size:16px;font-weight:bold;cursor:pointer}
-button:disabled{opacity:.5;cursor:wait}
-button:hover:not(:disabled){filter:brightness(1.15)}
-.small{color:#abc8da;font-size:12px;line-height:1.8}
-#toast{position:absolute;top:62%;left:50%;transform:translateX(-50%);font-weight:bold;color:#ffe87c;text-shadow:0 0 15px #ffb700;font-size:20px}
-@media(max-width:600px){
- #brand{font-size:17px}
- #tagline{font-size:8px}
- #help{font-size:10px;max-width:220px}
- #rightStats{font-size:11px}
- .panel{padding:7px 9px}
-}
+#hud{position:fixed;inset:0;pointer-events:none}
+#brand{position:absolute;top:16px;left:18px;color:#42eaff;font-size:24px;font-weight:900;text-shadow:0 0 15px #00bfff}
+#stats{position:absolute;top:65px;left:18px;display:grid;gap:8px}
+#right{position:absolute;top:16px;right:16px;text-align:right;display:grid;gap:8px}
+.panel{background:#101827dd;border:1px solid #35dfff;border-radius:9px;padding:10px}
+#crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:25px}
+#help{position:absolute;bottom:15px;left:15px;background:#101827dd;padding:12px;border-radius:10px;font-size:12px;line-height:1.8}
+#start{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:radial-gradient(#173b5a,#040711 75%);padding:14px;overflow:auto}
+#card{width:min(680px,100%);max-height:95vh;overflow:auto;text-align:center;padding:25px;background:#101827f5;border:1px solid #32dfff;border-radius:18px;box-shadow:0 0 35px #00bfff30}
+h1{color:#42eaff;text-shadow:0 0 18px #00bfff;margin:5px}
+h2{font-size:15px;color:#78eaff}
+.small{font-size:12px;color:#a8c8dc}
+.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}
+.choice{padding:12px 5px;border:1px solid #38516b;border-radius:10px;background:#0b1321;cursor:pointer;font-size:12px}
+.choice.selected{border:2px solid #42eaff;box-shadow:0 0 12px #00bfff55}
+.swatch{height:25px;width:25px;border-radius:50%;margin:0 auto 7px;box-shadow:0 0 12px currentColor}
+input{width:100%;padding:12px;margin:5px 0;background:#070d18;border:1px solid #38516b;border-radius:8px;color:white}
+button{cursor:pointer;border:0;border-radius:9px;padding:13px 22px;background:linear-gradient(100deg,#00b8e8,#73efff);font-weight:bold;color:#03101a}
+button:disabled{opacity:.5}
+#message{color:#8defff;min-height:20px;font-size:13px}
+#toast{position:absolute;top:65%;left:50%;transform:translateX(-50%);color:#ffdf72;font-weight:bold}
+@media(max-width:500px){.choices{grid-template-columns:repeat(2,minmax(0,1fr))}#brand{font-size:17px}}
 </style>
 </head>
 <body>
 <div id="hud">
-  <div id="brand">LEGENDS OF ABDE<div id="tagline">EXPLORE · JUMP · COLLECT</div></div>
-  <div id="stats">
-    <div class="panel">💎 CRISTALES: <span id="score">0</span></div>
-    <div class="panel">🏁 RÉCORD LOCAL: <span id="best">0</span></div>
-  </div>
-  <div id="rightStats">
-    <div class="panel">FPS: <span id="fps">0</span></div>
-    <div class="panel">JUGADORES: <span id="players">1/40</span></div>
-    <div class="panel">SERVIDOR: <span id="connection">Conectando...</span></div>
-  </div>
-  <div id="crosshair">+</div>
-  <div id="help">
-    <b>CONTROLES</b><br>
-    WASD / FLECHAS: moverte<br>
-    RATÓN: mirar alrededor<br>
-    ESPACIO: saltar<br>
-    SHIFT: correr<br>
-    ESC: liberar el ratón<br>
-    Recoge cristales para ganar puntos.
-  </div>
-  <div id="notice"></div>
-  <div id="toast"></div>
+ <div id="brand">LEGENDS OF ABDE</div>
+ <div id="stats">
+  <div class="panel">💎 Cristales: <span id="score">0</span></div>
+  <div class="panel">🏆 Récord: <span id="best">0</span></div>
+  <div class="panel">❤️ Vida: <span id="health">100</span></div>
+  <div class="panel">🔫 Arma: <span id="weaponName">Pulse</span></div>
+  <div class="panel">Munición: <span id="ammo">30</span></div>
+ </div>
+ <div id="right">
+  <div class="panel">FPS: <span id="fps">0</span></div>
+  <div class="panel">Jugadores: <span id="players">1/40</span></div>
+  <div class="panel">Servidor: <span id="connection">Conectando</span></div>
+  <div class="panel">Skin: <span id="skinName">CYBER BLUE</span></div>
+ </div>
+ <div id="crosshair">+</div>
+ <div id="help">WASD: moverte<br>Ratón: mirar<br>Espacio: saltar<br>Shift: correr<br>Clic: disparar<br>R: recargar<br>ESC: liberar ratón</div>
+ <div id="toast"></div>
 </div>
 
-<div id="startScreen">
-  <div id="card">
-    <h1 id="logo">LEGENDS OF ABDE</h1>
-    <div id="subtitle">MULTIPLAYER ARENA</div>
-    <p>Explora una enorme arena futurista con tus amigos.</p>
-    <p class="small">160 × 160 · Plataformas · Torres · Cristales · Hasta 40 jugadores</p>
-    <p id="message">Preparando el mundo 3D...</p>
-    <button id="startButton" disabled>PREPARANDO...</button>
-    <p class="small">Consejo: haz clic en el juego para controlar la cámara.</p>
-  </div>
+<div id="start">
+ <div id="card">
+  <h1>LEGENDS OF ABDE</h1>
+  <p class="small">MULTIPLAYER FUTURISTA · ARENA 3D</p>
+  <h2>ELIGE TU SKIN</h2>
+  <div class="choices" id="skinChoices"></div>
+  <h2>ELIGE TU ARMA</h2>
+  <div class="choices" id="weaponChoices"></div>
+  <h2>ACCESO DEL CREADOR</h2>
+  <input id="creatorKey" type="password" autocomplete="off" placeholder="Clave privada del creador (opcional)">
+  <p class="small">La clave solo debe validarse en el servidor. No la publiques ni la escribas en el código.</p>
+  <p id="message">Preparando arena...</p>
+  <button id="play" disabled>PREPARANDO...</button>
+  <p class="small">Hasta 40 jugadores si el servidor está configurado para ello.</p>
+ </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script>
-(() => {
 "use strict";
+const $=id=>document.getElementById(id);
 
-const $ = id => document.getElementById(id);
-const startButton = $("startButton");
-const message = $("message");
+const SERVER_URL="https://mi-web-poxe.onrender.com";
+const MAX_PLAYERS=40;
 
-const SERVER_URL = "https://mi-web-poxe.onrender.com";
-const MAX_PLAYERS = 40;
-
-if (!window.THREE) {
-  message.textContent = "No se pudo cargar Three.js. Recarga la página.";
-  startButton.textContent = "RECARGAR";
-  startButton.disabled = false;
-  startButton.onclick = () => location.reload();
-  return;
-}
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x07101e);
-scene.fog = new THREE.Fog(0x07101e, 100, 230);
-
-const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, .1, 400);
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth, innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-document.body.appendChild(renderer.domElement);
-
-scene.add(new THREE.HemisphereLight(0xaedfff, 0x17213a, 2));
-
-const sun = new THREE.DirectionalLight(0xffffff, 2.3);
-sun.position.set(30, 60, 15);
-sun.castShadow = true;
-sun.shadow.mapSize.set(1024,1024);
-sun.shadow.camera.left = -100;
-sun.shadow.camera.right = 100;
-sun.shadow.camera.top = 100;
-sun.shadow.camera.bottom = -100;
-scene.add(sun);
-
-const blueLight = new THREE.PointLight(0x00aaff, 100, 100);
-blueLight.position.set(-35, 18, -35);
-scene.add(blueLight);
-
-const pinkLight = new THREE.PointLight(0xd020ff, 100, 100);
-pinkLight.position.set(35, 16, 35);
-scene.add(pinkLight);
-
-const materials = {
-  floor: new THREE.MeshStandardMaterial({color:0x18283c,roughness:.8,metalness:.25}),
-  wall: new THREE.MeshStandardMaterial({color:0x263b55,roughness:.65,metalness:.4}),
-  dark: new THREE.MeshStandardMaterial({color:0x101725,roughness:.45,metalness:.65}),
-  blue: new THREE.MeshStandardMaterial({color:0x087fa8,emissive:0x003047,metalness:.5}),
-  purple: new THREE.MeshStandardMaterial({color:0x6326a0,emissive:0x220044,metalness:.5}),
-  cyan: new THREE.MeshStandardMaterial({color:0x00dfff,emissive:0x00aaff,emissiveIntensity:1.8}),
-  pink: new THREE.MeshStandardMaterial({color:0xff35d1,emissive:0xb90078,emissiveIntensity:1.5}),
-  gold: new THREE.MeshStandardMaterial({color:0xffdc55,emissive:0xff9900,emissiveIntensity:1.8}),
-  white: new THREE.MeshStandardMaterial({color:0xdafaff,emissive:0x2677aa,emissiveIntensity:.3})
+const SKINS={
+ cyber:{name:"CYBER BLUE",color:0x00dfff,armor:0x12334c,glow:0x00cfff},
+ shadow:{name:"SHADOW PURPLE",color:0xb45cff,armor:0x28153f,glow:0x922cff},
+ inferno:{name:"INFERNO",color:0xff4545,armor:0x45151c,glow:0xff2020},
+ gold:{name:"GOLD LEGEND",color:0xffd34d,armor:0x4a3812,glow:0xffaa00},
+ creator:{name:"ABDE CREATOR",color:0x42eaff,armor:0x090d16,glow:0xffc928,exclusive:true}
 };
 
-const colliders = [];
-const platforms = [];
-const decorations = [];
-const crystals = [];
-const remotePlayers = new Map();
-const keys = {};
+const WEAPONS={
+ pulse:{name:"PULSE RIFLE",damage:20,ammo:30,rate:220,color:0x00dfff},
+ plasma:{name:"PLASMA BLASTER",damage:35,ammo:12,rate:500,color:0xb45cff},
+ rapid:{name:"RAPID SMG",damage:10,ammo:50,rate:90,color:0xff4545},
+ creator:{name:"CREATOR BLASTER",damage:50,ammo:20,rate:300,color:0xffc928,exclusive:true}
+};
 
-function box(w,h,d,x,y,z,material,solid=false) {
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
-  mesh.position.set(x,y,z);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  scene.add(mesh);
-
-  if (solid) colliders.push({
-    x,z,w,d,minY:y-h/2,maxY:y+h/2
-  });
-  return mesh;
-}
-
-function platform(w,h,d,x,y,z,material) {
-  box(w,h,d,x,y,z,material,true);
-  platforms.push({x,z,w,d,top:y+h/2});
-}
-
-function addNeonRing(x,y,z,radius,color) {
-  const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(radius,.08,8,48),
-    color
-  );
-  ring.position.set(x,y,z);
-  ring.rotation.x=Math.PI/2;
-  scene.add(ring);
-  decorations.push(ring);
-}
-
-function addCrystal(x,y,z) {
-  const group = new THREE.Group();
-
-  const gem = new THREE.Mesh(
-    new THREE.OctahedronGeometry(.7,0),
-    materials.gold
-  );
-  gem.castShadow = true;
-  group.add(gem);
-
-  const halo = new THREE.Mesh(
-    new THREE.TorusGeometry(.95,.035,6,24),
-    materials.cyan
-  );
-  halo.rotation.x=Math.PI/2;
-  group.add(halo);
-
-  group.position.set(x,y,z);
-  scene.add(group);
-  crystals.push({group,active:true,phase:Math.random()*6.28,x,y,z});
-}
-
-/* MAPA GIGANTE: 160 x 160 */
-box(160,1,160,0,-.5,0,materials.floor,true);
-box(160,12,1,0,6,-80,materials.wall,true);
-box(160,12,1,0,6,80,materials.wall,true);
-box(1,12,160,-80,6,0,materials.wall,true);
-box(1,12,160,80,6,0,materials.wall,true);
-
-/* BORDES NEÓN */
-box(158,.2,.2,0,1,-78.8,materials.cyan);
-box(158,.2,.2,0,1,78.8,materials.pink);
-box(.2,.2,158,-78.8,1,0,materials.pink);
-box(.2,.2,158,78.8,1,0,materials.cyan);
-
-/* SUELO CON CUADRÍCULA */
-const grid = new THREE.GridHelper(158,80,0x1685ae,0x24405a);
-grid.position.y=.025;
-scene.add(grid);
-
-/* PILARES REPARTIDOS POR LA ARENA */
-for(let x=-60;x<=60;x+=20){
-  for(let z=-60;z<=60;z+=20){
-    if(Math.abs(x)<15&&Math.abs(z)<15) continue;
-    box(3,9,3,x,4.5,z,materials.dark,true);
-    box(3.2,.22,3.2,x,9.1,z,(x+z)%2===0?materials.cyan:materials.pink);
-    addNeonRing(x,1.3,z,2,(x+z)%2===0?materials.cyan:materials.pink);
-  }
-}
-
-/* PLATAFORMAS E ISLAS */
-const islandData = [
-  [-35,3,-30,12,8,materials.blue],
-  [35,5,30,12,8,materials.purple],
-  [0,7,-48,14,12,materials.blue],
-  [0,4,48,14,12,materials.purple],
-  [-50,4,10,12,12,materials.purple],
-  [50,6,-10,12,12,materials.blue],
-  [-30,8,48,12,10,materials.blue],
-  [30,8,-48,12,10,materials.purple],
-  [-52,3,-42,10,10,materials.blue],
-  [52,3,42,10,10,materials.purple]
-];
-
-for(const [x,y,z,w,d,mat] of islandData){
-  platform(w,1,d,x,y,z,mat);
-  box(w+.4,.15,d+.4,x,y+.58,z,mat);
-}
-
-/* ESCALERAS DE SALTO */
-for(let i=1;i<=7;i++){
-  const h=i*.75;
-  platform(4,h,4,-35+i*2,-.5+h/2,-30,materials.blue);
-  platform(4,h,4,35-i*2,1+h/2,30,materials.purple);
-  platform(4,h,4,0,-.5+h/2,-48+i*2,materials.blue);
-  platform(4,h,4,0,-.5+h/2,48-i*2,materials.purple);
-}
-
-/* TORRES DECORATIVAS */
-for(let i=0;i<24;i++){
-  const a=i/24*Math.PI*2;
-  const radius=66;
-  const x=Math.cos(a)*radius;
-  const z=Math.sin(a)*radius;
-  const h=8+(i%4)*3;
-  const mat=i%2?materials.blue:materials.purple;
-
-  box(5,h,5,x,h/2,z,materials.dark);
-  box(5.3,.25,5.3,x,h,z,mat);
-  box(5.4,.12,.12,x,h+1,z-2.4,materials.cyan);
-  addNeonRing(x,1.2,z,3,i%2?materials.cyan:materials.pink);
-}
-
-/* EDIFICIOS EN LOS CUATRO SECTORES */
-for(let i=0;i<12;i++){
-  const x=(i%4-1.5)*32;
-  const z=(Math.floor(i/4)-1)*38;
-  if(Math.abs(x)<12&&Math.abs(z)<12) continue;
-
-  const h=7+(i%3)*3;
-  box(10,h,10,x,h/2,z,materials.dark);
-  box(10.3,.25,10.3,x,h,z,i%2?materials.cyan:materials.pink);
-  for(let k=-1;k<=1;k++){
-    box(.18,2,.18,x+k*2,2,z+5.08,materials.cyan);
-  }
-}
-
-/* PUENTES ENTRE ZONAS */
-platform(8,1,24,-17,2,-17,materials.blue);
-platform(8,1,24,17,3,17,materials.purple);
-platform(24,1,7,-25,5,8,materials.purple);
-platform(24,1,7,25,5,-8,materials.blue);
-platform(7,1,25,-48,2,-15,materials.blue);
-platform(7,1,25,48,2,15,materials.purple);
-
-/* CRISTALES COLECCIONABLES */
-const crystalSpots = [
-  [-10,1,-10],[10,1,-10],[-10,1,10],[10,1,10],
-  [-35,4,-30],[35,6,30],[0,8,-48],[0,5,48],
-  [-50,5,10],[50,7,-10],[-30,9,48],[30,9,-48],
-  [-52,4,-42],[52,4,42],[-20,1,-35],[20,1,35],
-  [-45,1,0],[45,1,0],[0,1,-60],[0,1,60],
-  [-60,1,25],[60,1,-25],[-25,1,60],[25,1,-60]
-];
-for(const [x,y,z] of crystalSpots) addCrystal(x,y,z);
-
-/* DECORACIÓN FLOTANTE */
-for(let i=0;i<42;i++){
-  const x=(Math.random()-.5)*145;
-  const z=(Math.random()-.5)*145;
-  const mesh=new THREE.Mesh(
-    new THREE.OctahedronGeometry(.4+Math.random()*.7),
-    i%2?materials.cyan:materials.pink
-  );
-  mesh.position.set(x,2+Math.random()*12,z);
-  mesh.rotation.set(Math.random(),Math.random(),Math.random());
-  scene.add(mesh);
-  decorations.push(mesh);
-}
-
-/* JUGADOR LOCAL */
-const playerHeight=1.7;
-const playerRadius=.4;
-const player={x:0,y:0,z:65,yaw:0,pitch:0};
-let velocityY=0;
-let grounded=true;
-let score=0;
+let selectedSkin="cyber",selectedWeapon="pulse";
+let creatorVerified=false,started=false,socket=null,myId=null;
+let score=0,health=100,ammo=30,kills=0;
 let best=Number(localStorage.getItem("abdeBest")||0);
-let started=false;
-let socket=null;
-let myId=null;
-let lastMoveSent=0;
-let lastStateUpdate=0;
-let lastFrame=performance.now();
-let fpsFrames=0;
-let fpsTime=0;
-
+let yaw=0,pitch=0,vy=0,grounded=true,lastShot=0,lastMove=0;
+const keys={},remotePlayers=new Map(),crystals=[],shots=[];
 $("best").textContent=best;
 
-function floorAt(x,z){
-  let height=0;
-  for(const p of platforms){
-    if(Math.abs(x-p.x)<p.w/2-.15&&Math.abs(z-p.z)<p.d/2-.15){
-      height=Math.max(height,p.top);
-    }
-  }
-  return height;
+function makeChoices(){
+ const skins=$("skinChoices");
+ skins.innerHTML="";
+ for(const [id,s] of Object.entries(SKINS)){
+  if(s.exclusive)continue;
+  const el=document.createElement("div");
+  el.className="choice"+(selectedSkin===id?" selected":"");
+  el.innerHTML=`<div class="swatch" style="background:#${s.color.toString(16).padStart(6,"0")};color:#${s.color.toString(16).padStart(6,"0")}"></div><b>${s.name}</b>`;
+  el.onclick=()=>{selectedSkin=id;makeChoices()};
+  skins.appendChild(el);
+ }
+ const weapons=$("weaponChoices");
+ weapons.innerHTML="";
+ for(const [id,w] of Object.entries(WEAPONS)){
+  if(w.exclusive)continue;
+  const el=document.createElement("div");
+  el.className="choice"+(selectedWeapon===id?" selected":"");
+  el.innerHTML=`<div class="swatch" style="background:#${w.color.toString(16).padStart(6,"0")};color:#${w.color.toString(16).padStart(6,"0")}"></div><b>${w.name}</b><p class="small">Daño: ${w.damage}</p>`;
+  el.onclick=()=>{selectedWeapon=id;makeChoices()};
+  weapons.appendChild(el);
+ }
 }
+makeChoices();
 
-function blockedAt(x,z){
-  if(x < -78 || x > 78 || z < -78 || z > 78) return true;
+if(!window.THREE){
+ $("message").textContent="Error cargando Three.js.";
+}else{
+ const scene=new THREE.Scene();
+ scene.background=new THREE.Color(0x07101e);
+ scene.fog=new THREE.Fog(0x07101e,80,180);
+ const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,300);
+ const renderer=new THREE.WebGLRenderer({antialias:true});
+ renderer.setSize(innerWidth,innerHeight);
+ renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+ renderer.shadowMap.enabled=true;
+ renderer.outputColorSpace=THREE.SRGBColorSpace;
+ document.body.appendChild(renderer.domElement);
 
-  for(const c of colliders){
-    const nearX=Math.abs(x-c.x)<c.w/2+playerRadius;
-    const nearZ=Math.abs(z-c.z)<c.d/2+playerRadius;
-    const vertical=player.y<c.maxY-.05&&player.y+playerHeight>c.minY;
-    if(nearX&&nearZ&&vertical) return true;
-  }
-  return false;
-}
+ scene.add(new THREE.HemisphereLight(0xbdeaff,0x17213a,2));
+ const light=new THREE.DirectionalLight(0xffffff,2);
+ light.position.set(20,50,20);light.castShadow=true;scene.add(light);
 
-function syncCamera(){
-  camera.position.set(player.x,player.y+playerHeight,player.z);
-  camera.rotation.order="YXZ";
-  camera.rotation.y=player.yaw;
-  camera.rotation.x=player.pitch;
-}
+ const mat=(color,emissive=0x000000,metalness=.4)=>new THREE.MeshStandardMaterial({color,emissive,emissiveIntensity:1.4,metalness,roughness:.3});
+ const floorMat=mat(0x18283c);
+ const darkMat=mat(0x101725);
+ const cyanMat=mat(0x00dfff,0x00aaff);
+ const pinkMat=mat(0xff35d1,0xb90078);
 
-function updateScore(){
-  $("score").textContent=score;
-  if(score>best){
-    best=score;
-    $("best").textContent=best;
-    try{localStorage.setItem("abdeBest",String(best));}catch(e){}
-  }
-}
+ function box(w,h,d,x,y,z,material){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
+  m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;scene.add(m);return m;
+ }
+ box(160,1,160,0,-.5,0,floorMat);
+ box(160,12,1,0,6,-80,darkMat);
+ box(160,12,1,0,6,80,darkMat);
+ box(1,12,160,-80,6,0,darkMat);
+ box(1,12,160,80,6,0,darkMat);
+ const grid=new THREE.GridHelper(158,80,0x1685ae,0x24405a);
+ grid.position.y=.02;scene.add(grid);
 
-function showToast(text){
-  $("toast").textContent=text;
-  clearTimeout(showToast.timer);
-  showToast.timer=setTimeout(()=>$("toast").textContent="",1300);
-}
+ for(let i=0;i<24;i++){
+  const a=i*Math.PI*2/24,x=Math.cos(a)*65,z=Math.sin(a)*65,h=8+(i%4)*3;
+  box(4,h,4,x,h/2,z,darkMat);
+  box(4.3,.2,4.3,x,h,z,i%2?cyanMat:pinkMat);
+ }
+ for(let i=0;i<10;i++){
+  const x=(i%5-2)*24,z=(Math.floor(i/5)*2-1)*25;
+  box(10,1,10,x,2,z,i%2?cyanMat:pinkMat);
+ }
+ function addCrystal(x,y,z){
+  const g=new THREE.Group();
+  const gem=new THREE.Mesh(new THREE.OctahedronGeometry(.7),mat(0xffdc55,0xff9900));
+  g.add(gem);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(.95,.04,8,24),cyanMat);
+  ring.rotation.x=Math.PI/2;g.add(ring);g.position.set(x,y,z);scene.add(g);
+  crystals.push({g,x,y,z,active:true,phase:Math.random()*6});
+ }
+ for(let i=0;i<35;i++)addCrystal((Math.random()-.5)*130,1.5+Math.random()*5,(Math.random()-.5)*130);
 
-/* AVATARES MULTIJUGADOR */
-function makeAvatar(color){
+ // Arma y manos en primera persona
+ const weaponGroup=new THREE.Group();
+ camera.add(weaponGroup);scene.add(camera);
+ const handMat=mat(0x9b654b),gunMat=mat(0x152335);
+ const gunBody= new THREE.Mesh(new THREE.BoxGeometry(.22,.2,.7),gunMat);
+ gunBody.position.set(.42,-.32,-.72);weaponGroup.add(gunBody);
+ const gunBarrel=new THREE.Mesh(new THREE.CylinderGeometry(.055,.07,.48,12),cyanMat);
+ gunBarrel.rotation.x=Math.PI/2;gunBarrel.position.set(.42,-.29,-1.12);weaponGroup.add(gunBarrel);
+ const hand=new THREE.Mesh(new THREE.BoxGeometry(.16,.16,.25),handMat);
+ hand.position.set(.28,-.43,-.62);weaponGroup.add(hand);
+ weaponGroup.position.set(0,0,0);
+
+ const player={x:0,y:0,z:65};
+ function syncCamera(){
+  camera.position.set(player.x,player.y+1.7,player.z);
+  camera.rotation.order="YXZ";camera.rotation.y=yaw;camera.rotation.x=pitch;
+ }
+ function updateSkinWeapon(){
+  const s=SKINS[selectedSkin],w=WEAPONS[selectedWeapon];
+  $("skinName").textContent=s.name;$("weaponName").textContent=w.name;
+  gunBarrel.material=mat(w.color,w.color);
+  gunBody.material=mat(s.armor,s.glow);
+  $("ammo").textContent=ammo;
+ }
+ updateSkinWeapon();
+
+ function avatar(skinId){
+  const s=SKINS[skinId]||SKINS.cyber;
   const group=new THREE.Group();
-  const bodyMat=new THREE.MeshStandardMaterial({
-    color:color||0x42e8ff,emissive:color||0x42e8ff,emissiveIntensity:.12
-  });
-  const body=new THREE.Mesh(new THREE.BoxGeometry(.7,1.1,.45),bodyMat);
-  body.position.y=.8;
-  body.castShadow=true;
-  group.add(body);
-
-  const head=new THREE.Mesh(
-    new THREE.SphereGeometry(.25,12,10),
-    new THREE.MeshStandardMaterial({color:0xffc9a8})
-  );
-  head.position.y=1.5;
-  group.add(head);
-
-  const marker=new THREE.Mesh(new THREE.BoxGeometry(.9,.07,.07),materials.cyan);
-  marker.position.y=1.95;
-  group.add(marker);
-
-  scene.add(group);
+  const armor=mat(s.armor),neon=mat(s.color,s.glow),helmet=mat(0x111a27);
+  function part(w,h,d,x,y,z,m){
+   const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);
+   o.position.set(x,y,z);o.castShadow=true;group.add(o);return o;
+  }
+  part(.72,.8,.42,0,1.05,0,armor);
+  part(.48,.12,.05,0,1.2,.24,neon);
+  part(.52,.48,.5,0,1.68,0,helmet);
+  part(.36,.09,.06,0,1.7,.27,neon);
+  for(const side of [-1,1]){
+   part(.24,.68,.25,side*.49,1.03,0,armor);
+   part(.3,.2,.3,side*.48,1.38,0,neon);
+   part(.27,.65,.3,side*.19,.36,0,armor);
+  }
+  part(.42,.55,.2,0,1.08,-.3,armor);
   return group;
-}
+ }
 
-function setConnection(text){
-  $("connection").textContent=text;
-}
-
-function connectMultiplayer(){
-  if(typeof io==="undefined"){
-    setConnection("Socket.IO no disponible");
-    return;
-  }
-
-  socket=io(SERVER_URL,{
-    transports:["polling","websocket"],
-    reconnection:true,
-    timeout:20000
-  });
-
+ function setToast(t){$("toast").textContent=t;setTimeout(()=>{$("toast").textContent=""},1400)}
+ function updateScore(){
+  $("score").textContent=score;
+  if(score>best){best=score;$("best").textContent=best;localStorage.setItem("abdeBest",best)}
+ }
+ function connect(){
+  if(typeof io==="undefined"){$("connection").textContent="Socket.IO no disponible";return}
+  socket=io(SERVER_URL,{transports:["websocket","polling"],reconnection:true});
   socket.on("connect",()=>{
-    myId=socket.id;
-    setConnection("Conectado");
-    socket.emit("joinGame",{
-      name:"Jugador",
-      x:player.x,y:player.y,z:player.z,yaw:player.yaw
-    });
+   myId=socket.id;$("connection").textContent="Conectado";
+   socket.emit("joinGame",{
+    name:creatorVerified?"ABDE CREATOR":"Jugador",
+    x:player.x,y:player.y,z:player.z,yaw,
+    skin:selectedSkin,weapon:selectedWeapon,
+    creatorKey:$("creatorKey").value
+   });
   });
-
-  socket.on("disconnect",()=>{
-    setConnection("Desconectado");
+  socket.on("disconnect",()=>{$("connection").textContent="Desconectado"});
+  socket.on("connect_error",()=>{$("connection").textContent="Reintentando"});
+  socket.on("creatorVerified",data=>{
+   if(data?.ok){
+    creatorVerified=true;selectedSkin="creator";selectedWeapon="creator";
+    updateSkinWeapon();setToast("¡CREADOR VERIFICADO!");
+   }else{
+    creatorVerified=false;setToast("Clave de creador no válida");
+   }
   });
-
-  socket.on("connect_error",err=>{
-    setConnection("Reintentando...");
-    console.warn("Multijugador:",err.message);
-  });
-
-  socket.on("serverFull",data=>{
-    setConnection("Partida llena");
-    showToast(data?.message||"La partida está llena");
-  });
-
   socket.on("state",data=>{
-    const list=Array.isArray(data)?data:data?.players;
-    if(!Array.isArray(list)) return;
-
-    const seen=new Set();
-    for(const p of list){
-      if(!p||!p.id||p.id===myId) continue;
-      seen.add(p.id);
-
-      if(!remotePlayers.has(p.id)){
-        remotePlayers.set(p.id,makeAvatar(p.color));
-      }
-
-      const avatar=remotePlayers.get(p.id);
-      avatar.position.set(
-        Number(p.x)||0,
-        Number(p.y)||0,
-        Number(p.z)||0
-      );
-      avatar.rotation.y=Number(p.yaw??p.rotationY)||0;
+   const list=Array.isArray(data)?data:data?.players;
+   if(!Array.isArray(list))return;
+   const seen=new Set();
+   for(const p of list){
+    if(!p?.id||p.id===myId)continue;
+    seen.add(p.id);
+    const skin=p.skin||"cyber";
+    if(!remotePlayers.has(p.id)||remotePlayers.get(p.id).skin!==skin){
+     if(remotePlayers.has(p.id))scene.remove(remotePlayers.get(p.id).model);
+     const model=avatar(skin);scene.add(model);
+     remotePlayers.set(p.id,{model,skin});
     }
-
-    for(const [id,avatar] of remotePlayers){
-      if(!seen.has(id)){
-        scene.remove(avatar);
-        remotePlayers.delete(id);
-      }
-    }
-
-    $("players").textContent=Math.min(MAX_PLAYERS,remotePlayers.size+1)+"/"+MAX_PLAYERS;
+    const obj=remotePlayers.get(p.id).model;
+    obj.position.set(Number(p.x)||0,Number(p.y)||0,Number(p.z)||0);
+    obj.rotation.y=Number(p.yaw)||0;
+   }
+   for(const [id,p] of remotePlayers){
+    if(!seen.has(id)){scene.remove(p.model);remotePlayers.delete(id)}
+   }
+   $("players").textContent=Math.min(MAX_PLAYERS,remotePlayers.size+1)+"/"+MAX_PLAYERS;
   });
-}
+  socket.on("hit",data=>{if(data?.health!==undefined)$("health").textContent=data.health});
+  socket.on("kill",()=>{kills++;setToast("¡ELIMINACIÓN! "+kills)});
+  socket.on("shotResult",data=>{if(data?.ammo!==undefined){ammo=data.ammo;$("ammo").textContent=ammo}});
+ }
 
-/* CONTROLES */
-document.addEventListener("keydown",e=>{
+ document.addEventListener("keydown",e=>{
   keys[e.code]=true;
-  if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)){
-    e.preventDefault();
+  if(e.code==="KeyR"){ammo=WEAPONS[selectedWeapon].ammo;$("ammo").textContent=ammo}
+  if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code))e.preventDefault();
+ });
+ document.addEventListener("keyup",e=>keys[e.code]=false);
+ document.addEventListener("mousemove",e=>{
+  if(!started||document.pointerLockElement!==renderer.domElement)return;
+  yaw-=e.movementX*.002;pitch-=e.movementY*.002;
+  pitch=THREE.MathUtils.clamp(pitch,-1.4,1.4);
+ });
+ renderer.domElement.addEventListener("click",()=>{
+  if(started&&document.pointerLockElement!==renderer.domElement)renderer.domElement.requestPointerLock();
+  else if(started)shoot();
+ });
+
+ function shoot(){
+  const now=performance.now(),w=WEAPONS[selectedWeapon];
+  if(now-lastShot<w.rate)return;
+  if(ammo<=0){setToast("Pulsa R para recargar");return}
+  lastShot=now;ammo--;$("ammo").textContent=ammo;
+  const origin=camera.position.clone();
+  const direction=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+  const ray=new THREE.Raycaster(origin,direction,0,100);
+  const targets=[...remotePlayers.values()].map(p=>p.model);
+  const hits=ray.intersectObjects(targets,true);
+  if(hits.length&&socket?.connected){
+   let obj=hits[0].object;
+   while(obj.parent&&!targets.includes(obj))obj=obj.parent;
+   const entry=[...remotePlayers.entries()].find(([,p])=>p.model===obj);
+   if(entry)socket.emit("shoot",{targetId:entry[0],damage:w.damage,weapon:selectedWeapon});
   }
-});
-document.addEventListener("keyup",e=>keys[e.code]=false);
+  if(socket?.connected)socket.emit("fire",{yaw,pitch,weapon:selectedWeapon});
+  const flash=new THREE.PointLight(w.color,5,5);
+  flash.position.copy(camera.position).add(direction.clone().multiplyScalar(1.3));
+  scene.add(flash);setTimeout(()=>scene.remove(flash),60);
+ }
+ document.addEventListener("mousedown",e=>{if(e.button===0&&started&&document.pointerLockElement===renderer.domElement)shoot()});
 
-renderer.domElement.addEventListener("click",()=>{
-  if(started&&document.pointerLockElement!==renderer.domElement){
-    renderer.domElement.requestPointerLock();
-  }
-});
-
-document.addEventListener("mousemove",e=>{
-  if(!started||document.pointerLockElement!==renderer.domElement) return;
-  player.yaw-=e.movementX*.002;
-  player.pitch-=e.movementY*.002;
-  player.pitch=THREE.MathUtils.clamp(player.pitch,-1.45,1.45);
-  syncCamera();
-});
-
-startButton.addEventListener("click",()=>{
-  started=true;
-  $("startScreen").style.display="none";
-  connectMultiplayer();
-  renderer.domElement.requestPointerLock();
-  syncCamera();
-});
-
-/* MOVIMIENTO, SALTO Y COLECCIÓN */
-function update(dt,now){
-  if(!started) return;
-
-  const speed=(keys.ShiftLeft||keys.ShiftRight)?13:8;
-  let forward=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0);
-  let side=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);
-  const len=Math.hypot(forward,side)||1;
-  forward/=len;
-  side/=len;
-
-  const dx=(-Math.sin(player.yaw)*forward+Math.cos(player.yaw)*side)*speed*dt;
-  const dz=(-Math.cos(player.yaw)*forward-Math.sin(player.yaw)*side)*speed*dt;
-
-  if(!blockedAt(player.x+dx,player.z)) player.x+=dx;
-  if(!blockedAt(player.x,player.z+dz)) player.z+=dz;
-
-  if(keys.Space&&grounded){
-    velocityY=10;
-    grounded=false;
-  }
-
-  const oldY=player.y;
-  velocityY-=24*dt;
-  player.y+=velocityY*dt;
-  const floor=floorAt(player.x,player.z);
-
-  if(velocityY<=0&&oldY>=floor&&player.y<=floor){
-    player.y=floor;
-    velocityY=0;
-    grounded=true;
-  }else{
-    grounded=false;
-  }
-
-  if(player.y < -15){
-    player.x=0;
-    player.y=0;
-    player.z=65;
-    velocityY=0;
-    showToast("¡Vuelta al punto de inicio!");
-  }
-
-  /* RECOGER CRISTALES */
-  for(const crystal of crystals){
-    if(!crystal.active) continue;
-    const dx=player.x-crystal.x;
-    const dz=player.z-crystal.z;
-    const dy=(player.y+1)-crystal.y;
-
-    if(dx*dx+dz*dz<3.2&&Math.abs(dy)<2.5){
-      crystal.active=false;
-      crystal.group.visible=false;
-      score++;
-      updateScore();
-      showToast("+1 CRISTAL 💎");
-      setTimeout(()=>{
-        crystal.active=true;
-        crystal.group.visible=true;
-      },6000);
-    }
-  }
-
-  for(const c of crystals){
-    if(c.active){
-      c.group.rotation.y+=dt*1.8;
-      c.group.position.y=c.y+Math.sin(now*.002+c.phase)*.22;
-    }
-  }
-
-  syncCamera();
-
-  if(socket?.connected&&now-lastMoveSent>100){
-    lastMoveSent=now;
-    socket.emit("move",{
-      x:player.x,y:player.y,z:player.z,yaw:player.yaw
-    });
-  }
-}
-
-/* BUCLE GRÁFICO */
-function animate(now){
+ let last=performance.now(),frames=0,fpsTime=0;
+ function animate(now){
   requestAnimationFrame(animate);
-  const dt=Math.min((now-lastFrame)/1000,.04);
-  lastFrame=now;
-
-  update(dt,now);
-
-  for(const item of decorations){
-    if(item.geometry.type==="OctahedronGeometry"){
-      item.rotation.x+=dt*.15;
-      item.rotation.y+=dt*.3;
+  const dt=Math.min((now-last)/1000,.04);last=now;
+  if(started){
+   const speed=(keys.ShiftLeft||keys.ShiftRight)?13:8;
+   const f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0);
+   const s=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);
+   const len=Math.hypot(f,s)||1;
+   player.x+=(-Math.sin(yaw)*f/len+Math.cos(yaw)*s/len)*speed*dt;
+   player.z+=(-Math.cos(yaw)*f/len-Math.sin(yaw)*s/len)*speed*dt;
+   if(keys.Space&&grounded){vy=9;grounded=false}
+   vy-=22*dt;player.y+=vy*dt;
+   if(player.y<=0){player.y=0;vy=0;grounded=true}
+   player.x=THREE.MathUtils.clamp(player.x,-77,77);
+   player.z=THREE.MathUtils.clamp(player.z,-77,77);
+   if(player.y<-10){player.x=0;player.y=0;player.z=65}
+   for(const c of crystals){
+    c.g.rotation.y+=dt*1.8;
+    c.g.position.y=c.y+Math.sin(now*.002+c.phase)*.2;
+    if(c.active&&Math.hypot(player.x-c.x,player.z-c.z)<1.5&&Math.abs(player.y+1-c.y)<2){
+     c.active=false;c.g.visible=false;score++;updateScore();setToast("+1 CRISTAL");
+     setTimeout(()=>{c.active=true;c.g.visible=true},6000);
     }
+   }
+   syncCamera();
+   if(socket?.connected&&now-lastMove>100){
+    lastMove=now;socket.emit("move",{x:player.x,y:player.y,z:player.z,yaw,skin:selectedSkin,weapon:selectedWeapon});
+   }
   }
-
-  fpsFrames++;
-  fpsTime+=dt;
-  if(fpsTime>=1){
-    $("fps").textContent=Math.round(fpsFrames/fpsTime);
-    fpsFrames=0;
-    fpsTime=0;
-  }
-
+  frames++;fpsTime+=dt;
+  if(fpsTime>=1){$("fps").textContent=Math.round(frames/fpsTime);frames=0;fpsTime=0}
   renderer.render(scene,camera);
+ }
+ $("play").onclick=()=>{
+  started=true;$("start").style.display="none";
+  connect();renderer.domElement.requestPointerLock();syncCamera();
+ };
+ $("play").disabled=false;$("play").textContent="JUGAR";
+ $("message").textContent="Arena preparada. ¡Elige tu equipamiento!";
+ requestAnimationFrame(animate);
+ window.addEventListener("resize",()=>{
+  camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);
+ });
 }
-
-window.addEventListener("resize",()=>{
-  camera.aspect=innerWidth/innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth,innerHeight);
-});
-
-syncCamera();
-message.textContent="¡Mundo preparado! Pulsa JUGAR.";
-startButton.disabled=false;
-startButton.textContent="JUGAR";
-requestAnimationFrame(animate);
-})();
 </script>
 </body>
 </html>
