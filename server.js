@@ -16,125 +16,103 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 3000;
 const players = new Map();
 
-app.get("/", (req, res) => {
-  res.status(200).send("LEGENDS OF ABDE server is running!");
-});
-
-app.get("/health", (req, res) => {
-  res.status(200).json({
-    status: "ok",
-    players: players.size
-  });
-});
-
-function createPlayer(id) {
-  return {
-    id,
-    x: 0,
-    y: 0,
-    z: 0,
-    rotation: 0,
-    health: 100,
-    weapon: "pistol",
-    connected: true
-  };
-}
+const clamp = (value, min, max) =>
+  Math.max(min, Math.min(max, Number(value) || 0));
 
 function sendState() {
   io.emit("state", Array.from(players.values()));
 }
 
+app.get("/", (req, res) => {
+  res.status(200).send("LEGENDS OF ABDE: servidor activo");
+});
+
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", players: players.size });
+});
+
 io.on("connection", (socket) => {
-  console.log("Jugador conectado:", socket.id);
+  console.log("Conectado:", socket.id);
 
   socket.on("joinGame", (data = {}) => {
-    const player = createPlayer(socket.id);
-
-    if (data && typeof data === "object") {
-      if (typeof data.name === "string") {
-        player.name = data.name.slice(0, 20);
-      }
-
-      if (typeof data.x === "number") player.x = data.x;
-      if (typeof data.y === "number") player.y = data.y;
-      if (typeof data.z === "number") player.z = data.z;
+    if (!players.has(socket.id)) {
+      players.set(socket.id, {
+        id: socket.id,
+        x: 0,
+        y: 0,
+        z: 32,
+        rotationY: 0,
+        health: 100
+      });
     }
 
-    players.set(socket.id, player);
+    const player = players.get(socket.id);
 
-    socket.emit("joined", {
-      id: socket.id,
-      player
-    });
+    player.x = clamp(data.x, -38, 38);
+    player.y = clamp(data.y, 0, 15);
+    player.z = clamp(data.z ?? 32, -38, 38);
+    player.rotationY = clamp(data.rotationY, -1000, 1000);
 
+    socket.emit("joined", { id: socket.id });
     sendState();
 
-    console.log("Jugador dentro de la partida:", socket.id);
+    console.log("Jugador en partida:", socket.id);
   });
 
   socket.on("move", (data = {}) => {
-    const player = players.get(socket.id);
-    if (!player || !data || typeof data !== "object") return;
+    let player = players.get(socket.id);
 
-    for (const key of ["x", "y", "z", "rotation"]) {
-      if (
-        typeof data[key] === "number" &&
-        Number.isFinite(data[key])
-      ) {
-        player[key] = data[key];
-      }
+    if (!player) {
+      player = {
+        id: socket.id,
+        x: 0,
+        y: 0,
+        z: 32,
+        rotationY: 0,
+        health: 100
+      };
+      players.set(socket.id, player);
     }
 
-    if (typeof data.health === "number") {
-      player.health = Math.max(0, Math.min(100, data.health));
-    }
+    player.x = clamp(data.x, -38, 38);
+    player.y = clamp(data.y, 0, 15);
+    player.z = clamp(data.z, -38, 38);
+    player.rotationY = clamp(
+      data.rotationY ?? data.yaw ?? data.rotation,
+      -1000,
+      1000
+    );
 
-    if (typeof data.weapon === "string") {
-      player.weapon = data.weapon.slice(0, 20);
-    }
-
-   sendState();
-      id: socket.id,
-      ...player
-    });
+    sendState();
   });
 
   socket.on("attack", (data = {}) => {
-    const player = players.get(socket.id);
-    if (!player) return;
+    const targetId = data.target;
+    const target = players.get(targetId);
 
-    // Relay the attack to the other connected players.
-    // Damage is not applied automatically because the client
-    // must identify which player was actually hit.
-    socket.broadcast.emit("attack", {
-      id: socket.id,
-      playerId: socket.id,
-      weapon: player.weapon,
-      ...(data && typeof data === "object" ? data : {})
+    if (!target || targetId === socket.id) return;
+
+    const damage = clamp(data.damage, 0, 50);
+    if (damage <= 0) return;
+
+    target.health = Math.max(0, target.health - damage);
+
+    io.to(targetId).emit("hit", {
+      target: targetId,
+      id: targetId,
+      damage
     });
 
-    // If the client supplies a targetId, notify that target.
-    const targetId =
-      data && typeof data.targetId === "string"
-        ? data.targetId
-        : null;
-
-    if (targetId && targetId !== socket.id && players.has(targetId)) {
-      io.to(targetId).emit("hit", {
-        attackerId: socket.id,
-        targetId,
-        weapon: player.weapon
-      });
-    }
+    sendState();
   });
 
-  socket.on("disconnect", (reason) => {
+  socket.on("disconnect", () => {
     players.delete(socket.id);
-    console.log("Jugador desconectado:", socket.id, reason);
+    console.log("Desconectado:", socket.id);
     sendState();
   });
 });
 
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`LEGENDS OF ABDE escuchando en el puerto ${PORT}`);
+  console.log("LEGENDS OF ABDE activo en el puerto", PORT);
 });
