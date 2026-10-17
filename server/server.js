@@ -276,3 +276,8 @@ io.on("connection", socket => {
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`LEGENDS OF ABDE activo en el puerto ${PORT}`);
 });
+const PORT = process.env.PORT || 3000;
+
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Servidor iniciado en el puerto ${PORT}`);
+});
