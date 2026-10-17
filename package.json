@@ -3,7 +3,6 @@
   "name": "legends-of-abde-server",
   "version": "1.0.0",
   "private": true,
-  "description": "Servidor multijugador de LEGENDS OF ABDE",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
