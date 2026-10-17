@@ -449,6 +449,10 @@ socket.on("connect_error", (err) => {
    if(!data || !data.you) return;
    const p = data.you;
 
+   if (!socket.connected) {
+  socket.connect();
+}
+
    // Sincroniza la posición local con la posición real del servidor
    player.x = p.x;
    player.y = p.y;
