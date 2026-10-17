@@ -2,7 +2,7 @@
 {
   "name": "legends-of-abde-server",
   "version": "1.0.0",
-  "description": "Servidor multijugador",
+  "description": "Servidor multijugador de Legends of Abde",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
