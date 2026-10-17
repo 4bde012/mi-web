@@ -20,40 +20,31 @@ const PORT = process.env.PORT || 3000;
 const players = new Map();
 
 function clamp(value, min, max) {
-  const number = Number(value);
-  if (!Number.isFinite(number)) return min;
-  return Math.max(min, Math.min(max, number));
-}
-
-function publicPlayer(id, player) {
-  return {
-    id,
-    name: player.name,
-    x: player.x,
-    y: player.y,
-    z: player.z,
-    yaw: player.yaw,
-    color: player.color,
-    score: player.score
-  };
+  const n = Number(value);
+  if (!Number.isFinite(n)) return min;
+  return Math.max(min, Math.min(max, n));
 }
 
 function sendState() {
-  const state = Array.from(players, ([id, player]) =>
-    publicPlayer(id, player)
-  );
-  io.emit("state", state);
+  io.emit("state", {
+    players: Array.from(players, ([id, p]) => ({
+      id,
+      name: p.name,
+      x: p.x,
+      y: p.y,
+      z: p.z,
+      yaw: p.yaw,
+      color: p.color
+    }))
+  });
 }
 
 app.get("/", (req, res) => {
-  res.status(200).send("LEGENDS OF ABDE: servidor multijugador activo");
+  res.status(200).send("LEGENDS OF ABDE: servidor activo");
 });
 
 app.get("/health", (req, res) => {
-  res.status(200).json({
-    status: "ok",
-    players: players.size
-  });
+  res.json({ status: "ok", players: players.size });
 });
 
 io.on("connection", socket => {
@@ -63,12 +54,8 @@ io.on("connection", socket => {
     if (players.has(socket.id)) return;
 
     const colors = [
-      0x29c7ff,
-      0xff8a32,
-      0x65e572,
-      0xd477ff,
-      0xffdc55,
-      0xff5f7d
+      0x29c7ff, 0xff8a32, 0x65e572,
+      0xd477ff, 0xffdc55, 0xff5f7d
     ];
 
     players.set(socket.id, {
@@ -77,38 +64,29 @@ io.on("connection", socket => {
       y: clamp(data.y, 0, 15),
       z: clamp(data.z, -38, 38),
       yaw: clamp(data.yaw ?? data.rotationY, -1000, 1000),
-      color: colors[players.size % colors.length],
-      score: 0
+      color: colors[players.size % colors.length]
     });
 
     socket.emit("joined", { id: socket.id });
-    console.log("Jugador dentro de la partida:", socket.id);
+    console.log("Jugador en la arena:", socket.id);
     sendState();
   });
 
   socket.on("move", (data = {}) => {
-    const player = players.get(socket.id);
-    if (!player || !data || typeof data !== "object") return;
+    const p = players.get(socket.id);
+    if (!p || !data || typeof data !== "object") return;
 
-    player.x = clamp(data.x, -38, 38);
-    player.y = clamp(data.y, 0, 15);
-    player.z = clamp(data.z, -38, 38);
-    player.yaw = clamp(data.yaw ?? data.rotationY, -1000, 1000);
+    p.x = clamp(data.x, -38, 38);
+    p.y = clamp(data.y, 0, 15);
+    p.z = clamp(data.z, -38, 38);
+    p.yaw = clamp(data.yaw ?? data.rotationY, -1000, 1000);
 
-    sendState();
-  });
-
-  socket.on("score", value => {
-    const player = players.get(socket.id);
-    if (!player) return;
-
-    player.score = clamp(value, 0, 100000);
     sendState();
   });
 
   socket.on("disconnect", reason => {
     players.delete(socket.id);
-    console.log("Desconectado:", socket.id, reason);
+    console.log("Jugador desconectado:", socket.id, reason);
     sendState();
   });
 });
