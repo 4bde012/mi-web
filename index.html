@@ -208,9 +208,11 @@ function connect(){
     notice.textContent="Servidor conectado. ¡Ya puedes entrar!";
     play.disabled=false;
   });
-  socket.on("connect_error",()=>{
-    status.textContent="No se pudo conectar. Comprueba la URL del servidor.";
-    notice.textContent="Servidor desconectado. Revisa la configuración.";
+
+socket.on("connect_error", (err) => {
+  status.textContent = "Error de conexión: " + err.message;
+  notice.textContent = "No se pudo conectar al servidor.";
+  console.error("Error Socket.IO:", err.message);
   });
   socket.on("state",players=>{
     document.querySelector("#count").textContent=Object.keys(players).length;
