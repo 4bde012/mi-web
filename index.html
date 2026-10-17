@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -33,49 +34,49 @@ button{cursor:pointer;border:0;border-radius:9px;padding:13px 22px;background:li
 </head>
 <body>
 <div id="hud">
- <div id="brand">LEGENDS OF ABDE</div>
- <div id="stats">
-  <div class="panel">❤️ Vida: <span id="health">100</span></div>
-  <div class="panel">🔫 Arma: <span id="weaponName">PULSE RIFLE</span></div>
-  <div class="panel">💥 Munición: <span id="ammo">30</span></div>
-  <div class="panel">👑 Rango: <span id="rankName">JUGADOR</span></div>
-  <div class="panel">⚔️ Bajas: <span id="kills">0</span></div>
-  <div class="panel">☠️ Muertes: <span id="deaths">0</span></div>
- </div>
- <div id="right">
-  <div class="panel">FPS: <span id="fps">0</span></div>
-  <div class="panel">Jugadores: <span id="players">0/40</span></div>
-  <div class="panel">Servidor: <span id="connection">Desconectado</span></div>
-  <div class="panel">Skin: <span id="skinName">CYBER NEXUS</span></div>
- </div>
- <div id="crosshair">+</div>
- <div id="help">
-  WASD: moverte<br>
-  Ratón: mirar<br>
-  Espacio: saltar<br>
-  Shift: correr<br>
-  Clic: disparar<br>
-  R: recargar<br>
-  ESC: liberar ratón
- </div>
- <div id="toast"></div>
+<div id="brand">LEGENDS OF ABDE</div>
+<div id="stats">
+<div class="panel">❤️ Vida: <span id="health">100</span></div>
+<div class="panel">🔫 Arma: <span id="weaponName">PULSE RIFLE</span></div>
+<div class="panel">💥 Munición: <span id="ammo">30</span></div>
+<div class="panel">👑 Rango: <span id="rankName">JUGADOR</span></div>
+<div class="panel">⚔️ Bajas: <span id="kills">0</span></div>
+<div class="panel">☠️ Muertes: <span id="deaths">0</span></div>
+</div>
+<div id="right">
+<div class="panel">FPS: <span id="fps">0</span></div>
+<div class="panel">Jugadores: <span id="players">0/40</span></div>
+<div class="panel">Servidor: <span id="connection">Desconectado</span></div>
+<div class="panel">Skin: <span id="skinName">CYBER NEXUS</span></div>
+</div>
+<div id="crosshair">+</div>
+<div id="help">
+WASD: moverte<br>
+Ratón: mirar<br>
+Espacio: saltar<br>
+Shift: correr<br>
+Clic: disparar<br>
+R: recargar<br>
+ESC: liberar ratón
+</div>
+<div id="toast"></div>
 </div>
 
 <div id="start">
- <div id="card">
-  <h1>LEGENDS OF ABDE</h1>
-  <p class="small">MULTIPLAYER FUTURISTA · ARENA 3D</p>
-  <h2>ELIGE TU ARMADURA</h2>
-  <div class="choices" id="skinChoices"></div>
-  <h2>ELIGE TU ARMA</h2>
-  <div class="choices" id="weaponChoices"></div>
-  <h2>ACCESO DEL CREADOR</h2>
-  <input id="playerName" maxlength="16" placeholder="Tu nombre de jugador" value="Jugador">
-  <input id="creatorKey" type="password" autocomplete="off" placeholder="Clave privada del creador (opcional)">
-  <p class="small">La clave se valida en el servidor. No la publiques.</p>
-  <p id="message">Preparando el juego...</p>
-  <button id="play" disabled>PREPARANDO...</button>
- </div>
+<div id="card">
+<h1>LEGENDS OF ABDE</h1>
+<p class="small">MULTIPLAYER FUTURISTA · ARENA 3D</p>
+<h2>ELIGE TU ARMADURA</h2>
+<div class="choices" id="skinChoices"></div>
+<h2>ELIGE TU ARMA</h2>
+<div class="choices" id="weaponChoices"></div>
+<h2>ACCESO DEL CREADOR</h2>
+<input id="playerName" maxlength="16" placeholder="Tu nombre de jugador" value="Jugador">
+<input id="creatorKey" type="password" autocomplete="off" placeholder="Clave privada del creador (opcional)">
+<p class="small">La clave se valida en el servidor. No la publiques.</p>
+<p id="message">Preparando el juego...</p>
+<button id="play" disabled>PREPARANDO...</button>
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
@@ -88,4 +89,690 @@ const SERVER_URL = "https://mi-web-poxe.onrender.com";
 const MAX_PLAYERS = 40;
 
 const SKINS = {
- cyber:   {name:"CYBER NEXUS",color:0x00eaff,armor
+cyber:   {name:"CYBER NEXUS",color:0x00eaff,armor:0x102a42,glow:0x00dfff},
+shadow:  {name:"VOID SHADOW",color:0xc05cff,armor:0x21122f,glow:0x8c24ff},
+inferno: {name:"INFERNO X",color:0xff453d,armor:0x40151c,glow:0xff241b},
+gold:    {name:"GOLDEN PHANTOM",color:0xffd34d,armor:0x493612,glow:0xffb900},
+creator: {name:"ABDE LEGEND",color:0x42eaff,armor:0x090d16,glow:0xffc928}
+};
+
+const WEAPONS = {
+pulse:   {name:"PULSE RIFLE",ammo:30,rate:220,color:0x00dfff},
+plasma:  {name:"PLASMA DESTROYER",ammo:12,rate:500,color:0xb45cff},
+rapid:   {name:"NEON RAPID SMG",ammo:50,rate:100,color:0xff4545},
+creator: {name:"ABDE GOLDEN BLASTER",ammo:20,rate:300,color:0xffc928}
+};
+
+let selectedSkin = "cyber";
+let selectedWeapon = "pulse";
+let started = false;
+let socket = null;
+let myId = null;
+let yaw = 0, pitch = 0, vy = 0;
+let grounded = true;
+let lastShot = 0, lastMove = 0;
+let health = 100, ammo = 30, kills = 0, deaths = 0;
+let creatorVerified = false;
+const keys = {};
+const remotePlayers = new Map();
+const tracers = [];
+
+function makeChoices(){
+const skinContainer = $("skinChoices");
+skinContainer.innerHTML = "";
+
+for(const [id,s] of Object.entries(SKINS)){
+if(id === "creator") continue;
+
+const el = document.createElement("div");
+el.className = "choice" + (selectedSkin === id ? " selected" : "");
+el.innerHTML =
+`<div class="swatch" style="background:#${s.color.toString(16).padStart(6,"0")};color:#${s.color.toString(16).padStart(6,"0")}"></div>
+  <b>${s.name}</b><p class="small">Armadura de combate</p>`;
+
+el.onclick = () => {
+selectedSkin = id;
+makeChoices();
+updateLabels();
+};
+skinContainer.appendChild(el);
+}
+
+const weaponContainer = $("weaponChoices");
+weaponContainer.innerHTML = "";
+
+for(const [id,w] of Object.entries(WEAPONS)){
+if(id === "creator") continue;
+
+const el = document.createElement("div");
+el.className = "choice" + (selectedWeapon === id ? " selected" : "");
+el.innerHTML =
+`<div class="swatch" style="background:#${w.color.toString(16).padStart(6,"0")};color:#${w.color.toString(16).padStart(6,"0")}"></div>
+  <b>${w.name}</b><p class="small">${w.ammo} balas</p>`;
+
+el.onclick = () => {
+selectedWeapon = id;
+makeChoices();
+updateLabels();
+};
+weaponContainer.appendChild(el);
+}
+}
+
+function updateLabels(){
+$("skinName").textContent = SKINS[selectedSkin].name;
+$("weaponName").textContent = WEAPONS[selectedWeapon].name;
+}
+
+makeChoices();
+updateLabels();
+
+if(!window.THREE){
+$("message").textContent = "No se pudo cargar el motor 3D. Recarga la página.";
+}else{
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x050b19);
+scene.fog = new THREE.Fog(0x050b19,70,170);
+
+const camera = new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,250);
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+renderer.shadowMap.enabled = true;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0xbdeaff,0x17213a,2));
+
+const sun = new THREE.DirectionalLight(0xffffff,2);
+sun.position.set(20,50,20);
+sun.castShadow = true;
+scene.add(sun);
+
+function material(color,emissive=0x000000,metalness=.45,roughness=.28){
+return new THREE.MeshStandardMaterial({
+color,emissive,emissiveIntensity:1.5,metalness,roughness
+});
+}
+
+const floorMat = material(0x111f33);
+const darkMat = material(0x0b1423);
+const cyanMat = material(0x00dfff,0x00aaff);
+const pinkMat = material(0xff35d1,0xb90078);
+const goldMat = material(0xffc928,0xff9c00);
+
+function box(w,h,d,x,y,z,mat){
+const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+mesh.position.set(x,y,z);
+mesh.castShadow = true;
+mesh.receiveShadow = true;
+scene.add(mesh);
+return mesh;
+}
+
+// Arena cerrada
+box(160,1,160,0,-.5,0,floorMat);
+box(160,12,1,0,6,-80,darkMat);
+box(160,12,1,0,6,80,darkMat);
+box(1,12,160,-80,6,0,darkMat);
+box(1,12,160,80,6,0,darkMat);
+
+const grid = new THREE.GridHelper(158,80,0x1685ae,0x24405a);
+grid.position.y = .02;
+scene.add(grid);
+
+// Torres y coberturas
+for(let i=0;i<24;i++){
+const a = i*Math.PI*2/24;
+const x = Math.cos(a)*65;
+const z = Math.sin(a)*65;
+const h = 8+(i%4)*3;
+
+box(4,h,4,x,h/2,z,darkMat);
+box(4.3,.2,4.3,x,h,z,i%2 ? cyanMat : pinkMat);
+}
+
+for(let i=0;i<10;i++){
+const x = (i%5-2)*24;
+const z = (Math.floor(i/5)*2-1)*25;
+box(10,1,10,x,2,z,i%2 ? cyanMat : pinkMat);
+}
+
+// Arma en primera persona
+const weaponGroup = new THREE.Group();
+camera.add(weaponGroup);
+scene.add(camera);
+
+const handMat = material(0x956044);
+const gunBody = new THREE.Mesh(
+new THREE.BoxGeometry(.25,.22,.72),
+material(0x152335)
+);
+gunBody.position.set(.42,-.32,-.72);
+weaponGroup.add(gunBody);
+
+const gunBarrel = new THREE.Mesh(
+new THREE.CylinderGeometry(.055,.075,.48,12),
+cyanMat
+);
+gunBarrel.rotation.x = Math.PI/2;
+gunBarrel.position.set(.42,-.29,-1.12);
+weaponGroup.add(gunBarrel);
+
+const gunTop = new THREE.Mesh(
+new THREE.BoxGeometry(.12,.07,.45),
+goldMat
+);
+gunTop.position.set(.42,-.18,-.82);
+weaponGroup.add(gunTop);
+
+const hand = new THREE.Mesh(
+new THREE.BoxGeometry(.16,.16,.25),
+handMat
+);
+hand.position.set(.28,-.43,-.62);
+weaponGroup.add(hand);
+
+const player = {x:0,y:0,z:65};
+
+function syncCamera(){
+camera.position.set(player.x,player.y+1.7,player.z);
+camera.rotation.order = "YXZ";
+camera.rotation.y = yaw;
+camera.rotation.x = pitch;
+}
+
+function updateWeaponAppearance(){
+const skin = SKINS[selectedSkin];
+const weapon = WEAPONS[selectedWeapon];
+
+gunBarrel.material = material(weapon.color,weapon.color);
+gunBody.material = material(skin.armor,skin.glow);
+gunTop.material = material(skin.color,skin.glow);
+
+updateLabels();
+$("ammo").textContent = ammo;
+}
+
+function setToast(message){
+$("toast").textContent = message;
+setTimeout(()=>{
+if($("toast").textContent === message) $("toast").textContent = "";
+},1700);
+}
+
+function makeNameTag(name,rank,skinId){
+const canvas = document.createElement("canvas");
+canvas.width = 512;
+canvas.height = 128;
+const ctx = canvas.getContext("2d");
+
+ctx.textAlign = "center";
+ctx.font = "bold 38px Arial";
+ctx.fillStyle = skinId === "creator" ? "#ffd34d" : "#ffffff";
+ctx.shadowColor = skinId === "creator" ? "#ffb900" : "#00dfff";
+ctx.shadowBlur = 12;
+ctx.fillText((rank === "CREADOR" ? "ABDE · " : "")+name,256,45);
+
+ctx.shadowBlur = 0;
+ctx.font = "bold 24px Arial";
+ctx.fillStyle = rank === "CREADOR" ? "#ffd34d" : "#78eaff";
+ctx.fillText(rank,256,82);
+
+const texture = new THREE.CanvasTexture(canvas);
+const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+map:texture,transparent:true,depthTest:false
+}));
+sprite.scale.set(4.2,1.05,1);
+sprite.position.y = 2.8;
+return sprite;
+}
+
+function createAvatar(skinId,name,rank){
+const s = SKINS[skinId] || SKINS.cyber;
+const group = new THREE.Group();
+const armor = material(s.armor);
+const neon = material(s.color,s.glow);
+const helmet = material(0x101827);
+
+function part(w,h,d,x,y,z,mat){
+const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+mesh.position.set(x,y,z);
+mesh.castShadow = true;
+group.add(mesh);
+return mesh;
+}
+
+// Torso, casco y visor
+part(.72,.8,.42,0,1.05,0,armor);
+part(.52,.48,.5,0,1.68,0,helmet);
+part(.40,.10,.075,0,1.72,.29,neon);
+part(.20,.23,.08,0,1.10,.25,neon);
+part(.42,.52,.22,0,1.15,-.30,helmet);
+
+// Hombros, brazos y piernas
+for(const side of [-1,1]){
+part(.34,.24,.38,side*.53,1.40,0,neon);
+part(.24,.55,.25,side*.49,1.03,0,armor);
+part(.27,.65,.30,side*.19,.36,0,armor);
+part(.29,.16,.32,side*.19,.66,.02,neon);
+}
+
+// Detalles exclusivos del creador
+if(skinId === "creator"){
+part(.9,.07,.48,0,1.48,0,goldMat);
+part(.14,.6,.14,-.39,1,-.02,goldMat);
+part(.14,.6,.14,.39,1,-.02,goldMat);
+}
+
+group.add(makeNameTag(name,rank,skinId));
+return group;
+}
+
+function updateRemote(p){
+if(!p || !p.id || p.id === myId) return;
+
+const skin = SKINS[p.skin] ? p.skin : "cyber";
+const signature = [p.name,p.rank,skin].join("|");
+
+if(!remotePlayers.has(p.id) ||
+remotePlayers.get(p.id).signature !== signature){
+
+if(remotePlayers.has(p.id)){
+scene.remove(remotePlayers.get(p.id).model);
+}
+
+const model = createAvatar(skin,p.name,p.rank);
+scene.add(model);
+remotePlayers.set(p.id,{model,signature});
+}
+
+const model = remotePlayers.get(p.id).model;
+model.position.set(Number(p.x)||0,Number(p.y)||0,Number(p.z)||0);
+model.rotation.y = Number(p.yaw)||0;
+}
+
+function connect(){
+if(typeof io === "undefined"){
+$("connection").textContent = "Socket.IO no disponible";
+$("message").textContent = "No se pudo cargar el sistema multijugador.";
+return;
+}
+
+
+const SERVER_URL = "https://mi-web-poxe.onrender.com";
+
+socket = io(SERVER_URL, {
+autoConnect: false,
+reconnection: true,
+reconnectionAttempts: Infinity,
+reconnectionDelay: 1000,
+reconnectionDelayMax: 5000,
+timeout: 20000,
+transports: ["polling", "websocket"]
+});
+
+socket.on("connect", () => {
+console.log("Socket.IO conectado:", socket.id);
+$("connection").textContent = "Conectado";
+
+socket.emit("joinGame", {
+name: $("playerName").value || "Jugador",
+creatorKey: $("creatorKey").value || "",
+weapon: selectedWeapon,
+skin: selectedSkin
+});
+});
+
+socket.on("disconnect", (reason) => {
+console.warn("Socket.IO desconectado:", reason);
+$("connection").textContent = "Desconectado";
+});
+
+socket.on("connect_error", (err) => {
+console.error("Error Socket.IO:", err.message);
+$("connection").textContent = "Reintentando";
+});
+
+
+socket.on("disconnect",()=>{
+$("connection").textContent = "Desconectado";
+});
+
+socket.on("connect_error", (err) => {
+console.error("ERROR SOCKET.IO:", err.message, err.description);
+$("connection").textContent = "Error de conexión";
+});
+socket.on("notice",message=>setToast(String(message)));
+
+socket.on("joined",data=>{
+if(!data || !data.you) return;
+const p = data.you;
+
+   if (!socket.connected) {
+  socket.connect();
+}
+
+// Sincroniza la posición local con la posición real del servidor
+player.x = p.x;
+player.y = p.y;
+player.z = p.z;
+yaw = p.yaw || 0;
+
+health = p.health ?? 100;
+ammo = p.ammo ?? ammo;
+kills = p.kills ?? 0;
+deaths = p.deaths ?? 0;
+
+if(SKINS[p.skin]) selectedSkin = p.skin;
+if(WEAPONS[p.weapon]) selectedWeapon = p.weapon;
+
+$("health").textContent = health;
+$("ammo").textContent = ammo;
+$("kills").textContent = kills;
+$("deaths").textContent = deaths;
+$("rankName").textContent = p.rank;
+$("brand").textContent = p.rank === "CREADOR"
+? "ABDE · CREADOR" : "LEGENDS OF ABDE";
+
+updateWeaponAppearance();
+syncCamera();
+});
+
+socket.on("creatorVerified",data=>{
+creatorVerified = Boolean(data && data.ok);
+
+if(creatorVerified){
+selectedSkin = "creator";
+selectedWeapon = "creator";
+ammo = WEAPONS.creator.ammo;
+
+$("rankName").textContent = "CREADOR";
+$("brand").textContent = "ABDE · CREADOR";
+$("ammo").textContent = ammo;
+
+updateWeaponAppearance();
+setToast("¡EQUIPAMIENTO DEL CREADOR ACTIVADO!");
+}else if($("creatorKey").value){
+setToast("La clave no es válida o el creador ya está conectado");
+}
+});
+
+socket.on("state",data=>{
+const list = Array.isArray(data) ? data : data?.players;
+if(!Array.isArray(list)) return;
+
+const seen = new Set();
+
+for(const p of list){
+if(!p || !p.id) continue;
+
+if(p.id === myId){
+health = p.health ?? health;
+ammo = p.ammo ?? ammo;
+kills = p.kills ?? kills;
+deaths = p.deaths ?? deaths;
+
+$("health").textContent = health;
+$("ammo").textContent = ammo;
+$("kills").textContent = kills;
+$("deaths").textContent = deaths;
+continue;
+}
+
+seen.add(p.id);
+updateRemote(p);
+}
+
+for(const [id,item] of remotePlayers){
+if(!seen.has(id)){
+scene.remove(item.model);
+remotePlayers.delete(id);
+}
+}
+
+$("players").textContent =
+Math.min(MAX_PLAYERS,remotePlayers.size+(myId ? 1 : 0))+
+"/"+MAX_PLAYERS;
+});
+
+socket.on("shotResult",data=>{
+if(data && data.ammo !== undefined){
+ammo = data.ammo;
+$("ammo").textContent = ammo;
+}
+if(data && data.ok === false && ammo <= 0){
+setToast("Pulsa R para recargar");
+}
+});
+
+socket.on("shotEffect",data=>{
+if(!data) return;
+
+const start = new THREE.Vector3(data.x,data.y,data.z);
+const direction = new THREE.Vector3(data.dx,data.dy,data.dz);
+const end = start.clone().add(direction.multiplyScalar(data.distance || 60));
+
+const geometry = new THREE.BufferGeometry().setFromPoints([start,end]);
+const line = new THREE.Line(geometry,new THREE.LineBasicMaterial({
+color:data.color || "#00dfff",
+transparent:true,
+opacity:.95
+}));
+
+scene.add(line);
+tracers.push({line,until:performance.now()+100});
+
+const flash = new THREE.PointLight(data.color || "#00dfff",3,3);
+flash.position.copy(start);
+scene.add(flash);
+setTimeout(()=>scene.remove(flash),55);
+
+if(data.hit) setToast("¡IMPACTO!");
+});
+
+socket.on("playerHit",data=>{
+if(!data || data.id !== myId) return;
+
+health = data.health;
+$("health").textContent = health;
+
+if(health <= 0){
+setToast("¡ELIMINADO!");
+setTimeout(()=>socket?.emit("respawn"),2700);
+}
+});
+
+socket.on("elimination",data=>{
+if(!data) return;
+
+if(data.attacker === myId){
+kills = data.attackerKills ?? kills+1;
+$("kills").textContent = kills;
+setToast("¡ELIMINACIÓN!");
+}
+
+if(data.victim === myId){
+deaths++;
+$("deaths").textContent = deaths;
+setToast("¡TE HAN ELIMINADO!");
+}
+});
+
+socket.on("respawned",p=>{
+if(!p) return;
+
+player.x = p.x;
+player.y = p.y;
+player.z = p.z;
+health = p.health ?? 100;
+ammo = p.ammo ?? ammo;
+vy = 0;
+
+$("health").textContent = health;
+$("ammo").textContent = ammo;
+
+syncCamera();
+setToast("¡DE VUELTA A LA ARENA!");
+});
+}
+
+function shoot(){
+const now = performance.now();
+const weapon = WEAPONS[selectedWeapon];
+
+if(now-lastShot < weapon.rate) return;
+
+if(ammo <= 0){
+setToast("Pulsa R para recargar");
+return;
+}
+
+if(!socket || !socket.connected){
+setToast("Servidor desconectado");
+return;
+}
+
+lastShot = now;
+socket.emit("shoot",{yaw,pitch});
+}
+
+document.addEventListener("keydown",e=>{
+keys[e.code] = true;
+
+if(e.code === "KeyR" && started && socket?.connected){
+socket.emit("reload");
+}
+
+if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)){
+e.preventDefault();
+}
+});
+
+document.addEventListener("keyup",e=>{
+keys[e.code] = false;
+});
+
+document.addEventListener("mousemove",e=>{
+if(!started || document.pointerLockElement !== renderer.domElement) return;
+
+yaw -= e.movementX*.002;
+pitch -= e.movementY*.002;
+pitch = THREE.MathUtils.clamp(pitch,-1.4,1.4);
+});
+
+renderer.domElement.addEventListener("mousedown",e=>{
+if(e.button !== 0 || !started) return;
+
+if(document.pointerLockElement !== renderer.domElement){
+renderer.domElement.requestPointerLock();
+}else{
+shoot();
+}
+});
+
+let previousTime = performance.now();
+let frameCount = 0;
+let fpsTime = 0;
+
+function animate(now){
+requestAnimationFrame(animate);
+
+const dt = Math.min((now-previousTime)/1000,.04);
+previousTime = now;
+
+// Eliminar trazadores antiguos
+for(let i=tracers.length-1;i>=0;i--){
+if(now >= tracers[i].until){
+scene.remove(tracers[i].line);
+tracers[i].line.geometry.dispose();
+tracers[i].line.material.dispose();
+tracers.splice(i,1);
+}
+}
+
+if(started){
+const speed =
+(keys.ShiftLeft || keys.ShiftRight) ? 13 : 8;
+
+const forward =
+(keys.KeyW || keys.ArrowUp ? 1 : 0) -
+(keys.KeyS || keys.ArrowDown ? 1 : 0);
+
+const sideways =
+(keys.KeyD || keys.ArrowRight ? 1 : 0) -
+(keys.KeyA || keys.ArrowLeft ? 1 : 0);
+
+const length = Math.hypot(forward,sideways) || 1;
+
+player.x += (
+-Math.sin(yaw)*forward/length +
+Math.cos(yaw)*sideways/length
+)*speed*dt;
+
+player.z += (
+-Math.cos(yaw)*forward/length -
+Math.sin(yaw)*sideways/length
+)*speed*dt;
+
+if(keys.Space && grounded){
+vy = 9;
+grounded = false;
+}
+
+vy -= 22*dt;
+player.y += vy*dt;
+
+if(player.y <= 0){
+player.y = 0;
+vy = 0;
+grounded = true;
+}
+
+player.x = THREE.MathUtils.clamp(player.x,-77,77);
+player.z = THREE.MathUtils.clamp(player.z,-77,77);
+
+syncCamera();
+
+if(socket?.connected && now-lastMove > 100){
+lastMove = now;
+socket.emit("move",{
+x:player.x,y:player.y,z:player.z,yaw
+});
+}
+}
+
+frameCount++;
+fpsTime += dt;
+
+if(fpsTime >= 1){
+$("fps").textContent = Math.round(frameCount/fpsTime);
+frameCount = 0;
+fpsTime = 0;
+}
+
+renderer.render(scene,camera);
+}
+
+$("play").onclick = ()=>{
+started = true;
+$("start").style.display = "none";
+connect();
+syncCamera();
+renderer.domElement.requestPointerLock();
+};
+
+$("play").disabled = false;
+$("play").textContent = "ENTRAR EN LA ARENA";
+$("message").textContent = "Arena lista. Elige tu equipamiento.";
+requestAnimationFrame(animate);
+
+window.addEventListener("resize",()=>{
+camera.aspect = innerWidth/innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(innerWidth,innerHeight);
+});
+}
+</script>
+</body>
+</html>
