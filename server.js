@@ -13,193 +13,111 @@ const io = new Server(server, {
   }
 });
 
+const players = Object.create(null);
 const PORT = process.env.PORT || 3000;
 
 app.get("/", (req, res) => {
-  res.send("ABDE STRIKE server is running.");
+  res.send("LEGENDS OF ABDE — servidor multijugador activo");
 });
 
-const players = {};
-
-const MAX_HEALTH = 100;
-const ARENA_LIMIT = 37;
-
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
-
-function publicPlayers() {
-  const result = {};
-
-  for (const id in players) {
-    const p = players[id];
-
-    result[id] = {
-      id,
-      name: p.name,
-      x: p.x,
-      y: p.y,
-      z: p.z,
-      yaw: p.yaw,
-      pitch: p.pitch,
-      health: p.health,
-      score: p.score,
-      alive: p.alive
-    };
-  }
-
-  return result;
-}
-
-function sendState() {
-  io.emit("state", {
-    players: publicPlayers()
-  });
-}
-
-function respawnPlayer(p) {
-  p.x = Math.random() * 20 - 10;
-  p.y = 0;
-  p.z = Math.random() * 20 - 10;
-  p.health = MAX_HEALTH;
-  p.alive = true;
-}
-
-function damagePlayer(attackerId, targetId, damage, weapon) {
-  const attacker = players[attackerId];
-  const target = players[targetId];
-
-  if (!attacker || !target) return;
-  if (!attacker.alive || !target.alive) return;
-  if (attackerId === targetId) return;
-
-  const amount = clamp(Number(damage) || 0, 0, 100);
-
-  if (amount <= 0) return;
-
-  target.health = Math.max(0, target.health - amount);
-
-  io.to(targetId).emit("hit", {
-    attacker: attackerId,
-    target: targetId,
-    damage: amount,
-    weapon,
-    health: target.health
-  });
-
-  if (target.health <= 0) {
-    target.alive = false;
-    attacker.score += 1;
-
-    io.emit("playerDied", {
-      id: targetId,
-      killer: attackerId,
-      score: attacker.score
-    });
-
-    setTimeout(() => {
-      if (players[targetId]) {
-        respawnPlayer(players[targetId]);
-        sendState();
-      }
-    }, 2500);
-  }
-
-  sendState();
-}
-
-io.on("connection", (socket) => {
+io.on("connection", socket => {
   console.log("Jugador conectado:", socket.id);
 
-  socket.on("joinGame", (data = {}) => {
+  socket.on("joinGame", data => {
     players[socket.id] = {
       id: socket.id,
-      name: String(data.name || "Jugador").slice(0, 18),
-      x: Math.random() * 12 - 6,
-      y: 0,
-      z: Math.random() * 12 - 6,
-      yaw: 0,
-      pitch: 0,
-      health: MAX_HEALTH,
-      score: 0,
-      alive: true,
-      lastAttack: 0
+      name: "Jugador",
+      x: Number(data?.x) || 0,
+      y: Number(data?.y) || 0,
+      z: Number(data?.z) || 25,
+      rotationY: 0,
+      health: 100
     };
 
-    socket.emit("joined", {
-      id: socket.id,
-      health: MAX_HEALTH
-    });
-
-    sendState();
+    socket.emit("joined", { id: socket.id });
   });
 
-  socket.on("move", (data = {}) => {
+  socket.on("move", data => {
     const p = players[socket.id];
-    if (!p || !p.alive) return;
+    if (!p || !data) return;
 
     const x = Number(data.x);
     const y = Number(data.y);
     const z = Number(data.z);
-    const yaw = Number(data.yaw);
-    const pitch = Number(data.pitch);
+    const rotationY = Number(data.rotationY);
 
-    if (Number.isFinite(x)) p.x = clamp(x, -ARENA_LIMIT, ARENA_LIMIT);
-    if (Number.isFinite(y)) p.y = clamp(y, 0, 30);
-    if (Number.isFinite(z)) p.z = clamp(z, -ARENA_LIMIT, ARENA_LIMIT);
-    if (Number.isFinite(yaw)) p.yaw = yaw;
-    if (Number.isFinite(pitch)) p.pitch = pitch;
+    if (![x, y, z, rotationY].every(Number.isFinite)) return;
 
-    sendState();
+    // Límites básicos para evitar posiciones inválidas.
+    if (Math.abs(x) > 40 || Math.abs(z) > 40 ||
+        y < 0 || y > 20) return;
+
+    p.x = x;
+    p.y = y;
+    p.z = z;
+    p.rotationY = rotationY;
   });
 
-  socket.on("attack", (data = {}) => {
+  socket.on("attack", data => {
     const attacker = players[socket.id];
-    if (!attacker || !attacker.alive) return;
+    const target = players[data?.target];
 
-    const now = Date.now();
-    if (now - attacker.lastAttack < 180) return;
-    attacker.lastAttack = now;
+    if (!attacker || !target || target.id === attacker.id) return;
 
-    const weapon = String(data.weapon || "pistol");
-    const allowedWeapons = ["pistol", "shotgun", "machete"];
-
-    if (!allowedWeapons.includes(weapon)) return;
-
+    // El servidor decide el daño; no confía en el valor del cliente.
+    const weapon = String(data.weapon || "").toLowerCase();
     const damageByWeapon = {
-      pistol: 20,
-      shotgun: 35,
+      pistola: 20,
+      escopeta: 35,
       machete: 45
     };
-
     const damage = damageByWeapon[weapon];
-    const targetId = String(data.target || "");
 
-    // El cliente indica el objetivo al que apunta.
-    // Para producción habría que validar también la distancia
-    // y la dirección del disparo en el servidor.
-    if (!players[targetId]) return;
+    if (!damage) return;
 
-    const target = players[targetId];
+    const dx = attacker.x - target.x;
+    const dy = attacker.y - target.y;
+    const dz = attacker.z - target.z;
+    const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-    const dx = target.x - attacker.x;
-    const dz = target.z - attacker.z;
-    const distance = Math.sqrt(dx * dx + dz * dz);
+    if (distance > 25) return;
 
-    const maxDistance = weapon === "machete" ? 3 : weapon === "shotgun" ? 22 : 55;
+    target.health = Math.max(0, target.health - damage);
 
-    if (distance > maxDistance) return;
+    io.emit("hit", {
+      target: target.id,
+      attacker: attacker.id,
+      damage,
+      health: target.health
+    });
 
-    damagePlayer(socket.id, targetId, damage, weapon);
+    if (target.health <= 0) {
+      attacker.score = (attacker.score || 0) + 1;
+      target.health = 100;
+      target.x = 0;
+      target.y = 0;
+      target.z = 25;
+
+      io.emit("respawn", {
+        id: target.id,
+        x: target.x,
+        y: target.y,
+        z: target.z,
+        health: target.health
+      });
+    }
   });
 
   socket.on("disconnect", () => {
-    console.log("Jugador desconectado:", socket.id);
     delete players[socket.id];
-    sendState();
+    console.log("Jugador desconectado:", socket.id);
   });
 });
 
+setInterval(() => {
+  io.emit("state", { players });
+}, 50);
+
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`ABDE STRIKE activo en el puerto ${PORT}`);
+  console.log(`LEGENDS OF ABDE escuchando en el puerto ${PORT}`);
 });
