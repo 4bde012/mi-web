@@ -365,14 +365,19 @@ function startGame(){
  renderer.domElement.requestPointerLock?.();
  if(socket)socket.emit("joinGame",{name:"ABDE"});
 }
-$("start").addEventListener("click",startGame);
 
-document.addEventListener("pointerlockchange",()=>{
- if(document.pointerLockElement!==renderer.domElement&&started){
-  $("hint").textContent="Haz clic en el juego para volver a mirar";
- }
+$("start").addEventListener("click", function () {
+  try {
+    startGame();
+    $("message").textContent = "";
+    $("hint").textContent = "WASD para moverte · Ratón para mirar · Clic para disparar";
+  } catch (error) {
+    console.error("Error al iniciar ABDE STRIKE:", error);
+    $("message").textContent = "ERROR AL INICIAR";
+    $("hint").textContent = error.message;
+    $("start").classList.remove("hidden");
+  }
 });
-
 document.addEventListener("mousemove",e=>{
  if(!started||document.pointerLockElement!==renderer.domElement)return;
  yaw-=e.movementX*.0022;
