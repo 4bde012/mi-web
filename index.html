@@ -421,10 +421,10 @@ if(!window.THREE){
    $("connection").textContent = "Desconectado";
   });
 
-  socket.on("connect_error",()=>{
-   $("connection").textContent = "Reintentando";
-  });
-
+ socket.on("connect_error", (err) => {
+  console.error("ERROR SOCKET.IO:", err.message, err.description);
+  $("connection").textContent = "Error de conexión";
+});
   socket.on("notice",message=>setToast(String(message)));
 
   socket.on("joined",data=>{
