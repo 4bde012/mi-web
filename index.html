@@ -224,6 +224,9 @@ let deaths = 0;
 const keys = {};
 const remotePlayers = new Map();
 const tracers = [];
+  const floatingDamage = [];
+const medkitObjects = new Map();
+const requestedMedkits = new Set();
 
 let scene, camera, renderer, weaponGroup;
 let gunBody, gunBarrel, gunTop;
@@ -471,6 +474,96 @@ function syncCamera(){
 }
 
 function makeNameTag(name,rank,skinId){
+  function createHealthBar() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 40;
+
+  const ctx = canvas.getContext("2d");
+  const texture = new THREE.CanvasTexture(canvas);
+
+  const sprite = new THREE.Sprite(
+    new THREE.SpriteMaterial({
+      map: texture,
+      transparent: true,
+      depthTest: false
+    })
+  );
+
+  sprite.position.y = 3.15;
+  sprite.scale.set(1.5, 0.24, 1);
+
+  function update(health, maxHealth = 100) {
+    const percent = THREE.MathUtils.clamp(
+      Number(health) / Math.max(1, Number(maxHealth)),
+      0,
+      1
+    );
+
+    ctx.clearRect(0, 0, 256, 40);
+
+    ctx.fillStyle = "#101522";
+    ctx.fillRect(2, 8, 252, 24);
+
+    ctx.fillStyle =
+      percent > 0.5 ? "#35ed73" :
+      percent > 0.25 ? "#ffce43" : "#ff4242";
+
+    ctx.fillRect(5, 11, 246 * percent, 18);
+
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(2, 8, 252, 24);
+
+    texture.needsUpdate = true;
+  }
+
+  update(100, 100);
+
+  return { sprite, update };
+}
+
+function showDamageNumber(position, damage) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 128;
+
+  const ctx = canvas.getContext("2d");
+
+  ctx.font = "bold 76px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.lineWidth = 10;
+  ctx.strokeStyle = "#111111";
+  ctx.strokeText("-" + damage, 128, 64);
+
+  ctx.fillStyle = "#ffe94a";
+  ctx.fillText("-" + damage, 128, 64);
+
+  const texture = new THREE.CanvasTexture(canvas);
+
+  const sprite = new THREE.Sprite(
+    new THREE.SpriteMaterial({
+      map: texture,
+      transparent: true,
+      depthTest: false
+    })
+  );
+
+  sprite.position.set(position.x, position.y + 2.8, position.z);
+  sprite.scale.set(1.8, 0.9, 1);
+
+  scene.add(sprite);
+
+  floatingDamage.push({
+    sprite,
+    texture,
+    start: performance.now(),
+    x: position.x,
+    y: position.y + 2.8,
+    z: position.z
+  });
+}
   const canvas = document.createElement("canvas");
   canvas.width = 512;
   canvas.height = 128;
@@ -548,9 +641,13 @@ function createAvatar(skinId,name,rank){
     part(.14,.6,.14,.39,1,-.02,gold);
   }
 
-  group.add(makeNameTag(name,rank,skinId));
+group.add(makeNameTag(name,rank,skinId));
 
-  return group;
+const healthBar = createHealthBar();
+group.add(healthBar.sprite);
+group.userData.healthBar = healthBar;
+
+return group;
 }
 
 function updateRemote(p){
@@ -575,12 +672,22 @@ function updateRemote(p){
     remotePlayers.set(p.id,{model,signature});
   }
 
-  const model = remotePlayers.get(p.id).model;
+ const model = remotePlayers.get(p.id).model;
 
-  model.position.set(
-    Number(p.x) || 0,
-    Number(p.y) || 0,
-    Number(p.z) || 0
+model.position.set(
+  Number(p.x) || 0,
+  Number(p.y) || 0,
+  Number(p.z) || 0
+);
+
+model.rotation.y = Number(p.yaw) || 0;
+
+if (model.userData.healthBar) {
+  model.userData.healthBar.update(
+    p.health ?? 100,
+    p.maxHealth ?? 100
+  );
+}
   );
 
   model.rotation.y = Number(p.yaw) || 0;
@@ -817,19 +924,37 @@ function connect(){
     if(data.hit) setToast("¡IMPACTO!");
   });
 
-  socket.on("playerHit",data=>{
-    if(!data || data.id !== myId) return;
+  socket.on("playerHit", data => {
+  if (!data) return;
 
-    health = data.health;
-    $("health").textContent = health;
+  const targetId = data.targetId || data.id;
+  const damage = Number(data.damage);
 
-    if(health <= 0){
-      setToast("¡ELIMINADO!");
-      setTimeout(()=>{
-        if(socket?.connected) socket.emit("respawn");
-      },2700);
+  if (Number.isFinite(damage)) {
+    if (targetId === myId) {
+      showDamageNumber(player, damage);
+    } else {
+      const target = remotePlayers.get(targetId);
+
+      if (target) {
+        showDamageNumber(target.model.position, damage);
+      }
     }
-  });
+  }
+
+  if (data.id !== myId) return;
+
+  health = Number(data.health);
+  $("health").textContent = health;
+
+  if (health <= 0) {
+    setToast("¡ELIMINADO!");
+
+    setTimeout(() => {
+      if (socket?.connected) socket.emit("respawn");
+    }, 2700);
+  }
+});
 
   socket.on("elimination",data=>{
     if(!data) return;
@@ -990,12 +1115,19 @@ function animate(now){
   const dt = Math.min((now-previousTime)/1000,.04);
   previousTime = now;
 
-  for(let i=tracers.length-1;i>=0;i--){
-    if(now >= tracers[i].until){
-      scene.remove(tracers[i].line);
-      tracers[i].line.geometry.dispose();
-      tracers[i].line.material.dispose();
-      tracers.splice(i,1);
+for (let i = floatingDamage.length - 1; i >= 0; i--) {
+  const item = floatingDamage[i];
+  const elapsed = now - item.start;
+
+  item.sprite.position.y = item.y + elapsed * 0.002;
+
+  if (elapsed > 900) {
+    scene.remove(item.sprite);
+    item.sprite.material.dispose();
+    item.texture.dispose();
+    floatingDamage.splice(i, 1);
+  }
+}
     }
   }
 
