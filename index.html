@@ -1050,10 +1050,6 @@ if(!window.THREE){
   socket.emit("admin:getPlayers");
  }
 
- function setAdminStatus(message){
-  $("adminStatus").textContent=message||"";
- }
-
  function updateFlyButton(){
   $("adminFly").textContent=adminFlying
    ?"DESACTIVAR VUELO"
