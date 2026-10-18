@@ -739,6 +739,22 @@ function connect(){
   });
 
   socket.on("shotResult",data=>{
+    socket.on("hitConfirm", data => {
+  if (!data) return;
+
+  const damage = Number(data.damage);
+  const health = Number(data.health);
+
+  if (!Number.isFinite(damage)) return;
+
+  let message = "¡IMPACTO! -" + damage + " de vida";
+
+  if (Number.isFinite(health)) {
+    message += " · Le quedan " + health + " de vida";
+  }
+
+  setToast(message);
+});
     if(data && data.ammo !== undefined){
       ammo = data.ammo;
       $("ammo").textContent = ammo;
