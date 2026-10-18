@@ -5,39 +5,27 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LEGENDS OF ABDE</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#050914;color:#fff;font-family:Arial,sans-serif}
-canvas{display:block}
-#hud{position:fixed;inset:0;pointer-events:none}
-#brand{position:absolute;top:14px;left:16px;color:#42eaff;font-size:22px;font-weight:900;text-shadow:0 0 15px #00bfff}
-#stats,#right{position:absolute;top:58px;display:grid;gap:6px}
-#stats{left:12px}
-#right{right:12px;text-align:right;top:14px}
-.panel{padding:8px 10px;border:1px solid #35dfff77;border-radius:8px;background:#0b1424e8;font-size:13px}
-#crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:25px;color:white;text-shadow:0 0 8px #00eaff}
-#help{position:absolute;bottom:10px;left:10px;padding:10px;background:#0b1424e8;border:1px solid #35dfff55;border-radius:9px;font-size:12px;line-height:1.7}
-#toast{position:absolute;top:65%;left:50%;transform:translateX(-50%);color:#ffe477;font-weight:900;text-shadow:0 0 12px #ffae00;white-space:nowrap}
-#start{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:12px;background:radial-gradient(ellipse,#173b5a,#040711 75%);overflow:auto}
-#card{width:min(700px,100%);max-height:96vh;overflow:auto;text-align:center;padding:20px;background:#101827f5;border:1px solid #32dfff;border-radius:18px;box-shadow:0 0 35px #00bfff30}
-h1{color:#42eaff;text-shadow:0 0 18px #00bfff;margin:5px}
-h2{font-size:14px;color:#78eaff;margin:15px 0 8px}
-.small{font-size:12px;color:#a8c8dc}
-.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}
-.choice{padding:12px 5px;border:1px solid #38516b;border-radius:10px;background:#0b1321;cursor:pointer;font-size:12px}
-.choice.selected{border:2px solid #42eaff;box-shadow:0 0 12px #00bfff55}
-.swatch{height:30px;width:30px;border-radius:50%;margin:0 auto 7px;box-shadow:0 0 12px currentColor}
-input{width:100%;padding:12px;margin:5px 0;background:#070d18;border:1px solid #38516b;border-radius:8px;color:white}
-button{cursor:pointer;border:0;border-radius:9px;padding:13px 22px;background:linear-gradient(100deg,#00b8e8,#73efff);font-weight:bold;color:#03101a}
-#message{color:#8defff;min-height:20px;font-size:13px}
-@media(max-width:500px){
- .choices{grid-template-columns:repeat(2,minmax(0,1fr))}
- #brand{font-size:16px}
- .panel{font-size:11px;padding:6px}
-}
+:root{color-scheme:dark;--cyan:#41e8ff;--pink:#ff45d2;--gold:#ffd65a;--panel:rgba(6,16,31,.92);--line:rgba(65,232,255,.55)}
+*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#050a18;color:#f4fbff;font-family:Inter,Arial,sans-serif}
+canvas{display:block}button,input{font:inherit}button{cursor:pointer}
+#hud{position:fixed;inset:0;z-index:2;pointer-events:none}
+#brand{position:absolute;top:14px;left:16px;color:var(--cyan);font-size:clamp(16px,2vw,24px);font-weight:900;letter-spacing:1.5px;text-shadow:0 0 14px #00bfff}
+#stats,#right{position:absolute;top:58px;display:grid;gap:7px;max-width:min(240px,47vw)}#stats{left:12px}#right{right:12px;text-align:right;top:14px}
+.panel{padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--panel);box-shadow:0 0 14px #00bfff0d;backdrop-filter:blur(8px);font-size:13px;line-height:1.25}
+#crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:27px;font-weight:bold;color:white;text-shadow:0 0 8px var(--cyan);user-select:none}
+#help{position:absolute;bottom:12px;left:12px;padding:10px 13px;background:var(--panel);border:1px solid var(--line);border-radius:9px;font-size:12px;line-height:1.7;box-shadow:0 0 15px #00bfff12}
+#toast{position:absolute;top:67%;left:50%;transform:translateX(-50%);max-width:90vw;color:var(--gold);font-weight:900;text-align:center;text-shadow:0 0 12px #ffae00;white-space:pre-wrap}
+#adminToggle{position:absolute;top:105px;right:12px;pointer-events:auto;display:none;border:1px solid #ffd65a;background:#342707ef;color:#ffdf7a;border-radius:9px;padding:9px 12px;font-weight:900;box-shadow:0 0 15px #ffc92833}
+#adminToggle:hover{background:#5a430c}
+#adminPanel{position:fixed;z-index:8;top:50%;left:50%;transform:translate(-50%,-50%);display:none;width:min(720px,94vw);max-height:82vh;overflow:auto;padding:18px;background:rgba(5,13,27,.97);border:1px solid var(--gold);border-radius:16px;box-shadow:0 0 45px #ffc92822;pointer-events:auto}
+.adminHead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.adminTitle{margin:0;color:var(--gold);font-size:20px;letter-spacing:1px}.adminSub{font-size:12px;color:#a9bfd0;margin:5px 0 14px}.adminGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}.adminStat{padding:10px;border-radius:9px;border:1px solid #53657b;background:#0c1b2e}.adminStat small{display:block;color:#9eb3c9}.adminStat strong{display:block;margin-top:5px;font-size:18px;color:#fff;overflow-wrap:anywhere}.adminList{display:grid;gap:7px;margin-top:10px}.adminPlayer{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:9px 10px;border:1px solid #243d56;border-radius:8px;background:#091525}.adminPlayer strong{display:block;overflow-wrap:anywhere}.adminPlayer small{display:block;color:#9bb3c9;margin-top:3px;overflow-wrap:anywhere}.adminActions{display:flex;gap:8px;flex-wrap:wrap}.adminBtn{border:1px solid #3e7892;background:#10283a;color:#eafaff;border-radius:8px;padding:9px 11px}.adminBtn.gold{border-color:var(--gold);color:var(--gold)}.adminNotice{border:1px solid #4d6073;border-radius:8px;padding:10px;font-size:12px;color:#adbed0;line-height:1.5;margin:10px 0}
+#start{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:14px;background:radial-gradient(ellipse at 50% 20%,#174369 0%,#091225 48%,#030611 100%);overflow:auto}
+#card{width:min(720px,100%);max-height:96vh;overflow:auto;text-align:center;padding:22px;background:rgba(9,19,35,.97);border:1px solid #35dfff;border-radius:18px;box-shadow:0 0 40px #00bfff24}
+h1{color:var(--cyan);text-shadow:0 0 18px #00bfff;margin:4px;font-size:clamp(26px,5vw,38px);letter-spacing:2px}h2{font-size:14px;color:#78eaff;margin:16px 0 8px;letter-spacing:1px}.small{font-size:12px;color:#a8c8dc}.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}.choice{padding:12px 6px;border:1px solid #38516b;border-radius:10px;background:#0b1321;cursor:pointer;font-size:12px;transition:transform .12s,border-color .12s}.choice:hover{transform:translateY(-2px);border-color:#78eaff}.choice.selected{border:2px solid var(--cyan);box-shadow:0 0 12px #00bfff55}.swatch{height:30px;width:30px;border-radius:50%;margin:0 auto 7px;box-shadow:0 0 12px currentColor}input{width:100%;padding:12px;margin:5px 0;background:#070d18;border:1px solid #38516b;border-radius:8px;color:white;outline:none}input:focus{border-color:var(--cyan);box-shadow:0 0 0 2px #00dfff22}#play{border:0;border-radius:9px;padding:13px 22px;background:linear-gradient(100deg,#00b8e8,#73efff);font-weight:900;color:#03101a;width:100%;margin-top:6px}#play:disabled{opacity:.5;cursor:wait}#message{color:#8defff;min-height:20px;font-size:13px;line-height:1.5}
+@media(max-width:560px){.choices{grid-template-columns:repeat(2,minmax(0,1fr))}#brand{font-size:14px;letter-spacing:.5px;top:8px;left:8px}#stats{top:45px;left:7px;gap:4px}#right{top:7px;right:7px;gap:4px}.panel{font-size:10px;padding:6px 7px}#help{font-size:10px;bottom:7px;left:7px;padding:7px}#adminToggle{top:130px;right:7px;font-size:11px;padding:7px}.adminGrid{grid-template-columns:1fr}.adminTitle{font-size:17px}}
 </style>
 </head>
 <body>
-
 <div id="hud">
  <div id="brand">LEGENDS OF ABDE</div>
  <div id="stats">
@@ -48,16 +36,13 @@ button{cursor:pointer;border:0;border-radius:9px;padding:13px 22px;background:li
   <div class="panel">⚔️ Bajas: <span id="kills">0</span></div>
   <div class="panel">☠️ Muertes: <span id="deaths">0</span></div>
  </div>
-
  <div id="right">
   <div class="panel">FPS: <span id="fps">0</span></div>
   <div class="panel">Jugadores: <span id="players">0/40</span></div>
   <div class="panel">Servidor: <span id="connection">Desconectado</span></div>
   <div class="panel">Skin: <span id="skinName">CYBER NEXUS</span></div>
  </div>
-
  <div id="crosshair">+</div>
-
  <div id="help">
   WASD: moverte<br>
   Ratón: mirar<br>
@@ -70,17 +55,37 @@ button{cursor:pointer;border:0;border-radius:9px;padding:13px 22px;background:li
  <div id="toast"></div>
 </div>
 
+<button id="adminToggle" type="button" title="Panel del creador (F2)">⚙ PANEL CREADOR · F2</button>
+<div id="adminPanel" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+ <div class="adminHead">
+  <div>
+   <h2 class="adminTitle" id="adminTitle">PANEL DEL CREADOR</h2>
+   <div class="adminSub">Solo se muestra cuando Render confirma tu rango de creador.</div>
+  </div>
+  <button class="adminBtn gold" id="adminClose" type="button">Cerrar · F2</button>
+ </div>
+ <div class="adminGrid">
+  <div class="adminStat"><small>Socket ID</small><strong id="adminSocketId">—</strong></div>
+  <div class="adminStat"><small>Conexión</small><strong id="adminConnStatus">Desconectado</strong></div>
+  <div class="adminStat"><small>Jugadores detectados</small><strong id="adminPlayerCount">0</strong></div>
+ </div>
+ <div class="adminActions">
+  <button class="adminBtn" id="adminRefresh" type="button">Actualizar lista local</button>
+  <button class="adminBtn" id="adminCopy" type="button">Copiar informe</button>
+ </div>
+ <div class="adminNotice">Este panel muestra los jugadores y el estado real que ya envía el servidor. Las órdenes de expulsar, banear o cambiar ajustes requieren controladores seguros en <code>server.js</code>; no se simulan en el navegador.</div>
+ <h2>JUGADORES EN EL SERVIDOR</h2>
+ <div id="adminPlayerList" class="adminList"><div class="adminNotice">Esperando el primer estado del servidor…</div></div>
+</div>
+
 <div id="start">
  <div id="card">
   <h1>LEGENDS OF ABDE</h1>
   <p class="small">MULTIPLAYER FUTURISTA · ARENA 3D</p>
-
   <h2>ELIGE TU ARMADURA</h2>
   <div class="choices" id="skinChoices"></div>
-
   <h2>ELIGE TU ARMA</h2>
   <div class="choices" id="weaponChoices"></div>
-
   <h2>ACCESO DEL CREADOR</h2>
   <input id="playerName" maxlength="16" placeholder="Tu nombre de jugador" value="Jugador">
   <input id="creatorKey" type="password" autocomplete="off" placeholder="Clave privada del creador (opcional)">
@@ -100,70 +105,70 @@ const SERVER_URL = "https://mi-web-poxe.onrender.com";
 const MAX_PLAYERS = 40;
 
 const SKINS = {
- cyber:{name:"CYBER NEXUS",color:0x00eaff,armor:0x102a42,glow:0x00dfff},
- shadow:{name:"VOID SHADOW",color:0xc05cff,armor:0x21122f,glow:0x8c24ff},
- inferno:{name:"INFERNO X",color:0xff453d,armor:0x40151c,glow:0xff241b},
- gold:{name:"GOLDEN PHANTOM",color:0xffd34d,armor:0x493612,glow:0xffb900},
- creator:{name:"ABDE LEGEND",color:0x42eaff,armor:0x090d16,glow:0xffc928}
+ cyber:   {name:"CYBER NEXUS",color:0x00eaff,armor:0x102a42,glow:0x00dfff},
+ shadow:  {name:"VOID SHADOW",color:0xc05cff,armor:0x21122f,glow:0x8c24ff},
+ inferno: {name:"INFERNO X",color:0xff453d,armor:0x40151c,glow:0xff241b},
+ gold:    {name:"GOLDEN PHANTOM",color:0xffd34d,armor:0x493612,glow:0xffb900},
+ creator: {name:"ABDE LEGEND",color:0x42eaff,armor:0x090d16,glow:0xffc928}
 };
 
 const WEAPONS = {
- pulse:{name:"PULSE RIFLE",ammo:30,rate:220,color:0x00dfff},
- plasma:{name:"PLASMA DESTROYER",ammo:12,rate:500,color:0xb45cff},
- rapid:{name:"NEON RAPID SMG",ammo:50,rate:100,color:0xff4545},
- creator:{name:"ABDE GOLDEN BLASTER",ammo:20,rate:300,color:0xffc928}
+ pulse:   {name:"PULSE RIFLE",ammo:30,rate:220,color:0x00dfff},
+ plasma:  {name:"PLASMA DESTROYER",ammo:12,rate:500,color:0xb45cff},
+ rapid:   {name:"NEON RAPID SMG",ammo:50,rate:100,color:0xff4545},
+ creator: {name:"ABDE GOLDEN BLASTER",ammo:20,rate:300,color:0xffc928}
 };
 
-let selectedSkin="cyber";
-let selectedWeapon="pulse";
-let started=false;
-let socket=null;
-let myId=null;
-let yaw=0,pitch=0,vy=0;
-let grounded=true;
-let lastShot=0,lastMove=0;
-let health=100,ammo=30,kills=0,deaths=0;
-let creatorVerified=false;
-
-const keys={};
-const remotePlayers=new Map();
-const tracers=[];
+let selectedSkin = "cyber";
+let selectedWeapon = "pulse";
+let started = false;
+let socket = null;
+let myId = null;
+let yaw = 0, pitch = 0, vy = 0;
+let grounded = true;
+let lastShot = 0, lastMove = 0;
+let health = 100, ammo = 30, kills = 0, deaths = 0;
+let creatorVerified = false;
+const keys = {};
+const remotePlayers = new Map();
+const tracers = [];
+let lastServerPlayers = [];
 
 function makeChoices(){
- const skinContainer=$("skinChoices");
- skinContainer.innerHTML="";
+ const skinContainer = $("skinChoices");
+ skinContainer.innerHTML = "";
 
  for(const [id,s] of Object.entries(SKINS)){
-  if(id==="creator") continue;
+  if(id === "creator") continue;
 
-  const el=document.createElement("div");
-  el.className="choice"+(selectedSkin===id?" selected":"");
-  el.innerHTML=`
-   <div class="swatch" style="background:#${s.color.toString(16).padStart(6,"0")};color:#${s.color.toString(16).padStart(6,"0")}"></div>
+  const el = document.createElement("div");
+  el.className = "choice" + (selectedSkin === id ? " selected" : "");
+  el.innerHTML =
+   `<div class="swatch" style="background:#${s.color.toString(16).padStart(6,"0")};color:#${s.color.toString(16).padStart(6,"0")}"></div>
    <b>${s.name}</b><p class="small">Armadura de combate</p>`;
 
-  el.onclick=()=>{
-   selectedSkin=id;
+  el.onclick = () => {
+   selectedSkin = id;
    makeChoices();
    updateLabels();
   };
   skinContainer.appendChild(el);
  }
 
- const weaponContainer=$("weaponChoices");
- weaponContainer.innerHTML="";
+ const weaponContainer = $("weaponChoices");
+ weaponContainer.innerHTML = "";
 
  for(const [id,w] of Object.entries(WEAPONS)){
-  if(id==="creator") continue;
+  if(id === "creator") continue;
 
-  const el=document.createElement("div");
-  el.className="choice"+(selectedWeapon===id?" selected":"");
-  el.innerHTML=`
-   <div class="swatch" style="background:#${w.color.toString(16).padStart(6,"0")};color:#${w.color.toString(16).padStart(6,"0")}"></div>
+  const el = document.createElement("div");
+  el.className = "choice" + (selectedWeapon === id ? " selected" : "");
+  el.innerHTML =
+   `<div class="swatch" style="background:#${w.color.toString(16).padStart(6,"0")};color:#${w.color.toString(16).padStart(6,"0")}"></div>
    <b>${w.name}</b><p class="small">${w.ammo} balas</p>`;
 
-  el.onclick=()=>{
-   selectedWeapon=id;
+  el.onclick = () => {
+   selectedWeapon = id;
    makeChoices();
    updateLabels();
   };
@@ -172,33 +177,33 @@ function makeChoices(){
 }
 
 function updateLabels(){
- $("skinName").textContent=SKINS[selectedSkin].name;
- $("weaponName").textContent=WEAPONS[selectedWeapon].name;
+ $("skinName").textContent = SKINS[selectedSkin].name;
+ $("weaponName").textContent = WEAPONS[selectedWeapon].name;
 }
 
 makeChoices();
 updateLabels();
 
 if(!window.THREE){
- $("message").textContent="No se pudo cargar el motor 3D. Recarga la página.";
+ $("message").textContent = "No se pudo cargar el motor 3D. Recarga la página.";
 }else{
- const scene=new THREE.Scene();
- scene.background=new THREE.Color(0x050b19);
- scene.fog=new THREE.Fog(0x050b19,70,170);
+ const scene = new THREE.Scene();
+ scene.background = new THREE.Color(0x050b19);
+ scene.fog = new THREE.Fog(0x050b19,70,170);
 
- const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,250);
- const renderer=new THREE.WebGLRenderer({antialias:true});
+ const camera = new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,250);
+ const renderer = new THREE.WebGLRenderer({antialias:true});
  renderer.setSize(innerWidth,innerHeight);
  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
- renderer.shadowMap.enabled=true;
- renderer.outputColorSpace=THREE.SRGBColorSpace;
+ renderer.shadowMap.enabled = true;
+ renderer.outputColorSpace = THREE.SRGBColorSpace;
  document.body.appendChild(renderer.domElement);
 
  scene.add(new THREE.HemisphereLight(0xbdeaff,0x17213a,2));
 
- const sun=new THREE.DirectionalLight(0xffffff,2);
+ const sun = new THREE.DirectionalLight(0xffffff,2);
  sun.position.set(20,50,20);
- sun.castShadow=true;
+ sun.castShadow = true;
  scene.add(sun);
 
  function material(color,emissive=0x000000,metalness=.45,roughness=.28){
@@ -207,38 +212,47 @@ if(!window.THREE){
   });
  }
 
- const floorMat=material(0x111f33);
- const darkMat=material(0x0b1423);
- const cyanMat=material(0x00dfff,0x00aaff);
- const pinkMat=material(0xff35d1,0xb90078);
- const goldMat=material(0xffc928,0xff9c00);
+ const floorMat = material(0x21364d,0x0a1e31,.5,.48);
+ const darkMat = material(0x243b53,0x0b1e32,.45,.42);
+ const cyanMat = material(0x00eaff,0x00aaff,.3,.18);
+ const pinkMat = material(0xff36d2,0xc00077,.3,.18);
+ const goldMat = material(0xffd447,0xffa600,.35,.2);
+ const platformTopMat = material(0x4386a5,0x16445b,.32,.42);
+ const platformSideMat = material(0x24445c,0x0a2539,.45,.42);
+ const columnBodyMat = material(0x354f68,0x102337,.4,.42);
+ const solidPlatforms = [];
+ const solidObstacles = [];
+
+ // Colisiones físicas de bloques y columnas: dimensiones y altura reales.
+ function registerObstacle(x,z,w,d,bottomY,topY){
+  solidObstacles.push({x,z,w,d,bottomY,topY});
+ }
 
  function box(w,h,d,x,y,z,mat){
-  const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
   mesh.position.set(x,y,z);
-  mesh.castShadow=true;
-  mesh.receiveShadow=true;
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
   scene.add(mesh);
   return mesh;
  }
-
- // ARENA FUTURISTA: suelo, perímetro y zonas de combate
+  // ARENA NEÓN: suelo, perímetro y zonas de combate
  box(160,1,160,0,-.5,0,floorMat);
  box(160,12,1,0,6,-80,darkMat);
  box(160,12,1,0,6,80,darkMat);
  box(1,12,160,-80,6,0,darkMat);
  box(1,12,160,80,6,0,darkMat);
 
- const grid=new THREE.GridHelper(158,100,0x00dfff,0x1c3852);
- grid.position.y=.025;
+ const grid = new THREE.GridHelper(158,100,0x00dfff,0x1c3852);
+ grid.position.y = .025;
  scene.add(grid);
 
  // Bordes luminosos del suelo
- const lineMat=new THREE.MeshBasicMaterial({color:0x00dfff});
- const pinkLineMat=new THREE.MeshBasicMaterial({color:0xff35d1});
+ const lineMat = new THREE.MeshBasicMaterial({color:0x00dfff});
+ const pinkLineMat = new THREE.MeshBasicMaterial({color:0xff35d1});
 
  function groundLine(w,d,x,z,mat,y=.035){
-  const m=new THREE.Mesh(new THREE.BoxGeometry(w,.035,d),mat);
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w,.035,d),mat);
   m.position.set(x,y,z);
   scene.add(m);
   return m;
@@ -256,67 +270,84 @@ if(!window.THREE){
   groundLine(.07,118,x,0,x===-21||x===21?pinkLineMat:lineMat,.04);
  }
 
- // Plataforma central y núcleo energético
+ // Base central: bloque sólido y superficie pisable.
  box(28,.35,28,0,.08,0,darkMat);
+ solidPlatforms.push({x:0,z:0,w:28,d:28,topY:.255});
+ registerObstacle(0,0,28,28,-.1,.255);
+
  groundLine(28,.08,0,-14,lineMat,.29);
  groundLine(28,.08,0,14,lineMat,.29);
  groundLine(.08,28,-14,0,lineMat,.29);
  groundLine(.08,28,14,0,lineMat,.29);
 
- box(12,.5,12,0,.38,0,material(0x172c43,0x073d62));
- box(8,.12,8,0,.7,0,goldMat);
+ // Bloques centrales, opacos y con colisión.
+ box(12,.5,12,0,.38,0,platformSideMat);
+ solidPlatforms.push({x:0,z:0,w:12,d:12,topY:.63});
+ registerObstacle(0,0,12,12,.13,.63);
 
- const core=new THREE.Mesh(
+ box(8,.12,8,0,.7,0,goldMat);
+ solidPlatforms.push({x:0,z:0,w:8,d:8,topY:.76});
+ registerObstacle(0,0,8,8,.64,.76);
+
+ // Núcleo energético central
+ const core = new THREE.Mesh(
   new THREE.OctahedronGeometry(2.2,1),
   material(0x00dfff,0x0088ff,.65,.2)
  );
  core.position.set(0,4.1,0);
  scene.add(core);
 
- const coreRing=new THREE.Mesh(
+ const coreRing = new THREE.Mesh(
   new THREE.TorusGeometry(4.2,.09,8,64),cyanMat
  );
  coreRing.rotation.x=Math.PI/2;
  coreRing.position.y=1.15;
  scene.add(coreRing);
 
- const coreRing2=new THREE.Mesh(
+ const coreRing2 = new THREE.Mesh(
   new THREE.TorusGeometry(5.5,.06,8,64),pinkMat
  );
  coreRing2.rotation.x=Math.PI/2;
  coreRing2.position.y=.8;
  scene.add(coreRing2);
 
- // Torres periféricas con franjas luminosas
+ // Torres periféricas. El cuerpo se registra como obstáculo.
  for(let i=0;i<24;i++){
   const a=i*Math.PI*2/24;
   const x=Math.cos(a)*65;
   const z=Math.sin(a)*65;
   const h=8+(i%4)*3;
 
-  box(4.5,h,4.5,x,h/2,z,darkMat);
+  box(4.5,h,4.5,x,h/2,z,columnBodyMat);
+  registerObstacle(x,z,4.95,4.95,0,h+.15);
+
   box(4.8,.22,4.8,x,h,z,i%2?cyanMat:pinkMat);
   box(4.62,.12,4.62,x,h*.62,z,i%2?pinkMat:cyanMat);
 
-  const lamp=new THREE.PointLight(i%2?0x00dfff:0xff35d1,1.4,13);
+  const lamp=new THREE.PointLight(
+   i%2?0x00dfff:0xff35d1,1.4,13
+  );
   lamp.position.set(x,h+1,z);
   scene.add(lamp);
  }
 
- // Coberturas bajas
+ // Coberturas de combate: no se pueden atravesar.
  for(let i=0;i<8;i++){
   const side=i<4?-1:1;
   const n=i%4;
   const x=side*(20+n*10);
   const z=(n%2===0?-1:1)*(19+Math.floor(n/2)*12);
 
-  box(9,2.2,3.2,x,1.1,z,darkMat);
-  box(9.1,.12,3.3,x,2.25,z,n%2?pinkMat:cyanMat);
+  box(9,2.2,3.2,x,1.1,z,platformSideMat);
+  registerObstacle(x,z,9.25,3.55,0,2.4);
+
+  box(9.1,.16,3.3,x,2.25,z,n%2?pinkMat:cyanMat);
+  box(8.2,.10,.12,x,1.55,z-1.63,goldMat);
   box(.18,1.5,.18,x-3.4,1.1,z-.1,goldMat);
   box(.18,1.5,.18,x+3.4,1.1,z-.1,goldMat);
  }
 
- // Puertas decorativas de las paredes
+ // Puertas decorativas y paneles en las paredes
  for(const side of [-1,1]){
   for(let i=0;i<5;i++){
    const p=(i-2)*25;
@@ -349,7 +380,7 @@ if(!window.THREE){
   {r:10.2,t:.07,y:.25,c:0x00dfff},
   {r:12.1,t:.055,y:.16,c:0xffc928}
  ]){
-  const ring=new THREE.Mesh(
+  const ring = new THREE.Mesh(
    new THREE.TorusGeometry(cfg.r,cfg.t,8,96),
    new THREE.MeshBasicMaterial({color:cfg.c})
   );
@@ -358,48 +389,68 @@ if(!window.THREE){
   scene.add(ring);
  }
 
- // Placas de suelo en las cuatro zonas de combate
- const padMat=new THREE.MeshStandardMaterial({
-  color:0x14243a,metalness:.8,roughness:.22
- });
+ // Constructor de plataformas con bordes muy visibles.
+ function addBattlePlatform(x,z,w=13,d=13,topY=1.2,accent=lineMat){
+  box(w,topY,d,x,topY/2,z,platformSideMat);
+
+  // Superficie superior de color más claro.
+  box(w-.42,.12,d-.42,x,topY+.02,z,platformTopMat);
+
+  // Bordes de neón.
+  box(w+.18,.14,.22,x,topY+.025,z-d/2+.08,accent);
+  box(w+.18,.14,.22,x,topY+.025,z+d/2-.08,accent);
+  box(.22,.14,d-.18,x-w/2+.08,topY+.025,z,accent);
+  box(.22,.14,d-.18,x+w/2-.08,topY+.025,z,accent);
+
+  // Marcas amarillas en la superficie.
+  for(const sign of [-1,1]){
+   box(.24,.045,2.6,x+sign*(w/2-1.15),topY+.035,z,goldMat);
+   box(2.6,.045,.24,x,topY+.035,z+sign*(d/2-1.15),goldMat);
+  }
+
+  solidPlatforms.push({x,z,w,d,topY});
+ }
 
  for(const sx of [-1,1]){
   for(const sz of [-1,1]){
-   const x=sx*34;
-   const z=sz*34;
-
-   box(15,.12,15,x,.08,z,padMat);
-   groundLine(15,.10,x,z-sz*7.35,sx===sz?pinkLineMat:lineMat,.17);
-   groundLine(15,.10,x,z+sz*7.35,sx===sz?pinkLineMat:lineMat,.17);
-   groundLine(.10,15,x-sx*7.35,z,sx===sz?pinkLineMat:lineMat,.17);
-   groundLine(.10,15,x+sx*7.35,z,sx===sz?pinkLineMat:lineMat,.17);
-
-   for(const ox of [-5.8,5.8]){
-    for(const oz of [-5.8,5.8]){
-     box(.45,.16,.45,x+ox,.20,z+oz,goldMat);
-    }
-   }
+   addBattlePlatform(
+    sx*34,sz*34,13,13,1.2,
+    (sx===sz)?pinkMat:cyanMat
+   );
   }
  }
+ addBattlePlatform(-36,0,11,9,1.05,pinkMat);
+ addBattlePlatform(36,0,11,9,1.05,cyanMat);
 
- // Columnas tecnológicas pequeñas
+ // Comprobar primero las superficies más altas al aterrizar.
+ solidPlatforms.sort((a,b)=>b.topY-a.topY);
+
+ // Columnas tecnológicas: cuerpo y franjas opacas.
  for(let i=0;i<16;i++){
   const a=(i+.5)*Math.PI*2/16;
   const x=Math.cos(a)*53;
   const z=Math.sin(a)*53;
 
-  box(1.5,4,1.5,x,2,z,darkMat);
-  box(1.62,.12,1.62,x,3.5,z,i%2?cyanMat:pinkMat);
-  box(.12,2.4,.12,x,2,z,i%2?pinkMat:cyanMat);
+  box(1.5,4,1.5,x,2,z,columnBodyMat);
+  registerObstacle(x,z,1.85,1.85,0,4.1);
+
+  box(1.68,.16,1.68,x,3.5,z,i%2?cyanMat:pinkMat);
+
+  box(.16,2.8,1.56,x+.77,2,z,i%2?pinkMat:cyanMat);
+  box(.16,2.8,1.56,x-.77,2,z,i%2?pinkMat:cyanMat);
+  box(1.56,2.8,.16,x,2,z+.77,i%2?cyanMat:pinkMat);
+  box(1.56,2.8,.16,x,2,z-.77,i%2?cyanMat:pinkMat);
  }
 
- // Marcos de luz en las esquinas
+ // Columnas luminosas en las cuatro esquinas.
  for(const sx of [-1,1]){
   for(const sz of [-1,1]){
    const x=sx*47;
    const z=sz*47;
 
    box(.22,8,.22,x,4,z,cyanMat);
+   registerObstacle(x,z,.38,.38,0,8);
+
    box(3.5,.22,.22,x-sx*1.6,7.9,z,pinkMat);
    box(.22,.22,3.5,x,7.9,z-sz*1.6,pinkMat);
 
@@ -409,34 +460,39 @@ if(!window.THREE){
   }
  }
 
- // Paneles de señalización luminosos
+ // Paneles decorativos alrededor de la arena.
  for(let i=0;i<8;i++){
   const a=i*Math.PI/4;
   const x=Math.cos(a)*59;
   const z=Math.sin(a)*59;
 
-  const panel=box(3.4,2.4,.18,x,5,z,material(0x10263b,0x062b45,.7,.3));
+  const panel=box(
+   3.4,2.4,.18,x,5,z,
+   material(0x10263b,0x062b45,.7,.3)
+  );
   panel.rotation.y=-a;
 
-  const stripe=box(2.5,.10,.10,x,5.45,z,i%2?pinkMat:cyanMat);
+  const stripe=box(
+   2.5,.10,.10,x,5.45,z,
+   i%2?pinkMat:cyanMat
+  );
   stripe.rotation.y=-a;
  }
 
- // Arma en primera persona
- const weaponGroup=new THREE.Group();
+ // Arma en primera persona.
+ const weaponGroup = new THREE.Group();
  camera.add(weaponGroup);
  scene.add(camera);
 
- const handMat=material(0x956044);
-
- const gunBody=new THREE.Mesh(
+ const handMat = material(0x956044);
+ const gunBody = new THREE.Mesh(
   new THREE.BoxGeometry(.25,.22,.72),
   material(0x152335)
  );
  gunBody.position.set(.42,-.32,-.72);
  weaponGroup.add(gunBody);
 
- const gunBarrel=new THREE.Mesh(
+ const gunBarrel = new THREE.Mesh(
   new THREE.CylinderGeometry(.055,.075,.48,12),
   cyanMat
  );
@@ -444,21 +500,21 @@ if(!window.THREE){
  gunBarrel.position.set(.42,-.29,-1.12);
  weaponGroup.add(gunBarrel);
 
- const gunTop=new THREE.Mesh(
+ const gunTop = new THREE.Mesh(
   new THREE.BoxGeometry(.12,.07,.45),
   goldMat
  );
  gunTop.position.set(.42,-.18,-.82);
  weaponGroup.add(gunTop);
 
- const hand=new THREE.Mesh(
+ const hand = new THREE.Mesh(
   new THREE.BoxGeometry(.16,.16,.25),
   handMat
  );
  hand.position.set(.28,-.43,-.62);
  weaponGroup.add(hand);
 
- const player={x:0,y:0,z:65};
+ const player = {x:0,y:0,z:55};
 
  function syncCamera(){
   camera.position.set(player.x,player.y+1.7,player.z);
@@ -478,11 +534,12 @@ if(!window.THREE){
   updateLabels();
   $("ammo").textContent=ammo;
  }
-
- function setToast(message){
+  function setToast(message){
   $("toast").textContent=message;
   setTimeout(()=>{
-   if($("toast").textContent===message) $("toast").textContent="";
+   if($("toast").textContent===message){
+    $("toast").textContent="";
+   }
   },1700);
  }
 
@@ -506,9 +563,10 @@ if(!window.THREE){
 
   const texture=new THREE.CanvasTexture(canvas);
   const sprite=new THREE.Sprite(new THREE.SpriteMaterial({
-   map:texture,transparent:true,depthTest:false
+   map:texture,
+   transparent:true,
+   depthTest:false
   }));
-
   sprite.scale.set(4.2,1.05,1);
   sprite.position.y=2.8;
   return sprite;
@@ -522,19 +580,23 @@ if(!window.THREE){
   const helmet=material(0x101827);
 
   function part(w,h,d,x,y,z,mat){
-   const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+   const mesh=new THREE.Mesh(
+    new THREE.BoxGeometry(w,h,d),mat
+   );
    mesh.position.set(x,y,z);
    mesh.castShadow=true;
    group.add(mesh);
    return mesh;
   }
 
+  // Torso, casco y visor.
   part(.72,.8,.42,0,1.05,0,armor);
   part(.52,.48,.5,0,1.68,0,helmet);
   part(.40,.10,.075,0,1.72,.29,neon);
   part(.20,.23,.08,0,1.10,.25,neon);
   part(.42,.52,.22,0,1.15,-.30,helmet);
 
+  // Hombros, brazos y piernas.
   for(const side of [-1,1]){
    part(.34,.24,.38,side*.53,1.40,0,neon);
    part(.24,.55,.25,side*.49,1.03,0,armor);
@@ -542,6 +604,7 @@ if(!window.THREE){
    part(.29,.16,.32,side*.19,.66,.02,neon);
   }
 
+  // Detalles exclusivos del creador.
   if(skinId==="creator"){
    part(.9,.07,.48,0,1.48,0,goldMat);
    part(.14,.6,.14,-.39,1,-.02,goldMat);
@@ -560,7 +623,6 @@ if(!window.THREE){
 
   if(!remotePlayers.has(p.id)||
      remotePlayers.get(p.id).signature!==signature){
-
    if(remotePlayers.has(p.id)){
     scene.remove(remotePlayers.get(p.id).model);
    }
@@ -571,14 +633,127 @@ if(!window.THREE){
   }
 
   const model=remotePlayers.get(p.id).model;
-  model.position.set(Number(p.x)||0,Number(p.y)||0,Number(p.z)||0);
+  model.position.set(
+   Number(p.x)||0,
+   Number(p.y)||0,
+   Number(p.z)||0
+  );
   model.rotation.y=Number(p.yaw)||0;
  }
+
+ // Panel del creador: muestra datos reales que recibe el cliente.
+ function updateAdminPanel(list){
+  const playerList=$("adminPlayerList");
+  if(!playerList) return;
+
+  const safeList=Array.isArray(list)
+   ?list.filter(p=>p&&p.id):[];
+
+  $("adminSocketId").textContent=myId||"—";
+  $("adminConnStatus").textContent=
+   socket?.connected?"Conectado":"Desconectado";
+  $("adminPlayerCount").textContent=String(safeList.length);
+
+  playerList.replaceChildren();
+
+  if(!safeList.length){
+   const empty=document.createElement("div");
+   empty.className="adminNotice";
+   empty.textContent="Todavía no hay jugadores en el estado recibido.";
+   playerList.appendChild(empty);
+   return;
+  }
+
+  for(const p of safeList){
+   const row=document.createElement("div");
+   row.className="adminPlayer";
+
+   const left=document.createElement("div");
+   const name=document.createElement("strong");
+   name.textContent=String(
+    p.name||(p.id===myId?($("playerName").value||"Jugador"):"Jugador")
+   );
+
+   const meta=document.createElement("small");
+   const pos=[
+    Number(p.x)||0,
+    Number(p.y)||0,
+    Number(p.z)||0
+   ].map(n=>n.toFixed(1)).join(", ");
+
+   meta.textContent=
+    `${p.rank||"JUGADOR"} · ${p.id===myId?"TÚ":"JUGADOR"} · Posición ${pos}`;
+
+   left.append(name,meta);
+
+   const right=document.createElement("div");
+   right.style.textAlign="right";
+
+   const healthEl=document.createElement("strong");
+   healthEl.textContent=`${p.health??"—"} HP`;
+
+   const k=document.createElement("small");
+   k.textContent=`Bajas: ${p.kills??0}`;
+
+   right.append(healthEl,k);
+   row.append(left,right);
+   playerList.appendChild(row);
+  }
+ }
+
+ function toggleAdminPanel(force){
+  if(!creatorVerified){
+   setToast("Panel reservado al creador verificado por el servidor");
+   return;
+  }
+
+  const panel=$("adminPanel");
+  const show=typeof force==="boolean"
+   ?force:panel.style.display!=="block";
+
+  panel.style.display=show?"block":"none";
+  if(show) updateAdminPanel(lastServerPlayers);
+ }
+
+ $("adminToggle").addEventListener(
+  "click",()=>toggleAdminPanel()
+ );
+ $("adminClose").addEventListener(
+  "click",()=>toggleAdminPanel(false)
+ );
+ $("adminRefresh").addEventListener(
+  "click",()=>updateAdminPanel(lastServerPlayers)
+ );
+
+ $("adminCopy").addEventListener("click",async()=>{
+  const report=[
+   "LEGENDS OF ABDE - INFORME DEL CLIENTE",
+   `URL servidor: ${SERVER_URL}`,
+   `Conexión: ${socket?.connected?"Conectado":"Desconectado"}`,
+   `Socket ID: ${myId||"—"}`,
+   `Jugadores recibidos: ${lastServerPlayers.length}`,
+   `Creador verificado: ${creatorVerified?"Sí":"No"}`
+  ].join("\n");
+
+  try{
+   await navigator.clipboard.writeText(report);
+   setToast("Informe copiado");
+  }catch{
+   setToast("No se pudo copiar: el navegador bloqueó el portapapeles");
+  }
+ });
 
  function connect(){
   if(typeof io==="undefined"){
    $("connection").textContent="Socket.IO no disponible";
-   $("message").textContent="No se pudo cargar el sistema multijugador.";
+   $("message").textContent=
+    "No se pudo cargar Socket.IO. Recarga la página.";
+   return;
+  }
+
+  // No crear sockets nuevos al volver a entrar.
+  if(socket){
+   if(!socket.connected) socket.connect();
    return;
   }
 
@@ -593,37 +768,47 @@ if(!window.THREE){
   });
 
   socket.on("connect",()=>{
-   console.log("Socket.IO conectado:",socket.id);
    myId=socket.id;
+   console.log("Socket.IO conectado:",myId);
+
    $("connection").textContent="Conectado";
+   $("adminSocketId").textContent=myId;
+   $("adminConnStatus").textContent="Conectado";
 
    socket.emit("joinGame",{
-    name:$("playerName").value||"Jugador",
+    name:($("playerName").value||"Jugador").trim().slice(0,16),
     creatorKey:$("creatorKey").value||"",
     weapon:selectedWeapon,
     skin:selectedSkin
    });
   });
 
-  socket.on("disconnect",()=>{
+  socket.on("disconnect",reason=>{
+   console.warn("Socket.IO desconectado:",reason);
    $("connection").textContent="Desconectado";
+   $("adminConnStatus").textContent="Desconectado";
+   myId=null;
   });
 
   socket.on("connect_error",err=>{
-   console.error("Error Socket.IO:",err.message);
-   $("connection").textContent="Error de conexión";
+   console.error("Error Socket.IO:",err?.message||err);
+   $("connection").textContent="Error / reintentando";
+   $("message").textContent=
+    "Render no ha aceptado la conexión todavía. Comprueba el servidor.";
   });
 
   socket.on("notice",message=>setToast(String(message)));
 
   socket.on("joined",data=>{
    if(!data||!data.you) return;
-   const p=data.you;
 
-   player.x=p.x;
-   player.y=p.y;
-   player.z=p.z;
-   yaw=p.yaw||0;
+   const p=data.you;
+   myId=socket.id||p.id||myId;
+
+   player.x=Number(p.x)||0;
+   player.y=Number(p.y)||0;
+   player.z=Number(p.z)||0;
+   yaw=Number(p.yaw)||0;
 
    health=p.health??100;
    ammo=p.ammo??ammo;
@@ -637,8 +822,9 @@ if(!window.THREE){
    $("ammo").textContent=ammo;
    $("kills").textContent=kills;
    $("deaths").textContent=deaths;
-   $("rankName").textContent=p.rank;
-   $("brand").textContent=p.rank==="CREADOR"?"ABDE · CREADOR":"LEGENDS OF ABDE";
+   $("rankName").textContent=p.rank||"JUGADOR";
+   $("brand").textContent=p.rank==="CREADOR"
+    ?"ABDE · CREADOR":"LEGENDS OF ABDE";
 
    updateWeaponAppearance();
    syncCamera();
@@ -646,32 +832,33 @@ if(!window.THREE){
 
   socket.on("creatorVerified",data=>{
    creatorVerified=Boolean(data&&data.ok);
+   $("adminToggle").style.display=creatorVerified?"block":"none";
 
-   if(creatorVerified){
-    selectedSkin="creator";
-    selectedWeapon="creator";
-    ammo=WEAPONS.creator.ammo;
-
-    $("rankName").textContent="CREADOR";
-    $("brand").textContent="ABDE · CREADOR";
-    $("ammo").textContent=ammo;
-
-    updateWeaponAppearance();
-    setToast("¡EQUIPAMIENTO DEL CREADOR ACTIVADO!");
-   }else if($("creatorKey").value){
-    setToast("La clave no es válida o el creador ya está conectado");
+   if(!creatorVerified){
+    $("adminPanel").style.display="none";
+    return;
    }
+
+   selectedSkin="creator";
+   selectedWeapon="creator";
+   ammo=WEAPONS.creator.ammo;
+
+   $("rankName").textContent="CREADOR";
+   $("brand").textContent="ABDE · CREADOR";
+   $("ammo").textContent=ammo;
+
+   updateWeaponAppearance();
+   setToast("Creador verificado. Panel disponible con F2.");
   });
 
   socket.on("state",data=>{
    const list=Array.isArray(data)?data:data?.players;
    if(!Array.isArray(list)) return;
 
+   lastServerPlayers=list.filter(p=>p&&p.id);
    const seen=new Set();
 
-   for(const p of list){
-    if(!p||!p.id) continue;
-
+   for(const p of lastServerPlayers){
     if(p.id===myId){
      health=p.health??health;
      ammo=p.ammo??ammo;
@@ -697,8 +884,19 @@ if(!window.THREE){
    }
 
    $("players").textContent=
-    Math.min(MAX_PLAYERS,remotePlayers.size+(myId?1:0))+
-    "/"+MAX_PLAYERS;
+    Math.min(MAX_PLAYERS,lastServerPlayers.length)+"/"+MAX_PLAYERS;
+
+   if(creatorVerified) updateAdminPanel(lastServerPlayers);
+  });
+
+  // Este evento solo funciona si el backend lo emite.
+  socket.on("admin:players",data=>{
+   const list=Array.isArray(data)?data:data?.players;
+
+   if(Array.isArray(list)){
+    lastServerPlayers=list.filter(p=>p&&p.id);
+    updateAdminPanel(lastServerPlayers);
+   }
   });
 
   socket.on("shotResult",data=>{
@@ -706,25 +904,38 @@ if(!window.THREE){
     ammo=data.ammo;
     $("ammo").textContent=ammo;
    }
-
    if(data&&data.ok===false&&ammo<=0){
-    setToast("Pulsa R para recargar");
+    setToast("Munición agotada");
    }
   });
-
-  socket.on("shotEffect",data=>{
+    socket.on("shotEffect",data=>{
    if(!data) return;
 
-   const start=new THREE.Vector3(data.x,data.y,data.z);
-   const direction=new THREE.Vector3(data.dx,data.dy,data.dz);
-   const end=start.clone().add(direction.multiplyScalar(data.distance||60));
+   const start=new THREE.Vector3(
+    Number(data.x)||0,
+    Number(data.y)||0,
+    Number(data.z)||0
+   );
+
+   const direction=new THREE.Vector3(
+    Number(data.dx)||0,
+    Number(data.dy)||0,
+    Number(data.dz)||0
+   );
+
+   const end=start.clone().add(
+    direction.multiplyScalar(Number(data.distance)||60)
+   );
 
    const geometry=new THREE.BufferGeometry().setFromPoints([start,end]);
-   const line=new THREE.Line(geometry,new THREE.LineBasicMaterial({
-    color:data.color||"#00dfff",
-    transparent:true,
-    opacity:.95
-   }));
+   const line=new THREE.Line(
+    geometry,
+    new THREE.LineBasicMaterial({
+     color:data.color||"#00dfff",
+     transparent:true,
+     opacity:.95
+    })
+   );
 
    scene.add(line);
    tracers.push({line,until:performance.now()+100});
@@ -734,7 +945,7 @@ if(!window.THREE){
    scene.add(flash);
    setTimeout(()=>scene.remove(flash),55);
 
-   if(data.hit) setToast("¡IMPACTO!");
+   if(data.hit) setToast("¡Impacto!");
   });
 
   socket.on("playerHit",data=>{
@@ -744,7 +955,7 @@ if(!window.THREE){
    $("health").textContent=health;
 
    if(health<=0){
-    setToast("¡ELIMINADO!");
+    setToast("Te han eliminado");
     setTimeout(()=>socket?.emit("respawn"),2700);
    }
   });
@@ -755,22 +966,22 @@ if(!window.THREE){
    if(data.attacker===myId){
     kills=data.attackerKills??kills+1;
     $("kills").textContent=kills;
-    setToast("¡ELIMINACIÓN!");
+    setToast("¡Eliminación!");
    }
 
    if(data.victim===myId){
     deaths++;
     $("deaths").textContent=deaths;
-    setToast("¡TE HAN ELIMINADO!");
+    setToast("Has sido eliminado");
    }
   });
 
   socket.on("respawned",p=>{
    if(!p) return;
 
-   player.x=p.x;
-   player.y=p.y;
-   player.z=p.z;
+   player.x=Number(p.x)||0;
+   player.y=Number(p.y)||0;
+   player.z=Number(p.z)||0;
    health=p.health??100;
    ammo=p.ammo??ammo;
    vy=0;
@@ -779,13 +990,13 @@ if(!window.THREE){
    $("ammo").textContent=ammo;
 
    syncCamera();
-   setToast("¡DE VUELTA A LA ARENA!");
+   setToast("De vuelta a la arena");
   });
 
   socket.connect();
  }
 
-   function shoot(){
+ function shoot(){
   const now=performance.now();
   const weapon=WEAPONS[selectedWeapon];
 
@@ -805,7 +1016,18 @@ if(!window.THREE){
   socket.emit("shoot",{yaw,pitch});
  }
 
+ // CONTROLES
  document.addEventListener("keydown",e=>{
+  if(e.code==="F2"&&creatorVerified){
+   e.preventDefault();
+   toggleAdminPanel();
+   return;
+  }
+
+  if(e.code==="Escape"&&$("adminPanel").style.display==="block"){
+   toggleAdminPanel(false);
+  }
+
   keys[e.code]=true;
 
   if(e.code==="KeyR"&&started&&socket?.connected){
@@ -849,7 +1071,7 @@ if(!window.THREE){
   const dt=Math.min((now-previousTime)/1000,.04);
   previousTime=now;
 
-  // Eliminar trazadores antiguos
+  // Eliminar efectos de disparos antiguos.
   for(let i=tracers.length-1;i>=0;i--){
    if(now>=tracers[i].until){
     scene.remove(tracers[i].line);
@@ -860,7 +1082,8 @@ if(!window.THREE){
   }
 
   if(started){
-   const speed=(keys.ShiftLeft||keys.ShiftRight)?13:8;
+   const speed=
+    (keys.ShiftLeft||keys.ShiftRight)?13:8;
 
    const forward=
     (keys.KeyW||keys.ArrowUp?1:0)-
@@ -871,24 +1094,145 @@ if(!window.THREE){
     (keys.KeyA||keys.ArrowLeft?1:0);
 
    const length=Math.hypot(forward,sideways)||1;
+   const oldX=player.x;
+   const oldZ=player.z;
 
-   player.x+=(
+   const moveX=(
     -Math.sin(yaw)*forward/length+
      Math.cos(yaw)*sideways/length
    )*speed*dt;
 
-   player.z+=(
+   const moveZ=(
     -Math.cos(yaw)*forward/length-
      Math.sin(yaw)*sideways/length
    )*speed*dt;
 
+   const PLAYER_RADIUS=.38;
+   const PLAYER_HEIGHT=1.7;
+
+   const overlapsPlatform=(x,z,plat,pad=0)=>
+    Math.abs(x-plat.x)<plat.w/2+pad&&
+    Math.abs(z-plat.z)<plat.d/2+pad;
+
+   // Comprueba si una posición se mete dentro de un bloque.
+   // También deja salir al jugador si el servidor lo coloca dentro
+   // de un obstáculo al iniciar la partida.
+   function blockedAt(x,z,fromX,fromZ){
+    for(const o of solidObstacles){
+     const verticalOverlap=
+      player.y<o.topY-.035&&
+      player.y+PLAYER_HEIGHT>o.bottomY+.035;
+
+     if(!verticalOverlap) continue;
+
+     const targetX=
+      o.w/2+PLAYER_RADIUS-Math.abs(x-o.x);
+
+     const targetZ=
+      o.d/2+PLAYER_RADIUS-Math.abs(z-o.z);
+
+     const targetInside=targetX>0&&targetZ>0;
+     if(!targetInside) continue;
+
+     const oldXPen=
+      o.w/2+PLAYER_RADIUS-Math.abs(fromX-o.x);
+
+     const oldZPen=
+      o.d/2+PLAYER_RADIUS-Math.abs(fromZ-o.z);
+
+     const wasInside=oldXPen>0&&oldZPen>0;
+
+     if(wasInside){
+      const oldPen=Math.min(oldXPen,oldZPen);
+      const newPen=Math.min(targetX,targetZ);
+
+      // Permite moverse hacia fuera, pero no adentrarse más.
+      if(newPen<oldPen-.001) continue;
+     }
+
+     return true;
+    }
+
+    // Las plataformas también bloquean por los laterales.
+    for(const plat of solidPlatforms){
+     if(
+      player.y<plat.topY-.12&&
+      overlapsPlatform(x,z,plat,.15)
+     ){
+      const oldXPen=
+       plat.w/2+.15-Math.abs(fromX-plat.x);
+
+      const oldZPen=
+       plat.d/2+.15-Math.abs(fromZ-plat.z);
+
+      const wasInside=oldXPen>0&&oldZPen>0;
+
+      if(wasInside){
+       const newPenX=
+        plat.w/2+.15-Math.abs(x-plat.x);
+
+       const newPenZ=
+        plat.d/2+.15-Math.abs(z-plat.z);
+
+       if(
+        Math.min(newPenX,newPenZ)<
+        Math.min(oldXPen,oldZPen)-.001
+       ){
+        continue;
+       }
+      }
+
+      return true;
+     }
+    }
+
+    return false;
+   }
+
+   // Movimiento por ejes para poder deslizarse junto a las paredes.
+   const tryX=THREE.MathUtils.clamp(oldX+moveX,-77,77);
+
+   if(!blockedAt(tryX,oldZ,oldX,oldZ)){
+    player.x=tryX;
+   }
+
+   const tryZ=THREE.MathUtils.clamp(oldZ+moveZ,-77,77);
+
+   if(!blockedAt(player.x,tryZ,player.x,oldZ)){
+    player.z=tryZ;
+   }
+
+   // SALTO Y GRAVEDAD
    if(keys.Space&&grounded){
-    vy=9;
+    vy=9.2;
     grounded=false;
    }
 
+   const previousY=player.y;
    vy-=22*dt;
-   player.y+=vy*dt;
+   const nextY=player.y+vy*dt;
+   let landed=false;
+
+   // Aterrizaje sobre la superficie más alta que corresponda.
+   for(const plat of solidPlatforms){
+    if(
+     vy<=0&&
+     previousY>=plat.topY-.02&&
+     nextY<=plat.topY&&
+     overlapsPlatform(player.x,player.z,plat,-.1)
+    ){
+     player.y=plat.topY;
+     vy=0;
+     grounded=true;
+     landed=true;
+     break;
+    }
+   }
+
+   if(!landed){
+    player.y=nextY;
+    grounded=false;
+   }
 
    if(player.y<=0){
     player.y=0;
@@ -896,15 +1240,20 @@ if(!window.THREE){
     grounded=true;
    }
 
+   // Límites exteriores de la arena.
    player.x=THREE.MathUtils.clamp(player.x,-77,77);
    player.z=THREE.MathUtils.clamp(player.z,-77,77);
 
    syncCamera();
 
+   // Sincronizar la posición local con Render.
    if(socket?.connected&&now-lastMove>100){
     lastMove=now;
     socket.emit("move",{
-     x:player.x,y:player.y,z:player.z,yaw
+     x:player.x,
+     y:player.y,
+     z:player.z,
+     yaw
     });
    }
   }
