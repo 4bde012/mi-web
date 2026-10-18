@@ -23,11 +23,8 @@ const MAX_PLAYERS = 40;
 const MAX_HEALTH = 100;
 const MEDKIT_HEAL = 40;
 const MAX_MEDKITS = 5;
-
 const CREATOR_KEY = process.env.CREATOR_KEY || "";
 
-// En Render configura RANKING_FILE=/data/ranking.json
-// y conecta un disco persistente en /data.
 const RANKING_FILE =
   process.env.RANKING_FILE ||
   path.join(__dirname, "ranking.json");
@@ -69,9 +66,11 @@ const CREATOR_SKIN = "creator";
 const players = new Map();
 const medkits = new Map();
 
-// Ranking acumulado: las kills y muertes sobreviven
-// a las desconexiones si el archivo persiste.
 let ranking = {};
+
+// =========================
+// RANKING MUNDIAL
+// =========================
 
 function loadRanking() {
   try {
@@ -79,13 +78,20 @@ function loadRanking() {
       const contents = fs.readFileSync(RANKING_FILE, "utf8");
       const parsed = JSON.parse(contents);
 
-      if (parsed && typeof parsed === "object" &&
-          !Array.isArray(parsed)) {
+      if (
+        parsed &&
+        typeof parsed === "object" &&
+        !Array.isArray(parsed)
+      ) {
         ranking = parsed;
       }
     }
   } catch (error) {
-    console.error("No se pudo leer el ranking:", error.message);
+    console.error(
+      "No se pudo leer el ranking:",
+      error.message
+    );
+
     ranking = {};
   }
 }
@@ -93,18 +99,21 @@ function loadRanking() {
 function saveRanking() {
   try {
     const folder = path.dirname(RANKING_FILE);
+
     fs.mkdirSync(folder, { recursive: true });
 
     const tempFile = RANKING_FILE + ".tmp";
+
     fs.writeFileSync(
       tempFile,
       JSON.stringify(ranking, null, 2),
       "utf8"
     );
+
     fs.renameSync(tempFile, RANKING_FILE);
   } catch (error) {
     console.error(
-      "No se pudo guardar el ranking. Comprueba el disco persistente:",
+      "No se pudo guardar el ranking:",
       error.message
     );
   }
@@ -126,11 +135,14 @@ function ensureRankingEntry(name) {
       deaths: 0
     };
   } else {
-    ranking[key].name = String(name || "Jugador").slice(0, 16);
+    ranking[key].name =
+      String(name || "Jugador").slice(0, 16);
+
     ranking[key].kills = Math.max(
       0,
       Number(ranking[key].kills) || 0
     );
+
     ranking[key].deaths = Math.max(
       0,
       Number(ranking[key].deaths) || 0
@@ -161,6 +173,10 @@ function broadcastRanking() {
 
 loadRanking();
 
+// =========================
+// RUTAS DEL SERVIDOR
+// =========================
+
 app.get("/", (req, res) => {
   res.send("LEGENDS OF ABDE: servidor multijugador activo.");
 });
@@ -173,10 +189,13 @@ app.get("/health", (req, res) => {
   });
 });
 
-// Ranking público de solo lectura.
 app.get("/ranking", (req, res) => {
   res.json(getWorldRanking());
 });
+
+// =========================
+// JUGADORES
+// =========================
 
 function randomPosition() {
   return {
@@ -197,12 +216,12 @@ function publicPlayer(p) {
     y: p.y,
     z: p.z,
     yaw: p.yaw,
-    health: p.health,
+    health: p.isCreator ? MAX_HEALTH : p.health,
     maxHealth: MAX_HEALTH,
     ammo: p.ammo,
     kills: p.kills,
     deaths: p.deaths,
-    alive: p.alive,
+    alive: p.isCreator ? true : p.alive,
     flyEnabled: Boolean(p.isCreator && p.flyEnabled)
   };
 }
@@ -214,14 +233,17 @@ function adminPlayerList() {
     rank: p.rank,
     kills: p.kills,
     deaths: p.deaths,
-    health: p.health,
-    alive: p.alive,
+    health: p.isCreator ? MAX_HEALTH : p.health,
+    alive: p.isCreator ? true : p.alive,
     isCreator: p.isCreator
   }));
 }
 
 function broadcastState() {
-  io.emit("state", Array.from(players.values(), publicPlayer));
+  io.emit(
+    "state",
+    Array.from(players.values(), publicPlayer)
+  );
 }
 
 function broadcastMedkits() {
@@ -231,10 +253,17 @@ function broadcastMedkits() {
 function broadcastAdminPlayerList() {
   for (const p of players.values()) {
     if (p.isCreator) {
-      io.to(p.id).emit("admin:players", adminPlayerList());
+      io.to(p.id).emit(
+        "admin:players",
+        adminPlayerList()
+      );
     }
   }
 }
+
+// =========================
+// BOTIQUINES
+// =========================
 
 function spawnMedkit() {
   if (medkits.size >= MAX_MEDKITS) return;
@@ -258,8 +287,23 @@ function fillMedkits() {
   }
 }
 
+// =========================
+// REAPARICIÓN
+// =========================
+
 function respawnPlayer(p) {
   if (!players.has(p.id)) return;
+
+  // El creador no necesita reaparecer porque no puede morir.
+  if (p.isCreator && p.rank === "CREADOR") {
+    p.health = MAX_HEALTH;
+    p.alive = true;
+
+    broadcastState();
+    broadcastAdminPlayerList();
+
+    return;
+  }
 
   const pos = randomPosition();
 
@@ -273,9 +317,14 @@ function respawnPlayer(p) {
   p.lastShot = 0;
 
   io.to(p.id).emit("respawned", publicPlayer(p));
+
   broadcastState();
   broadcastAdminPlayerList();
 }
+
+// =========================
+// DETECCIÓN DE DISPAROS
+// =========================
 
 function findHitPlayer(shooter, yaw, pitch) {
   const dx = -Math.sin(yaw) * Math.cos(pitch);
@@ -292,7 +341,9 @@ function findHitPlayer(shooter, yaw, pitch) {
   let bestDistance = 60;
 
   for (const target of players.values()) {
-    if (target.id === shooter.id || !target.alive) continue;
+    if (target.id === shooter.id || !target.alive) {
+      continue;
+    }
 
     const center = {
       x: target.x,
@@ -329,24 +380,55 @@ function findHitPlayer(shooter, yaw, pitch) {
   return {
     target: best,
     origin,
-    direction: { x: dx, y: dy, z: dz },
+    direction: {
+      x: dx,
+      y: dy,
+      z: dz
+    },
     distance: best ? bestDistance : 60
   };
 }
+
+// =========================
+// PERMISOS DE ADMINISTRADOR
+// =========================
 
 function getCreator(socket) {
   const p = players.get(socket.id);
 
   if (!p || !p.isCreator || p.rank !== "CREADOR") {
-    socket.emit("admin:error", "No tienes permisos de administrador.");
+    socket.emit(
+      "admin:error",
+      "No tienes permisos de administrador."
+    );
+
     return null;
   }
 
   return p;
 }
 
-function killPlayer(target, attacker, isAdminAction = false) {
+// =========================
+// ELIMINACIÓN SEGURA
+// =========================
+
+function killPlayer(
+  target,
+  attacker,
+  isAdminAction = false
+) {
   if (!target || !target.alive) return false;
+
+  // PROTECCIÓN: el creador nunca puede morir.
+  if (target.isCreator && target.rank === "CREADOR") {
+    target.health = MAX_HEALTH;
+    target.alive = true;
+
+    broadcastState();
+    broadcastAdminPlayerList();
+
+    return false;
+  }
 
   target.health = 0;
   target.alive = false;
@@ -355,9 +437,11 @@ function killPlayer(target, attacker, isAdminAction = false) {
   const victimEntry = ensureRankingEntry(target.name);
   victimEntry.deaths++;
 
-  // Las eliminaciones administrativas no suman kills
-  // al ranking mundial.
-  if (!isAdminAction && attacker && attacker.id !== target.id) {
+  if (
+    !isAdminAction &&
+    attacker &&
+    attacker.id !== target.id
+  ) {
     attacker.kills++;
     ensureRankingEntry(attacker.name).kills++;
   }
@@ -393,9 +477,17 @@ function killPlayer(target, attacker, isAdminAction = false) {
   return true;
 }
 
+// =========================
+// CONEXIÓN MULTIJUGADOR
+// =========================
+
 io.on("connection", socket => {
+
   socket.on("joinGame", data => {
-    if (players.size >= MAX_PLAYERS && !players.has(socket.id)) {
+    if (
+      players.size >= MAX_PLAYERS &&
+      !players.has(socket.id)
+    ) {
       socket.emit("notice", "La arena está llena.");
       socket.disconnect(true);
       return;
@@ -410,10 +502,14 @@ io.on("connection", socket => {
       data.creatorKey === CREATOR_KEY;
 
     const requestedWeapon =
-      typeof data.weapon === "string" ? data.weapon : "pulse";
+      typeof data.weapon === "string"
+        ? data.weapon
+        : "pulse";
 
     const requestedSkin =
-      typeof data.skin === "string" ? data.skin : "cyber";
+      typeof data.skin === "string"
+        ? data.skin
+        : "cyber";
 
     let weapon = "pulse";
     let skin = "cyber";
@@ -426,7 +522,8 @@ io.on("connection", socket => {
       skin = CREATOR_SKIN;
     } else {
       weapon =
-        WEAPONS[requestedWeapon] && requestedWeapon !== "creator"
+        WEAPONS[requestedWeapon] &&
+        requestedWeapon !== "creator"
           ? requestedWeapon
           : "pulse";
 
@@ -436,6 +533,7 @@ io.on("connection", socket => {
     }
 
     const pos = randomPosition();
+
     const name = String(data.name || "Jugador")
       .trim()
       .slice(0, 16) || "Jugador";
@@ -447,6 +545,7 @@ io.on("connection", socket => {
       name,
       skin,
       weapon,
+
       rank: isCreator ? "CREADOR" : "JUGADOR",
       isCreator,
       flyEnabled: false,
@@ -508,6 +607,7 @@ io.on("connection", socket => {
         ok: false,
         message: "Ese jugador ya no está conectado."
       });
+
       return;
     }
 
@@ -516,14 +616,16 @@ io.on("connection", socket => {
         ok: false,
         message: "No puedes seleccionarte a ti mismo."
       });
+
       return;
     }
 
-    if (target.isCreator) {
+    if (target.isCreator && target.rank === "CREADOR") {
       socket.emit("admin:killResult", {
         ok: false,
         message: "No puedes eliminar al creador."
       });
+
       return;
     }
 
@@ -532,6 +634,7 @@ io.on("connection", socket => {
         ok: false,
         message: "Ese jugador ya está eliminado."
       });
+
       return;
     }
 
@@ -550,6 +653,7 @@ io.on("connection", socket => {
     if (!admin) return;
 
     const enabled = Boolean(data?.enabled);
+
     admin.flyEnabled = enabled;
 
     if (!enabled) {
@@ -604,6 +708,7 @@ io.on("connection", socket => {
 
   socket.on("move", data => {
     const p = players.get(socket.id);
+
     if (!p || !p.alive || !data) return;
 
     const x = Number(data.x);
@@ -611,18 +716,17 @@ io.on("connection", socket => {
     const z = Number(data.z);
     const yaw = Number(data.yaw);
 
-    if (![x, y, z, yaw].every(Number.isFinite)) return;
+    if (![x, y, z, yaw].every(Number.isFinite)) {
+      return;
+    }
 
     p.x = Math.max(-77, Math.min(77, x));
     p.z = Math.max(-77, Math.min(77, z));
     p.yaw = yaw;
 
-    // Solo el creador con vuelo activado puede subir
-    // hasta la altura máxima de la arena.
     if (p.isCreator && p.flyEnabled) {
       p.y = Math.max(0, Math.min(30, y));
     } else {
-      // Se permite un pequeño margen para los saltos normales.
       p.y = Math.max(0, Math.min(2, y));
     }
   });
@@ -633,6 +737,7 @@ io.on("connection", socket => {
 
   socket.on("shoot", data => {
     const p = players.get(socket.id);
+
     if (!p || !p.alive) return;
 
     const weapon = WEAPONS[p.weapon] || WEAPONS.pulse;
@@ -644,6 +749,7 @@ io.on("connection", socket => {
         ammo: p.ammo,
         message: "Dispara un poco más despacio."
       });
+
       return;
     }
 
@@ -653,6 +759,7 @@ io.on("connection", socket => {
         ammo: 0,
         message: "Pulsa R para recargar."
       });
+
       return;
     }
 
@@ -664,6 +771,7 @@ io.on("connection", socket => {
         ok: false,
         ammo: p.ammo
       });
+
       return;
     }
 
@@ -692,6 +800,23 @@ io.on("connection", socket => {
     if (shot.target) {
       const target = shot.target;
 
+      // PROTECCIÓN: los disparos no dañan al creador.
+      if (target.isCreator && target.rank === "CREADOR") {
+        target.health = MAX_HEALTH;
+        target.alive = true;
+
+        socket.emit("hitConfirm", {
+          targetId: target.id,
+          damage: 0,
+          health: MAX_HEALTH
+        });
+
+        broadcastState();
+        broadcastAdminPlayerList();
+
+        return;
+      }
+
       target.health = Math.max(
         0,
         target.health - weapon.damage
@@ -715,15 +840,23 @@ io.on("connection", socket => {
         killPlayer(target, p, false);
       } else {
         broadcastState();
+        broadcastAdminPlayerList();
       }
     }
   });
 
+  // =========================
+  // RECARGA
+  // =========================
+
   socket.on("reload", () => {
     const p = players.get(socket.id);
+
     if (!p || !p.alive) return;
 
-    p.ammo = WEAPONS[p.weapon]?.ammo || WEAPONS.pulse.ammo;
+    p.ammo =
+      WEAPONS[p.weapon]?.ammo ||
+      WEAPONS.pulse.ammo;
 
     socket.emit("shotResult", {
       ok: true,
@@ -736,7 +869,7 @@ io.on("connection", socket => {
   });
 
   // =========================
-  // BOTIQUINES
+  // RECOGER BOTIQUINES
   // =========================
 
   socket.on("collectMedkit", data => {
@@ -753,6 +886,7 @@ io.on("connection", socket => {
         health: p.health,
         ok: false
       });
+
       return;
     }
 
@@ -761,13 +895,17 @@ io.on("connection", socket => {
       p.z - kit.z
     );
 
-    if (distance > 3.5 || p.health >= MAX_HEALTH) {
+    if (
+      distance > 3.5 ||
+      p.health >= MAX_HEALTH
+    ) {
       socket.emit("medkitCollected", {
         id: kit.id,
         playerId: p.id,
         health: p.health,
         ok: false
       });
+
       return;
     }
 
@@ -791,6 +929,10 @@ io.on("connection", socket => {
     setTimeout(spawnMedkit, 8000);
   });
 
+  // =========================
+  // SOLICITUD DE REAPARICIÓN
+  // =========================
+
   socket.on("respawn", () => {
     const p = players.get(socket.id);
 
@@ -798,6 +940,10 @@ io.on("connection", socket => {
       respawnPlayer(p);
     }
   });
+
+  // =========================
+  // DESCONEXIÓN
+  // =========================
 
   socket.on("disconnect", () => {
     const p = players.get(socket.id);
@@ -815,6 +961,10 @@ io.on("connection", socket => {
     }
   });
 });
+
+// =========================
+// INICIO DEL SERVIDOR
+// =========================
 
 fillMedkits();
 
