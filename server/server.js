@@ -27,6 +27,7 @@ const RANKING_FILE = process.env.RANKING_FILE ||
 const WORLD_LIMIT = 77;
 const PLAYER_RADIUS = 0.65;
 const MAX_MOVE_SPEED = 14.5;
+const SHOT_RANGE = 60;
 
 const WEAPONS = {
   pulse: {
@@ -67,11 +68,6 @@ const adminLogs = [];
 
 let ranking = {};
 
-/* =========================================
-   MAPA Y COLISIONES DEL SERVIDOR
-   Deben coincidir con el mapa del index.html.
-========================================= */
-
 const WORLD_COLLIDERS = [];
 
 function addCollider(x, y, z, w, h, d) {
@@ -88,39 +84,32 @@ function addCollider(x, y, z, w, h, d) {
 function buildWorldColliders() {
   WORLD_COLLIDERS.length = 0;
 
-  // Paredes exteriores
   addCollider(0, 5, -80, 160, 10, 3);
   addCollider(0, 5, 80, 160, 10, 3);
   addCollider(-80, 5, 0, 3, 10, 160);
   addCollider(80, 5, 0, 3, 10, 160);
 
-  // Plataforma central
   addCollider(0, 0.35, 0, 18, 0.7, 18);
 
-  // Pilares
   addCollider(-18, 3, -18, 5, 6, 5);
   addCollider(18, 3, -18, 5, 6, 5);
   addCollider(-18, 3, 18, 5, 6, 5);
   addCollider(18, 3, 18, 5, 6, 5);
 
-  // Coberturas
   addCollider(0, 1.2, -28, 13, 2.4, 3);
   addCollider(0, 1.2, 28, 13, 2.4, 3);
   addCollider(-28, 1.2, 0, 3, 2.4, 13);
   addCollider(28, 1.2, 0, 3, 2.4, 13);
 
-  // Barreras centrales
   addCollider(-10, 0.65, -10, 9, 1.3, 1.4);
   addCollider(10, 0.65, -10, 9, 1.3, 1.4);
   addCollider(-10, 0.65, 10, 9, 1.3, 1.4);
   addCollider(10, 0.65, 10, 9, 1.3, 1.4);
 
-  // Pilares decorativos que también bloquean el paso
   for (let i = 0; i < 20; i++) {
     const angle = i * Math.PI * 2 / 20;
     const x = Math.cos(angle) * 53;
     const z = Math.sin(angle) * 53;
-
     addCollider(x, 1.7, z, 1, 3.4, 1);
   }
 }
@@ -128,14 +117,13 @@ function buildWorldColliders() {
 buildWorldColliders();
 
 function positionBlocked(x, z) {
-  if (x < -WORLD_LIMIT || x > WORLD_LIMIT ||
-      z < -WORLD_LIMIT || z > WORLD_LIMIT) {
-    return true;
-  }
+  if (
+    x < -WORLD_LIMIT || x > WORLD_LIMIT ||
+    z < -WORLD_LIMIT || z > WORLD_LIMIT
+  ) return true;
 
   for (const c of WORLD_COLLIDERS) {
-    // Coincide con el filtro de colisiones del cliente.
-    if (c.minY > 1.7 + 0.25) continue;
+    if (c.minY > 1.95) continue;
 
     const nearestX = Math.max(c.minX, Math.min(x, c.maxX));
     const nearestZ = Math.max(c.minZ, Math.min(z, c.maxZ));
@@ -157,17 +145,17 @@ function pathBlocked(x1, z1, x2, z2) {
 
   for (let i = 1; i <= steps; i++) {
     const t = i / steps;
-    const x = x1 + (x2 - x1) * t;
-    const z = z1 + (z2 - z1) * t;
-
-    if (positionBlocked(x, z)) return true;
+    if (positionBlocked(
+      x1 + (x2 - x1) * t,
+      z1 + (z2 - z1) * t
+    )) return true;
   }
 
   return false;
 }
 
 function randomPosition() {
-  for (let i = 0; i < 150; i++) {
+  for (let i = 0; i < 200; i++) {
     const x = Math.round((Math.random() * 100 - 50) * 10) / 10;
     const z = Math.round((Math.random() * 100 - 50) * 10) / 10;
 
@@ -176,13 +164,10 @@ function randomPosition() {
     }
   }
 
-  // Posición segura de reserva
   return { x: 0, y: 0, z: 15 };
 }
 
-/* =========================================
-   RANKING
-========================================= */
+/* RANKING */
 
 function loadRanking() {
   try {
@@ -203,13 +188,7 @@ function saveRanking() {
     fs.mkdirSync(path.dirname(RANKING_FILE), { recursive: true });
 
     const temp = RANKING_FILE + ".tmp";
-
-    fs.writeFileSync(
-      temp,
-      JSON.stringify(ranking, null, 2),
-      "utf8"
-    );
-
+    fs.writeFileSync(temp, JSON.stringify(ranking, null, 2), "utf8");
     fs.renameSync(temp, RANKING_FILE);
   } catch (error) {
     console.error("Error guardando ranking:", error.message);
@@ -217,9 +196,7 @@ function saveRanking() {
 }
 
 function rankingKey(name) {
-  return String(name || "Jugador")
-    .trim()
-    .toLocaleLowerCase("es");
+  return String(name || "Jugador").trim().toLocaleLowerCase("es");
 }
 
 function ensureRanking(name) {
@@ -255,9 +232,7 @@ function broadcastRanking() {
   io.emit("worldRanking", getRanking());
 }
 
-/* =========================================
-   JUGADORES
-========================================= */
+/* JUGADORES */
 
 function publicPlayer(p) {
   return {
@@ -341,10 +316,7 @@ function logAdmin(admin, action, details = "") {
   };
 
   adminLogs.unshift(entry);
-
-  if (adminLogs.length > 100) {
-    adminLogs.length = 100;
-  }
+  if (adminLogs.length > 100) adminLogs.length = 100;
 
   console.log("[ADMIN]", entry.admin, entry.action, entry.details);
 }
@@ -369,7 +341,6 @@ function getStats() {
 
 function targetForAdmin(socket, data) {
   const admin = getCreator(socket);
-
   if (!admin) return { admin: null, target: null };
 
   const target = players.get(String(data?.targetId || ""));
@@ -387,9 +358,7 @@ function targetForAdmin(socket, data) {
   return { admin, target };
 }
 
-/* =========================================
-   BOTIQUINES Y REAPARICIÓN
-========================================= */
+/* BOTIQUINES Y REAPARICIÓN */
 
 function spawnMedkit() {
   if (medkits.size >= MAX_MEDKITS) return;
@@ -408,21 +377,11 @@ function spawnMedkit() {
 }
 
 function fillMedkits() {
-  while (medkits.size < MAX_MEDKITS) {
-    spawnMedkit();
-  }
+  while (medkits.size < MAX_MEDKITS) spawnMedkit();
 }
 
 function respawnPlayer(p) {
   if (!players.has(p.id)) return;
-
-  if (p.isCreator) {
-    p.health = MAX_HEALTH;
-    p.alive = true;
-    broadcastState();
-    broadcastAdminPlayers();
-    return;
-  }
 
   const pos = randomPosition();
 
@@ -437,19 +396,14 @@ function respawnPlayer(p) {
   p.lastMoveAt = Date.now();
 
   io.to(p.id).emit("respawned", publicPlayer(p));
-
   broadcastState();
   broadcastAdminPlayers();
 }
 
-/* =========================================
-   ELIMINACIONES
-========================================= */
+/* ELIMINACIONES */
 
 function killPlayer(target, attacker, adminAction = false) {
-  if (!target || !target.alive || target.isCreator) {
-    return false;
-  }
+  if (!target || !target.alive || target.isCreator) return false;
 
   target.health = 0;
   target.alive = false;
@@ -481,10 +435,7 @@ function killPlayer(target, attacker, adminAction = false) {
 
   setTimeout(() => {
     const current = players.get(target.id);
-
-    if (current && !current.alive) {
-      respawnPlayer(current);
-    }
+    if (current && !current.alive) respawnPlayer(current);
   }, 3000);
 
   broadcastState();
@@ -493,12 +444,8 @@ function killPlayer(target, attacker, adminAction = false) {
   return true;
 }
 
-/* =========================================
-   DISPAROS Y PAREDES
-========================================= */
+/* RAYOS Y DETECCIÓN DE IMPACTOS */
 
-// Distancia a la primera caja que atraviesa un rayo.
-// Sirve para impedir disparos a través de paredes y coberturas.
 function rayBoxDistance(origin, direction, box, maxDistance) {
   let tMin = 0;
   let tMax = maxDistance;
@@ -521,11 +468,7 @@ function rayBoxDistance(origin, direction, box, maxDistance) {
     let t1 = (min - o) / d;
     let t2 = (max - o) / d;
 
-    if (t1 > t2) {
-      const temp = t1;
-      t1 = t2;
-      t2 = temp;
-    }
+    if (t1 > t2) [t1, t2] = [t2, t1];
 
     tMin = Math.max(tMin, t1);
     tMax = Math.min(tMax, t2);
@@ -533,10 +476,12 @@ function rayBoxDistance(origin, direction, box, maxDistance) {
     if (tMin > tMax) return null;
   }
 
-  return tMin >= 0 ? tMin : tMax >= 0 ? tMax : null;
+  if (tMax < 0) return null;
+  return tMin >= 0 ? tMin : tMax;
 }
 
 function findHitPlayer(shooter, yaw, pitch) {
+  // Dirección compatible con la convención de Three.js.
   const dx = -Math.sin(yaw) * Math.cos(pitch);
   const dy = Math.sin(pitch);
   const dz = -Math.cos(yaw) * Math.cos(pitch);
@@ -549,12 +494,10 @@ function findHitPlayer(shooter, yaw, pitch) {
 
   const direction = { x: dx, y: dy, z: dz };
 
-  let wallDistance = 60;
+  let wallDistance = SHOT_RANGE;
 
   for (const box of WORLD_COLLIDERS) {
-    const distance = rayBoxDistance(
-      origin, direction, box, wallDistance
-    );
+    const distance = rayBoxDistance(origin, direction, box, SHOT_RANGE);
 
     if (distance !== null && distance < wallDistance) {
       wallDistance = distance;
@@ -567,33 +510,30 @@ function findHitPlayer(shooter, yaw, pitch) {
   for (const target of players.values()) {
     if (target.id === shooter.id || !target.alive) continue;
 
-    const center = {
-      x: target.x,
-      y: target.y + 1.1,
-      z: target.z
+    // Se trata al jugador como un volumen vertical, no solo como un punto.
+    const minY = target.y + 0.1;
+    const maxY = target.y + 2.2;
+    const radius = 0.85;
+
+    const box = {
+      minX: target.x - radius,
+      maxX: target.x + radius,
+      minY,
+      maxY,
+      minZ: target.z - radius,
+      maxZ: target.z + radius
     };
 
-    const rx = center.x - origin.x;
-    const ry = center.y - origin.y;
-    const rz = center.z - origin.z;
-
-    const along = rx * dx + ry * dy + rz * dz;
-
-    if (along < 0 || along > bestDistance) continue;
-
-    const nearestX = origin.x + dx * along;
-    const nearestY = origin.y + dy * along;
-    const nearestZ = origin.z + dz * along;
-
-    const distance = Math.hypot(
-      center.x - nearestX,
-      center.y - nearestY,
-      center.z - nearestZ
+    const distance = rayBoxDistance(
+      origin,
+      direction,
+      box,
+      bestDistance
     );
 
-    if (distance <= 1.15) {
+    if (distance !== null && distance <= bestDistance) {
       best = target;
-      bestDistance = along;
+      bestDistance = distance;
     }
   }
 
@@ -605,9 +545,7 @@ function findHitPlayer(shooter, yaw, pitch) {
   };
 }
 
-/* =========================================
-   TELETRANSPORTE SEGURO
-========================================= */
+/* TELETRANSPORTE */
 
 function findSafePositionNear(x, z) {
   const offsets = [
@@ -620,17 +558,13 @@ function findSafePositionNear(x, z) {
     const px = Math.max(-WORLD_LIMIT, Math.min(WORLD_LIMIT, x + dx));
     const pz = Math.max(-WORLD_LIMIT, Math.min(WORLD_LIMIT, z + dz));
 
-    if (!positionBlocked(px, pz)) {
-      return { x: px, y: 0, z: pz };
-    }
+    if (!positionBlocked(px, pz)) return { x: px, y: 0, z: pz };
   }
 
   return randomPosition();
 }
 
-/* =========================================
-   HTTP
-========================================= */
+/* HTTP */
 
 loadRanking();
 
@@ -650,9 +584,7 @@ app.get("/ranking", (req, res) => {
   res.json(getRanking());
 });
 
-/* =========================================
-   SOCKET.IO
-========================================= */
+/* SOCKET.IO */
 
 io.on("connection", socket => {
   console.log("Conexión:", socket.id);
@@ -704,18 +636,14 @@ io.on("connection", socket => {
       rank: isCreator ? "CREADOR" : "JUGADOR",
       isCreator,
       flyEnabled: false,
-
       x: pos.x,
       y: 0,
       z: pos.z,
       yaw: 0,
-
       health: MAX_HEALTH,
       ammo: WEAPONS[weapon].ammo,
-
       kills: entry.kills,
       deaths: entry.deaths,
-
       alive: true,
       lastShot: 0,
       lastMoveAt: Date.now()
@@ -733,32 +661,22 @@ io.on("connection", socket => {
     socket.broadcast.emit("notice", name + " ha entrado en la arena.");
   });
 
-  /* =====================================
-     ADMIN PRO
-  ===================================== */
+  /* ADMIN PRO: se conservan los eventos existentes */
 
   socket.on("admin:getPlayers", () => {
-    if (getCreator(socket)) {
-      socket.emit("admin:players", adminPlayerList());
-    }
+    if (getCreator(socket)) socket.emit("admin:players", adminPlayerList());
   });
 
   socket.on("admin:getRanking", () => {
-    if (getCreator(socket)) {
-      socket.emit("worldRanking", getRanking());
-    }
+    if (getCreator(socket)) socket.emit("worldRanking", getRanking());
   });
 
   socket.on("admin:getStats", () => {
-    if (getCreator(socket)) {
-      socket.emit("admin:stats", getStats());
-    }
+    if (getCreator(socket)) socket.emit("admin:stats", getStats());
   });
 
   socket.on("admin:getLogs", () => {
-    if (getCreator(socket)) {
-      socket.emit("admin:logs", adminLogs.slice(0, 100));
-    }
+    if (getCreator(socket)) socket.emit("admin:logs", adminLogs.slice(0, 100));
   });
 
   socket.on("admin:kill", data => {
@@ -771,14 +689,9 @@ io.on("connection", socket => {
     }
 
     const ok = killPlayer(target, admin, true);
-
     if (ok) logAdmin(admin, "ELIMINAR", target.name);
 
-    adminResult(
-      socket,
-      ok,
-      ok ? "Jugador eliminado." : "No se pudo eliminar."
-    );
+    adminResult(socket, ok, ok ? "Jugador eliminado." : "No se pudo eliminar.");
   });
 
   socket.on("admin:heal", data => {
@@ -791,13 +704,9 @@ io.on("connection", socket => {
     }
 
     target.health = MAX_HEALTH;
-
     logAdmin(admin, "CURAR", target.name);
-
     io.to(target.id).emit("notice", "El administrador te ha curado.");
-
     adminResult(socket, true, target.name + " tiene toda la vida.");
-
     broadcastState();
     broadcastAdminPlayers();
   });
@@ -808,25 +717,15 @@ io.on("connection", socket => {
 
     if (target.alive) {
       target.health = MAX_HEALTH;
-
       broadcastState();
       broadcastAdminPlayers();
-
-      adminResult(
-        socket,
-        true,
-        target.name + " ya estaba vivo y ha sido curado."
-      );
-
+      adminResult(socket, true, target.name + " ya estaba vivo y ha sido curado.");
       return;
     }
 
     respawnPlayer(target);
-
     logAdmin(admin, "REVIVIR", target.name);
-
     io.to(target.id).emit("notice", "El administrador te ha revivido.");
-
     adminResult(socket, true, target.name + " ha vuelto a la arena.");
   });
 
@@ -840,7 +739,6 @@ io.on("connection", socket => {
     }
 
     const pos = findSafePositionNear(admin.x, admin.z);
-
     target.x = pos.x;
     target.y = pos.y;
     target.z = pos.z;
@@ -849,11 +747,8 @@ io.on("connection", socket => {
 
     io.to(target.id).emit("admin:teleported", publicPlayer(target));
     io.to(target.id).emit("notice", "El administrador te ha teletransportado.");
-
     logAdmin(admin, "TELETRANSPORTAR", target.name);
-
     adminResult(socket, true, target.name + " ha sido teletransportado.");
-
     broadcastState();
     broadcastAdminPlayers();
   });
@@ -865,7 +760,6 @@ io.on("connection", socket => {
     logAdmin(admin, "EXPULSAR", target.name);
 
     const targetSocket = io.sockets.sockets.get(target.id);
-
     if (targetSocket) {
       targetSocket.emit("notice", "Has sido expulsado por el administrador.");
       targetSocket.disconnect(true);
@@ -894,11 +788,8 @@ io.on("connection", socket => {
     });
 
     io.to(target.id).emit("notice", "El administrador te ha cambiado el arma.");
-
     logAdmin(admin, "CAMBIAR ARMA", target.name + " → " + WEAPONS[weapon].name);
-
     adminResult(socket, true, "Arma cambiada a " + WEAPONS[weapon].name + ".");
-
     broadcastState();
     broadcastAdminPlayers();
   });
@@ -915,9 +806,7 @@ io.on("connection", socket => {
     }
 
     logAdmin(admin, "MENSAJE GLOBAL", message);
-
     io.emit("notice", "📢 " + admin.name + ": " + message);
-
     adminResult(socket, true, "Mensaje enviado a todos.");
   });
 
@@ -926,25 +815,16 @@ io.on("connection", socket => {
     if (!admin) return;
 
     admin.flyEnabled = Boolean(data?.enabled);
-
-    if (!admin.flyEnabled) {
-      admin.y = 0;
-    }
+    if (!admin.flyEnabled) admin.y = 0;
 
     socket.emit("admin:flyStatus", { enabled: admin.flyEnabled });
-
-    socket.emit(
-      "notice",
-      admin.flyEnabled ? "Vuelo activado." : "Vuelo desactivado."
-    );
+    socket.emit("notice", admin.flyEnabled ? "Vuelo activado." : "Vuelo desactivado.");
 
     broadcastState();
     broadcastAdminPlayers();
   });
 
-  /* =====================================
-     MOVIMIENTO VALIDADO EN EL SERVIDOR
-  ===================================== */
+  /* MOVIMIENTO */
 
   socket.on("move", data => {
     const p = players.get(socket.id);
@@ -958,23 +838,11 @@ io.on("connection", socket => {
     if (![x, y, z, yaw].every(Number.isFinite)) return;
 
     const now = Date.now();
-    const elapsed = Math.max(
-      0.05,
-      Math.min(0.5, (now - p.lastMoveAt) / 1000)
-    );
-
+    const elapsed = Math.max(0.05, Math.min(0.5, (now - p.lastMoveAt) / 1000));
     const distance = Math.hypot(x - p.x, z - p.z);
     const maxDistance = MAX_MOVE_SPEED * elapsed + 0.9;
 
-    // Impide movimientos instantáneos exagerados.
-    if (distance > maxDistance) {
-      socket.emit("moveCorrection", publicPlayer(p));
-      p.lastMoveAt = now;
-      return;
-    }
-
-    // Impide atravesar paredes, pilares y coberturas.
-    if (pathBlocked(p.x, p.z, x, z)) {
+    if (distance > maxDistance || pathBlocked(p.x, p.z, x, z)) {
       socket.emit("moveCorrection", publicPlayer(p));
       p.lastMoveAt = now;
       return;
@@ -993,23 +861,15 @@ io.on("connection", socket => {
     p.lastMoveAt = now;
   });
 
-  /* =====================================
-     CAMBIO DE ARMAS
-  ===================================== */
+  /* CAMBIO DE ARMAS */
 
   socket.on("changeWeapon", data => {
     const p = players.get(socket.id);
     if (!p || !p.alive) return;
 
     const weapon = String(data?.weapon || "");
-
     if (!WEAPONS[weapon]) return;
-
-    // El arma de creador no se puede conseguir como jugador normal.
     if (weapon === "creator" && !p.isCreator) return;
-
-    // Los jugadores normales no pueden usar el arma exclusiva del creador.
-    if (!p.isCreator && weapon === "creator") return;
 
     p.weapon = weapon;
     p.ammo = WEAPONS[weapon].ammo;
@@ -1021,18 +881,15 @@ io.on("connection", socket => {
     });
 
     socket.emit("notice", "Arma equipada: " + WEAPONS[weapon].name);
-
     broadcastState();
     broadcastAdminPlayers();
   });
 
-  /* =====================================
-     DISPAROS
-  ===================================== */
+  /* DISPAROS */
 
   socket.on("shoot", data => {
     const p = players.get(socket.id);
-    if (!p || !p.alive) return;
+    if (!p || !p.alive || !data || typeof data !== "object") return;
 
     const weapon = WEAPONS[p.weapon] || WEAPONS.pulse;
     const now = Date.now();
@@ -1055,8 +912,8 @@ io.on("connection", socket => {
       return;
     }
 
-    const yaw = Number(data?.yaw);
-    const pitch = Number(data?.pitch);
+    const yaw = Number(data.yaw);
+    const pitch = Number(data.pitch);
 
     if (!Number.isFinite(yaw) || !Number.isFinite(pitch)) return;
 
@@ -1077,10 +934,7 @@ io.on("connection", socket => {
       color: weapon.color
     });
 
-    socket.emit("shotResult", {
-      ok: true,
-      ammo: p.ammo
-    });
+    socket.emit("shotResult", { ok: true, ammo: p.ammo });
 
     if (!shot.target) {
       broadcastState();
@@ -1089,10 +943,8 @@ io.on("connection", socket => {
 
     const target = shot.target;
 
-    // El creador es invulnerable.
+    // El creador sigue siendo invulnerable.
     if (target.isCreator) {
-      target.health = MAX_HEALTH;
-
       socket.emit("hitConfirm", {
         targetId: target.id,
         damage: 0,
@@ -1133,19 +985,12 @@ io.on("connection", socket => {
 
     p.ammo = WEAPONS[p.weapon]?.ammo || WEAPONS.pulse.ammo;
 
-    socket.emit("shotResult", {
-      ok: true,
-      ammo: p.ammo
-    });
-
+    socket.emit("shotResult", { ok: true, ammo: p.ammo });
     socket.emit("notice", "Arma recargada.");
-
     broadcastState();
   });
 
-  /* =====================================
-     BOTIQUINES
-  ===================================== */
+  /* BOTIQUINES */
 
   socket.on("collectMedkit", data => {
     const p = players.get(socket.id);
@@ -1192,39 +1037,28 @@ io.on("connection", socket => {
     setTimeout(spawnMedkit, 8000);
   });
 
-  /* =====================================
-     REAPARICIÓN
-  ===================================== */
+  /* REAPARICIÓN */
 
   socket.on("respawn", () => {
     const p = players.get(socket.id);
-
-    if (p && !p.alive) {
-      respawnPlayer(p);
-    }
+    if (p && !p.alive) respawnPlayer(p);
   });
 
-  /* =====================================
-     DESCONEXIÓN
-  ===================================== */
+  /* DESCONEXIÓN */
 
   socket.on("disconnect", () => {
     const p = players.get(socket.id);
-
     players.delete(socket.id);
 
     if (p) {
       io.emit("notice", p.name + " ha salido de la arena.");
-
       broadcastState();
       broadcastAdminPlayers();
     }
   });
 });
 
-/* =========================================
-   INICIO DEL SERVIDOR
-========================================= */
+/* INICIO */
 
 fillMedkits();
 
@@ -1238,8 +1072,6 @@ server.listen(PORT, "0.0.0.0", () => {
   console.log("LEGENDS OF ABDE escuchando en el puerto " + PORT);
 
   if (!CREATOR_KEY) {
-    console.warn(
-      "AVISO: configura CREATOR_KEY en las variables de entorno de Render."
-    );
+    console.warn("AVISO: configura CREATOR_KEY en las variables de entorno de Render.");
   }
 });
