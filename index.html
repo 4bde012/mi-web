@@ -1582,5 +1582,462 @@ function init() {
 
 init();
 </script>
+  
+<style>
+#adminToggle {
+  display:none;
+  position:fixed;
+  top:145px;
+  right:14px;
+  z-index:20;
+  pointer-events:auto;
+  background:#332506;
+  color:#ffdf69;
+  border:1px solid #ffd34d;
+  border-radius:9px;
+  padding:11px 15px;
+  font-weight:900;
+  box-shadow:0 0 15px #ffb90044;
+}
+#adminPanel {
+  display:none;
+  position:fixed;
+  top:190px;
+  right:14px;
+  z-index:20;
+  width:min(370px,calc(100vw - 28px));
+  max-height:65vh;
+  overflow:auto;
+  padding:15px;
+  border:1px solid #ffd34d;
+  border-radius:13px;
+  background:rgba(8,12,25,.97);
+  color:white;
+  box-shadow:0 0 30px #ffb90033;
+  pointer-events:auto;
+  font:13px Arial,sans-serif;
+}
+#adminPanel h2 {
+  color:#ffdf69;
+  margin:5px 0 12px;
+}
+#adminPanel button {
+  padding:9px;
+  border:1px solid #526078;
+  border-radius:7px;
+  background:#172239;
+  color:white;
+  cursor:pointer;
+}
+#adminPanel .adminAction {
+  width:100%;
+  margin:5px 0;
+}
+#adminPanel .adminDanger {
+  background:#4a1420;
+  border-color:#ff405c;
+}
+#adminPanel .adminGold {
+  background:#44320b;
+  border-color:#ffd34d;
+  color:#ffdf69;
+}
+.adminPlayer {
+  padding:9px;
+  margin:5px 0;
+  border:1px solid #34445e;
+  border-radius:7px;
+  background:#101a2c;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+}
+.adminPlayer.selected {
+  border-color:#ffd34d;
+}
+.adminPlayer button {
+  flex-shrink:0;
+}
+.adminSection {
+  margin-top:15px;
+  padding-top:10px;
+  border-top:1px solid #34445e;
+}
+.adminMuted {
+  color:#9cb0c9;
+  font-size:12px;
+}
+#adminRanking {
+  padding-left:24px;
+  line-height:1.8;
+}
+</style>
+
+<button id="adminToggle">👑 ADMIN PANEL</button>
+
+<div id="adminPanel">
+  <h2>👑 ADMINISTRACIÓN</h2>
+  <p class="adminMuted">
+    Panel privado del creador de LEGENDS OF ABDE.
+  </p>
+
+  <button class="adminAction adminGold" id="adminRefresh">
+    🔄 Actualizar jugadores
+  </button>
+
+  <div class="adminSection">
+    <strong>👥 JUGADORES CONECTADOS</strong>
+    <div id="adminPlayerList">Esperando jugadores...</div>
+    <p id="adminSelected">Ningún jugador seleccionado.</p>
+    <button class="adminAction adminDanger" id="adminKill">
+      ☠️ ELIMINAR JUGADOR SELECCIONADO
+    </button>
+  </div>
+
+  <div class="adminSection">
+    <strong>🕊️ MODO VUELO</strong>
+    <p class="adminMuted">
+      Usa Espacio para subir y Ctrl para bajar.
+    </p>
+    <button class="adminAction adminGold" id="adminFly">
+      Activar vuelo
+    </button>
+  </div>
+
+  <div class="adminSection">
+    <strong>🏆 RANKING MUNDIAL DE KILLS</strong>
+    <ol id="adminRanking">
+      <li>Cargando ranking...</li>
+    </ol>
+    <button class="adminAction" id="adminRefreshRanking">
+      Actualizar ranking
+    </button>
+  </div>
+
+  <div class="adminSection">
+    <strong>📊 ESTADÍSTICAS</strong>
+    <p id="adminStats">Esperando datos...</p>
+    <button class="adminAction" id="adminRefreshStats">
+      Actualizar estadísticas
+    </button>
+  </div>
+
+  <button class="adminAction" id="adminClose">Cerrar panel</button>
+  <p id="adminMessage" class="adminMuted"></p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const byId = id => document.getElementById(id);
+
+  let selectedPlayerId = null;
+  let adminFlyEnabled = false;
+  let adminReady = false;
+
+  const adminToggle = byId("adminToggle");
+  const adminPanel = byId("adminPanel");
+  const playerList = byId("adminPlayerList");
+  const selectedLabel = byId("adminSelected");
+  const message = byId("adminMessage");
+
+  function adminMessage(text) {
+    message.textContent = text;
+  }
+
+  function showAdminPanel() {
+    if (!adminReady) return;
+
+    adminPanel.style.display = "block";
+    if (socket && socket.connected) {
+      socket.emit("admin:getPlayers");
+      socket.emit("admin:getRanking");
+      socket.emit("admin:getStats");
+    }
+  }
+
+  adminToggle.addEventListener("click", () => {
+    if (adminPanel.style.display === "block") {
+      adminPanel.style.display = "none";
+    } else {
+      showAdminPanel();
+    }
+  });
+
+  byId("adminClose").addEventListener("click", () => {
+    adminPanel.style.display = "none";
+  });
+
+  byId("adminRefresh").addEventListener("click", () => {
+    if (socket && socket.connected) {
+      socket.emit("admin:getPlayers");
+    }
+  });
+
+  byId("adminKill").addEventListener("click", () => {
+    if (!adminReady || !socket || !socket.connected) {
+      adminMessage("No estás conectado como creador.");
+      return;
+    }
+
+    if (!selectedPlayerId) {
+      adminMessage("Selecciona primero un jugador.");
+      return;
+    }
+
+    if (!confirm("¿Seguro que quieres eliminar a este jugador?")) {
+      return;
+    }
+
+    socket.emit("admin:kill", {
+      targetId: selectedPlayerId
+    });
+  });
+
+  byId("adminFly").addEventListener("click", () => {
+    if (!adminReady || !socket || !socket.connected) {
+      adminMessage("No tienes permisos de administrador.");
+      return;
+    }
+
+    socket.emit("admin:toggleFly", {
+      enabled: !adminFlyEnabled
+    });
+  });
+
+  byId("adminRefreshRanking").addEventListener("click", () => {
+    if (socket && socket.connected) {
+      socket.emit("admin:getRanking");
+    }
+  });
+
+  byId("adminRefreshStats").addEventListener("click", () => {
+    if (socket && socket.connected) {
+      socket.emit("admin:getStats");
+    }
+  });
+
+  function renderPlayers(players) {
+    playerList.replaceChildren();
+
+    if (!Array.isArray(players) || players.length === 0) {
+      playerList.textContent = "No hay jugadores conectados.";
+      return;
+    }
+
+    for (const p of players) {
+      if (!p || !p.id) continue;
+
+      const row = document.createElement("div");
+      row.className = "adminPlayer" +
+        (selectedPlayerId === p.id ? " selected" : "");
+
+      const info = document.createElement("div");
+      const name = document.createElement("strong");
+
+      name.textContent =
+        (p.isCreator || p.rank === "CREADOR" ? "👑 " : "") +
+        String(p.name || "Jugador");
+
+      const details = document.createElement("div");
+      details.className = "adminMuted";
+      details.textContent =
+        "Kills: " + (Number(p.kills) || 0) +
+        " · Muertes: " + (Number(p.deaths) || 0) +
+        " · Vida: " + (Number(p.health) || 0);
+
+      info.append(name, details);
+
+      const choose = document.createElement("button");
+      choose.textContent =
+        selectedPlayerId === p.id ? "Seleccionado" : "Elegir";
+
+      if (p.id === myId || p.isCreator || p.rank === "CREADOR") {
+        choose.disabled = true;
+        choose.textContent = "Creador";
+      } else {
+        choose.addEventListener("click", () => {
+          selectedPlayerId = p.id;
+          selectedLabel.textContent =
+            "Seleccionado: " + String(p.name || "Jugador");
+          renderPlayers(players);
+          adminMessage("");
+        });
+      }
+
+      row.append(info, choose);
+      playerList.appendChild(row);
+    }
+
+    if (selectedPlayerId &&
+        !players.some(p => p.id === selectedPlayerId)) {
+      selectedPlayerId = null;
+      selectedLabel.textContent = "Ningún jugador seleccionado.";
+    }
+  }
+
+  function renderRanking(entries) {
+    const list = byId("adminRanking");
+    list.replaceChildren();
+
+    if (!Array.isArray(entries) || entries.length === 0) {
+      const li = document.createElement("li");
+      li.textContent = "Todavía no hay estadísticas.";
+      list.appendChild(li);
+      return;
+    }
+
+    for (const entry of entries.slice(0, 20)) {
+      const li = document.createElement("li");
+      li.textContent =
+        String(entry.name || "Jugador") +
+        " — " + (Number(entry.kills) || 0) + " kills";
+      list.appendChild(li);
+    }
+  }
+
+  function renderStats(stats) {
+    byId("adminStats").textContent =
+      "Conectados: " + stats.online + "/" + stats.maxPlayers +
+      " | Kills acumuladas: " + stats.totalKills +
+      " | Muertes acumuladas: " + stats.totalDeaths +
+      " | Jugadores registrados: " + stats.rankingPlayers;
+  }
+
+  // Se conecta a los eventos del socket cuando se crea.
+  const originalConnect = connect;
+
+  connect = function () {
+    originalConnect();
+
+    if (!socket) return;
+
+    socket.on("joined", data => {
+      const p = data && data.you;
+      adminReady = Boolean(p && p.rank === "CREADOR");
+
+      adminToggle.style.display = adminReady ? "block" : "none";
+
+      if (!adminReady) {
+        adminPanel.style.display = "none";
+        selectedPlayerId = null;
+        adminFlyEnabled = false;
+      } else {
+        socket.emit("admin:getPlayers");
+        socket.emit("admin:getRanking");
+        socket.emit("admin:getStats");
+      }
+    });
+
+    socket.on("admin:players", players => {
+      if (adminReady) renderPlayers(players);
+    });
+
+    socket.on("admin:killResult", result => {
+      adminMessage(result && result.message
+        ? result.message
+        : "No se recibió una respuesta del servidor.");
+
+      if (result && result.ok) {
+        selectedPlayerId = null;
+        selectedLabel.textContent = "Ningún jugador seleccionado.";
+        socket.emit("admin:getPlayers");
+      }
+    });
+
+    socket.on("admin:flyStatus", data => {
+      adminFlyEnabled = Boolean(data && data.enabled);
+      byId("adminFly").textContent = adminFlyEnabled
+        ? "Desactivar vuelo"
+        : "Activar vuelo";
+      adminMessage(adminFlyEnabled
+        ? "Vuelo activado. Espacio sube y Ctrl baja."
+        : "Vuelo desactivado.");
+    });
+
+    socket.on("admin:stats", stats => {
+      if (adminReady && stats) renderStats(stats);
+    });
+
+    socket.on("worldRanking", ranking => {
+      renderRanking(ranking);
+    });
+
+    socket.on("admin:error", error => {
+      adminReady = false;
+      adminToggle.style.display = "none";
+      adminPanel.style.display = "none";
+      adminMessage(String(error || "Acceso denegado."));
+    });
+
+    socket.on("connect_error", () => {
+      adminMessage("No se pudo conectar al servidor.");
+    });
+  };
+
+  // Movimiento especial: el vuelo solo se activa cuando
+  // el servidor confirma los permisos del creador.
+  const originalUpdateMovement = updateMovement;
+
+  updateMovement = function (dt, now) {
+    if (!adminReady || !adminFlyEnabled || isDead) {
+      originalUpdateMovement(dt, now);
+      return;
+    }
+
+    const speed = (keys.ShiftLeft || keys.ShiftRight) ? 13 : 8;
+
+    const forward =
+      (keys.KeyW || keys.ArrowUp ? 1 : 0) -
+      (keys.KeyS || keys.ArrowDown ? 1 : 0);
+
+    const sideways =
+      (keys.KeyD || keys.ArrowRight ? 1 : 0) -
+      (keys.KeyA || keys.ArrowLeft ? 1 : 0);
+
+    const length = Math.hypot(forward, sideways) || 1;
+
+    player.x += (
+      -Math.sin(yaw) * forward / length +
+      Math.cos(yaw) * sideways / length
+    ) * speed * dt;
+
+    player.z += (
+      -Math.cos(yaw) * forward / length -
+      Math.sin(yaw) * sideways / length
+    ) * speed * dt;
+
+    const vertical =
+      (keys.Space ? 1 : 0) -
+      (keys.ControlLeft || keys.ControlRight ? 1 : 0);
+
+    player.y = THREE.MathUtils.clamp(
+      player.y + vertical * speed * dt,
+      0,
+      29
+    );
+
+    player.x = THREE.MathUtils.clamp(player.x, -77, 77);
+    player.z = THREE.MathUtils.clamp(player.z, -77, 77);
+
+    syncCamera();
+
+    if (socket && socket.connected && now - lastMove > 100) {
+      lastMove = now;
+      socket.emit("move", {
+        x: player.x,
+        y: player.y,
+        z: player.z,
+        yaw
+      });
+    }
+  };
+})();
+</script>
+</body>
+</html>
+
 </body>
 </html>
