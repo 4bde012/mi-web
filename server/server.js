@@ -1461,10 +1461,11 @@ io.on("connection", socket => {
     const maxDistance =
       MAX_MOVE_SPEED * elapsed + 0.9;
 
-    if (
-      distance > maxDistance ||
-      pathBlocked(p.x, p.z, x, z)
-    ) {
+  if (
+  distance > maxDistance ||
+  (!(p.isCreator && p.flyEnabled) &&
+    pathBlocked(p.x, p.z, x, z))
+) {
       socket.emit(
         "moveCorrection",
         publicPlayer(p)
