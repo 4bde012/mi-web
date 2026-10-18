@@ -43,6 +43,29 @@ const WEAPONS = {
 
 const players = new Map();
 const lastShots = new Map();
+const medkits = new Map();
+let medkitCounter = 0;
+
+function spawnMedkit() {
+  const id = "medkit_" + (++medkitCounter);
+
+  medkits.set(id, {
+    id,
+    x: Math.random() * 120 - 60,
+    y: 0.7,
+    z: Math.random() * 120 - 60
+  });
+
+  io.emit("medkits", Array.from(medkits.values()));
+}
+
+for (let i = 0; i < 5; i++) {
+  spawnMedkit();
+}
+
+setInterval(() => {
+  if (medkits.size < 5) spawnMedkit();
+}, 8000);
 
 app.use(express.json());
 
