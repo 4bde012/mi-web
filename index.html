@@ -214,6 +214,7 @@ let grounded = true;
 let lastShot = 0;
 let lastMove = 0;
 let isFiring = false;
+  let isAiming = false;
 
 let health = 100;
 let ammo = 30;
@@ -967,63 +968,101 @@ function animate(now){
   renderer.render(scene,camera);
 }
 
+
 function setupControls(){
-  document.addEventListener("keydown",e=>{
+  document.addEventListener("keydown", e => {
     keys[e.code] = true;
 
-    if(
+    if (
       ["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"]
       .includes(e.code)
-    ){
+    ) {
       e.preventDefault();
     }
 
-    if(e.code === "KeyR" && started && socket?.connected){
+    if (
+      e.code === "KeyR" &&
+      started &&
+      socket?.connected
+    ) {
       socket.emit("reload");
     }
   });
 
-  document.addEventListener("keyup",e=>{
+  document.addEventListener("keyup", e => {
     keys[e.code] = false;
   });
 
-  document.addEventListener("mousemove",e=>{
-    if(!started ||
-       document.pointerLockElement !== renderer.domElement){
-      return;
-    }
+  // Mover la cámara con el ratón
+  document.addEventListener("mousemove", e => {
+    if (
+      !started ||
+      document.pointerLockElement !== renderer.domElement
+    ) return;
 
-    yaw -= e.movementX*.002;
-    pitch -= e.movementY*.002;
-    pitch = THREE.MathUtils.clamp(pitch,-1.4,1.4);
+    yaw -= e.movementX * 0.002;
+    pitch -= e.movementY * 0.002;
+
+    pitch = THREE.MathUtils.clamp(pitch, -1.4, 1.4);
   });
 
-  renderer.domElement.addEventListener("mousedown",e=>{
-    if(e.button !== 0 || !started) return;
+  // Evitar que el botón derecho abra el menú del navegador
+  renderer.domElement.addEventListener("contextmenu", e => {
+    e.preventDefault();
+  });
 
-    if(document.pointerLockElement !== renderer.domElement){
+  renderer.domElement.addEventListener("mousedown", e => {
+    if (!started) return;
+
+    // Primer clic: capturar el ratón
+    if (document.pointerLockElement !== renderer.domElement) {
       renderer.domElement.requestPointerLock?.();
       return;
     }
 
-    isFiring = true;
-    shoot();
-  });
+    // Botón derecho: apuntar con zoom
+    if (e.button === 2) {
+      isAiming = true;
+      camera.fov = 45;
+      camera.updateProjectionMatrix();
+      return;
+    }
 
-  document.addEventListener("mouseup",e=>{
-    if(e.button === 0) isFiring = false;
-  });
-
-  document.addEventListener("pointerlockchange",()=>{
-    if(document.pointerLockElement !== renderer.domElement){
-      isFiring = false;
+    // Botón izquierdo: disparar
+    if (e.button === 0) {
+      isFiring = true;
+      shoot();
     }
   });
 
-  window.addEventListener("blur",()=>{
-    isFiring = false;
+  document.addEventListener("mouseup", e => {
+    if (e.button === 0) {
+      isFiring = false;
+    }
 
-    for(const key of Object.keys(keys)){
+    if (e.button === 2) {
+      isAiming = false;
+      camera.fov = 75;
+      camera.updateProjectionMatrix();
+    }
+  });
+
+  document.addEventListener("pointerlockchange", () => {
+    if (document.pointerLockElement !== renderer.domElement) {
+      isFiring = false;
+      isAiming = false;
+      camera.fov = 75;
+      camera.updateProjectionMatrix();
+    }
+  });
+
+  window.addEventListener("blur", () => {
+    isFiring = false;
+    isAiming = false;
+    camera.fov = 75;
+    camera.updateProjectionMatrix();
+
+    for (const key of Object.keys(keys)) {
       keys[key] = false;
     }
   });
