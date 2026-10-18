@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,690 +5,1068 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LEGENDS OF ABDE</title>
 <style>
-:root{--cyan:#41e8ff;--gold:#ffd65a;--panel:rgba(5,15,30,.95)}
-*{box-sizing:border-box}
-html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#050a18;color:#f4fbff;font-family:Arial,sans-serif}
-canvas{display:block}
-button,input{font:inherit}
-button{cursor:pointer}
+:root{color-scheme:dark;--cyan:#41e8ff;--pink:#ff45d2;--gold:#ffd65a;--panel:rgba(6,16,31,.92);--line:rgba(65,232,255,.55)}
+*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#050a18;color:#f4fbff;font-family:Inter,Arial,sans-serif}
+canvas{display:block}button,input{font:inherit}button{cursor:pointer}
 #hud{position:fixed;inset:0;z-index:2;pointer-events:none}
-#brand{position:absolute;top:12px;left:14px;color:var(--cyan);font-size:21px;font-weight:900;text-shadow:0 0 14px #00bfff}
-#stats,#right{position:absolute;top:55px;display:grid;gap:6px;max-width:48vw}
-#stats{left:10px}#right{right:10px;top:10px;text-align:right}
-.panel{padding:8px 10px;border:1px solid #41e8ff77;border-radius:8px;background:var(--panel);font-size:12px}
-#healthTrack{height:8px;margin-top:5px;background:#263247;border-radius:10px;overflow:hidden}
-#healthBar{height:100%;width:100%;background:#39ed91;transition:width .15s}
-#crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:26px;font-weight:bold;text-shadow:0 0 8px var(--cyan)}
-#hitmarker{position:absolute;left:50%;top:calc(50% + 25px);transform:translateX(-50%);font-size:12px;color:var(--gold);font-weight:bold;opacity:0}
-#hitmarker.show{opacity:1}
-#help{position:absolute;bottom:10px;left:10px;padding:9px 12px;border:1px solid #41e8ff66;border-radius:8px;background:var(--panel);font-size:11px;line-height:1.6}
-#toast{position:absolute;top:68%;left:50%;transform:translateX(-50%);max-width:90vw;text-align:center;color:var(--gold);font-weight:bold;text-shadow:0 0 10px #ffae00}
-#adminToggle{position:absolute;top:110px;right:10px;pointer-events:auto;display:none;background:#352b09;color:var(--gold);border:1px solid var(--gold);padding:9px;border-radius:8px;font-weight:bold}
-#adminPanel{position:fixed;z-index:20;left:50%;top:50%;transform:translate(-50%,-50%);display:none;width:min(1000px,96vw);max-height:90vh;overflow:auto;padding:16px;background:rgba(4,12,25,.98);border:1px solid var(--gold);border-radius:14px;box-shadow:0 0 40px #ffc92833;pointer-events:auto}
-.adminHead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.adminTitle{color:var(--gold);margin:0}
-.adminGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
-.adminStat,.adminPlayer{padding:10px;border:1px solid #314961;border-radius:8px;background:#0a1728;overflow-wrap:anywhere}
-.adminStat small,.adminPlayer small{display:block;color:#a9bfd0;margin-top:4px}
-.adminActions,.adminPlayerButtons{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
-.adminBtn{background:#10283a;color:white;border:1px solid #3e7892;padding:8px 10px;border-radius:7px}
-.adminBtn.gold{border-color:var(--gold);color:var(--gold)}
-.adminBtn.green{border-color:#52e0a2;color:#7af0b9}
-.adminBtn.danger{border-color:#ff5d72;color:#ff8795;background:#35121c}
-.adminToolbar{display:flex;gap:8px;margin:10px 0}
-.adminToolbar input{flex:1;min-width:0}
-.adminList{display:grid;gap:8px;margin-top:10px}
-.adminPlayer{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}
-.adminPlayer.selected{border-color:var(--gold)}
-#adminStatus{min-height:18px;color:#9feaff;font-size:12px;margin:10px 0}
-input{padding:11px;background:#070d18;border:1px solid #38516b;border-radius:8px;color:white;outline:none}
-#start{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:12px;background:radial-gradient(ellipse at top,#174369,#091225 50%,#030611);overflow:auto}
-#card{width:min(680px,100%);max-height:96vh;overflow:auto;text-align:center;padding:20px;background:#091323f7;border:1px solid #35dfff;border-radius:16px}
-h1{color:var(--cyan);margin:4px;font-size:clamp(25px,5vw,38px);text-shadow:0 0 16px #00bfff}
-h2{font-size:14px;color:#78eaff;margin:15px 0 8px}
-.small{font-size:12px;color:#a8c8dc}
-.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}
-.choice{padding:10px 5px;border:1px solid #38516b;border-radius:9px;background:#0b1321;cursor:pointer;font-size:12px}
-.choice.selected{border:2px solid var(--cyan)}
-.swatch{width:27px;height:27px;border-radius:50%;margin:0 auto 6px}
-#play{width:100%;margin-top:8px;padding:13px;border:0;border-radius:8px;background:linear-gradient(100deg,#00b8e8,#73efff);font-weight:900;color:#03101a}
-#message{min-height:20px;color:#8defff;font-size:13px}
-@media(max-width:650px){.adminGrid{grid-template-columns:1fr}.adminPlayer{grid-template-columns:1fr}.adminToolbar{flex-direction:column}#adminPanel{padding:10px;max-height:94vh}.adminPlayerButtons .adminBtn{font-size:11px;padding:7px}}
-@media(max-width:560px){#brand{font-size:13px;top:6px;left:7px}#stats{top:40px;left:6px;gap:3px}#right{top:6px;right:6px;gap:3px}.panel{font-size:10px;padding:5px 6px}#help{font-size:9px;bottom:5px;left:5px;padding:6px}#adminToggle{top:125px;right:5px;font-size:10px;padding:6px}.choices{grid-template-columns:repeat(2,1fr)}}
+#brand{position:absolute;top:14px;left:16px;color:var(--cyan);font-size:clamp(16px,2vw,24px);font-weight:900;letter-spacing:1.5px;text-shadow:0 0 14px #00bfff}
+#stats,#right{position:absolute;top:58px;display:grid;gap:7px;max-width:min(240px,47vw)}#stats{left:12px}#right{right:12px;text-align:right;top:14px}
+.panel{padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--panel);box-shadow:0 0 14px #00bfff0d;backdrop-filter:blur(8px);font-size:13px;line-height:1.25}
+.healthTrack{height:7px;width:150px;max-width:34vw;margin-top:6px;background:#233247;border-radius:99px;overflow:hidden;border:1px solid #456078}.healthFill{height:100%;width:100%;background:linear-gradient(90deg,#39f29b,#c6ff69);border-radius:99px;transition:width .16s,background .16s}#damageLayer{position:fixed;inset:0;z-index:4;pointer-events:none;overflow:hidden}.damageNumber{position:absolute;color:#fff;font-weight:1000;font-size:22px;letter-spacing:.4px;text-shadow:0 2px 3px #000,0 0 10px #ff3d61;transform:translate(-50%,-50%);animation:damageFloat .85s ease-out forwards;white-space:nowrap}.damageNumber small{display:block;font-size:11px;text-align:center;color:#ffd65a;text-shadow:0 1px 3px #000}@keyframes damageFloat{0%{opacity:0;translate:0 10px;scale:.7}15%{opacity:1;scale:1.15}100%{opacity:0;translate:0 -48px;scale:.9}}
+
+#crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:27px;font-weight:bold;color:white;text-shadow:0 0 8px var(--cyan);user-select:none}
+#help{position:absolute;bottom:12px;left:12px;padding:10px 13px;background:var(--panel);border:1px solid var(--line);border-radius:9px;font-size:12px;line-height:1.7;box-shadow:0 0 15px #00bfff12}
+#toast{position:absolute;top:67%;left:50%;transform:translateX(-50%);max-width:90vw;color:var(--gold);font-weight:900;text-align:center;text-shadow:0 0 12px #ffae00;white-space:pre-wrap}
+#adminToggle{position:fixed;z-index:60;top:14px;right:14px;pointer-events:auto;display:block;border:2px solid #ffd65a;background:rgba(52,39,7,.97);color:#ffdf7a;border-radius:10px;padding:10px 14px;font-weight:900;box-shadow:0 0 22px #ffc92877;cursor:pointer}
+#adminToggle:hover{background:#5a430c;transform:translateY(-1px)}
+#adminPanel{position:fixed;z-index:55;top:6vh;left:50%;transform:translateX(-50%);display:none;width:min(980px,96vw);max-height:88vh;overflow:auto;padding:20px;background:rgba(5,13,27,.985);border:2px solid var(--gold);border-radius:16px;box-shadow:0 0 0 9999px rgba(0,0,0,.62),0 0 45px #ffc92866;pointer-events:auto;overscroll-behavior:contain}
+.adminHead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.adminTitle{margin:0;color:var(--gold);font-size:20px;letter-spacing:1px}.adminSub{font-size:12px;color:#a9bfd0;margin:5px 0 14px}.adminGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}.adminStat{padding:10px;border-radius:9px;border:1px solid #53657b;background:#0c1b2e}.adminStat small{display:block;color:#9eb3c9}.adminStat strong{display:block;margin-top:5px;font-size:18px;color:#fff;overflow-wrap:anywhere}.adminList{display:grid;gap:7px;margin-top:10px}.adminPlayer{display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,auto);gap:12px;align-items:center;padding:12px;border:1px solid #243d56;border-radius:8px;background:#091525}.adminPlayer strong{display:block;overflow-wrap:anywhere}.adminPlayer small{display:block;color:#9bb3c9;margin-top:3px;overflow-wrap:anywhere}.adminActions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.adminPlayerButtons{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:440px}.adminPlayerButtons .adminBtn{font-size:11px;padding:7px 8px}.adminBtn.danger{border-color:#ff5d72;color:#ff8795;background:#35121c}.adminBtn.green{border-color:#52e0a2;color:#7af0b9}.adminToolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin:10px 0}.adminToolbar input{margin:0}.adminSectionTitle{margin:18px 0 8px;color:var(--cyan);font-size:13px}.adminStatus{font-size:12px;color:#a9bfd0;min-height:18px;margin:8px 0}.adminPlayer.selected{border-color:var(--gold);box-shadow:0 0 0 1px #ffd65a44}.adminBtn{border:1px solid #3e7892;background:#10283a;color:#eafaff;border-radius:8px;padding:9px 11px}.adminBtn.gold{border-color:var(--gold);color:var(--gold)}.adminNotice{border:1px solid #4d6073;border-radius:8px;padding:10px;font-size:12px;color:#adbed0;line-height:1.5;margin:10px 0}.blueTick{display:inline-flex;vertical-align:middle;align-items:center;justify-content:center;width:17px;height:17px;margin-left:6px;border-radius:50%;background:#168bff;color:#fff;font:bold 12px Arial;box-shadow:0 0 8px #168bff66;flex-shrink:0}.sponsorButton{font-size:11px;white-space:nowrap;padding:7px 8px}
+#start{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:14px;background:radial-gradient(ellipse at 50% 20%,#174369 0%,#091225 48%,#030611 100%);overflow:auto}
+#card{width:min(720px,100%);max-height:96vh;overflow:auto;text-align:center;padding:22px;background:rgba(9,19,35,.97);border:1px solid #35dfff;border-radius:18px;box-shadow:0 0 40px #00bfff24}
+h1{color:var(--cyan);text-shadow:0 0 18px #00bfff;margin:4px;font-size:clamp(26px,5vw,38px);letter-spacing:2px}h2{font-size:14px;color:#78eaff;margin:16px 0 8px;letter-spacing:1px}.small{font-size:12px;color:#a8c8dc}.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}.choice{padding:12px 6px;border:1px solid #38516b;border-radius:10px;background:#0b1321;cursor:pointer;font-size:12px;transition:transform .12s,border-color .12s}.choice:hover{transform:translateY(-2px);border-color:#78eaff}.choice.selected{border:2px solid var(--cyan);box-shadow:0 0 12px #00bfff55}.swatch{height:30px;width:30px;border-radius:50%;margin:0 auto 7px;box-shadow:0 0 12px currentColor}input{width:100%;padding:12px;margin:5px 0;background:#070d18;border:1px solid #38516b;border-radius:8px;color:white;outline:none}input:focus{border-color:var(--cyan);box-shadow:0 0 0 2px #00dfff22}#play{border:0;border-radius:9px;padding:13px 22px;background:linear-gradient(100deg,#00b8e8,#73efff);font-weight:900;color:#03101a;width:100%;margin-top:6px}#play:disabled{opacity:.5;cursor:wait}#message{color:#8defff;min-height:20px;font-size:13px;line-height:1.5}
+@media(max-width:650px){.adminGrid{grid-template-columns:1fr}.adminPlayer{grid-template-columns:1fr}.adminPlayerButtons{justify-content:flex-start;max-width:none}.adminToolbar{grid-template-columns:1fr}#adminPanel{padding:13px;max-height:92vh}}
+@media(max-width:560px){.choices{grid-template-columns:repeat(2,minmax(0,1fr))}#brand{font-size:14px;letter-spacing:.5px;top:8px;left:8px}#stats{top:45px;left:7px;gap:4px}#right{top:7px;right:7px;gap:4px}.panel{font-size:10px;padding:6px 7px}#help{font-size:10px;bottom:7px;left:7px;padding:7px}#adminToggle{top:10px;right:8px;font-size:10px;padding:8px 9px;max-width:48vw}.adminGrid{grid-template-columns:1fr}.adminTitle{font-size:17px}#adminPanel{top:5vh;width:96vw;max-height:90vh;padding:12px}}
 </style>
 </head>
 <body>
 <div id="hud">
-  <div id="brand">LEGENDS OF ABDE</div>
-  <div id="stats">
-    <div class="panel">❤️ Vida: <b id="health">100</b>/100<div id="healthTrack"><div id="healthBar"></div></div></div>
-    <div class="panel">🔫 Arma: <span id="weaponName">PULSE RIFLE</span></div>
-    <div class="panel">💥 Munición: <span id="ammo">30</span></div>
-    <div class="panel">👑 Rango: <span id="rankName">JUGADOR</span></div>
-    <div class="panel">⚔️ Bajas: <span id="kills">0</span></div>
-    <div class="panel">☠️ Muertes: <span id="deaths">0</span></div>
-  </div>
-  <div id="right">
-    <div class="panel">FPS: <span id="fps">0</span></div>
-    <div class="panel">Jugadores: <span id="players">0/40</span></div>
-    <div class="panel">Servidor: <span id="connection">Desconectado</span></div>
-    <div class="panel">Skin: <span id="skinName">CYBER NEXUS</span></div>
-  </div>
-  <div id="crosshair">+</div><div id="hitmarker">IMPACTO CONFIRMADO</div>
-  <div id="help">WASD: moverte<br>Ratón: mirar<br>Espacio: saltar<br>Shift: correr<br>Clic: disparar<br>R: recargar<br>1/2/3: cambiar arma<br>ESC: liberar ratón</div>
-  <div id="toast"></div>
+ <div id="brand">LEGENDS OF ABDE</div>
+ <div id="stats">
+  <div class="panel">❤️ Vida: <strong><span id="health">100</span>/100</strong><div class="healthTrack" aria-label="Barra de vida"><div id="healthFill" class="healthFill"></div></div></div>
+  <div class="panel">🔫 Arma: <span id="weaponName">PULSE RIFLE</span></div>
+  <div class="panel">💥 Munición: <span id="ammo">30</span></div>
+  <div class="panel">👑 Rango: <span id="rankName">JUGADOR</span></div>
+  <div class="panel">⚔️ Bajas: <span id="kills">0</span></div>
+  <div class="panel">☠️ Muertes: <span id="deaths">0</span></div>
+ </div>
+ <div id="right">
+  <div class="panel">FPS: <span id="fps">0</span></div>
+  <div class="panel">Jugadores: <span id="players">0/40</span></div>
+  <div class="panel">Servidor: <span id="connection">Desconectado</span></div>
+  <div class="panel">Skin: <span id="skinName">CYBER NEXUS</span></div>
+ </div>
+ <div id="crosshair">+</div>
+ <div id="help">
+  WASD: moverte<br>
+  Ratón: mirar<br>
+  Espacio: saltar<br>
+  Shift: correr<br>
+  Clic: disparar<br>
+  R: recargar<br>
+  ESC: liberar ratón
+ </div>
+ <div id="toast"></div>
 </div>
+<div id="damageLayer" aria-hidden="true"></div>
 
-<button id="adminToggle">⚙ PANEL CREADOR · F2</button>
-
-<div id="adminPanel" role="dialog" aria-modal="true">
-  <div class="adminHead">
-    <h2 class="adminTitle">PANEL DEL CREADOR</h2>
-    <button class="adminBtn gold" id="adminClose">Cerrar · F2</button>
+<button id="adminToggle" type="button" title="Panel del creador (F2)">⚙ PANEL CREADOR · F2</button>
+<div id="adminPanel" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+ <div class="adminHead">
+  <div>
+   <h2 class="adminTitle" id="adminTitle">PANEL DEL CREADOR</h2>
+   <div class="adminSub">Solo se muestra cuando Render confirma tu rango de creador.</div>
   </div>
-  <div class="adminGrid">
-    <div class="adminStat"><small>Socket ID</small><strong id="adminSocketId">—</strong></div>
-    <div class="adminStat"><small>Conexión</small><strong id="adminConnStatus">Desconectado</strong></div>
-    <div class="adminStat"><small>Jugadores</small><strong id="adminPlayerCount">0</strong></div>
-  </div>
-  <div class="adminActions">
-    <button class="adminBtn" id="adminRefresh">↻ Actualizar</button>
-    <button class="adminBtn" id="adminCopy">Copiar informe</button>
-    <button class="adminBtn green" id="adminFly">Activar vuelo</button>
-  </div>
-  <p class="small">Selecciona jugadores para las acciones. En vuelo, ESPACIO sube y CTRL baja.</p>
-  <h2>MENSAJE PARA TODOS</h2>
-  <div class="adminToolbar"><input id="adminBroadcastText" maxlength="180" placeholder="Escribe un aviso"><button class="adminBtn gold" id="adminBroadcastSend">Enviar</button></div>
-  <div id="adminStatus" aria-live="polite">Panel listo.</div>
-  <h2>JUGADORES</h2>
-  <div id="adminPlayerList" class="adminList">Esperando jugadores…</div>
+  <button class="adminBtn gold" id="adminClose" type="button">Cerrar · F2</button>
+ </div>
+ <div class="adminGrid">
+  <div class="adminStat"><small>Socket ID</small><strong id="adminSocketId">—</strong></div>
+  <div class="adminStat"><small>Conexión</small><strong id="adminConnStatus">Desconectado</strong></div>
+  <div class="adminStat"><small>Jugadores detectados</small><strong id="adminPlayerCount">0</strong></div>
+ </div>
+ <div class="adminActions">
+  <button class="adminBtn" id="adminRefresh" type="button">↻ Actualizar jugadores</button>
+  <button class="adminBtn" id="adminCopy" type="button">Copiar informe</button>
+  <button class="adminBtn green" id="adminFly" type="button">✈ Activar vuelo</button>
+ </div>
+ <div class="adminNotice">Selecciona un jugador y usa sus acciones. El tick azul se guarda en el servidor. El vuelo es solo para el creador: ESPACIO sube y CTRL baja. No compartas tu clave privada.</div>
+ <h3 class="adminSectionTitle">MENSAJE PARA TODOS</h3>
+ <div class="adminToolbar"><input id="adminBroadcastText" maxlength="180" placeholder="Escribe un aviso para todos los jugadores"><button class="adminBtn gold" id="adminBroadcastSend" type="button">Enviar aviso</button></div>
+ <div id="adminStatus" class="adminStatus" aria-live="polite">Panel listo.</div>
+ <h2>JUGADORES EN EL SERVIDOR</h2>
+ <div id="adminPlayerList" class="adminList"><div class="adminNotice">Esperando el primer estado del servidor…</div></div>
 </div>
 
 <div id="start">
-  <div id="card">
-    <h1>LEGENDS OF ABDE</h1>
-    <p class="small">MULTIPLAYER FUTURISTA · ARENA 3D</p>
-    <h2>ELIGE TU ARMADURA</h2><div class="choices" id="skinChoices"></div>
-    <h2>ELIGE TU ARMA</h2><div class="choices" id="weaponChoices"></div>
-    <h2>ACCESO DEL CREADOR</h2>
-    <input id="playerName" maxlength="16" placeholder="Tu nombre" value="Jugador" style="width:100%;margin:5px 0">
-    <input id="creatorKey" type="password" autocomplete="off" placeholder="Clave privada del creador (opcional)" style="width:100%;margin:5px 0">
-    <p class="small">La clave se valida en el servidor. No la compartas.</p>
-    <p id="message">Preparando juego…</p><button id="play" disabled>PREPARANDO…</button>
-  </div>
+ <div id="card">
+  <h1>LEGENDS OF ABDE</h1>
+  <p class="small">MULTIPLAYER FUTURISTA · ARENA 3D</p>
+  <h2>ELIGE TU ARMADURA</h2>
+  <div class="choices" id="skinChoices"></div>
+  <h2>ELIGE TU ARMA</h2>
+  <div class="choices" id="weaponChoices"></div>
+  <h2>ACCESO DEL CREADOR</h2>
+  <input id="playerName" maxlength="16" placeholder="Tu nombre de jugador" value="Jugador">
+  <input id="creatorKey" type="password" autocomplete="off" placeholder="Clave privada del creador (opcional)">
+  <p class="small">La clave se valida en el servidor. No la publiques.</p>
+  <p id="message">Preparando el juego...</p>
+  <button id="play" disabled>PREPARANDO...</button>
+ </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/socket.io-client@4.8.1/dist/socket.io.min.js'"></script>
 <script>
 "use strict";
+
 const $ = id => document.getElementById(id);
 const SERVER_URL = "https://mi-web-poxe.onrender.com";
 const MAX_PLAYERS = 40;
 
 const SKINS = {
-  cyber:{name:"CYBER NEXUS",color:0x00eaff,armor:0x102a42,glow:0x00dfff},
-  shadow:{name:"VOID SHADOW",color:0xc05cff,armor:0x21122f,glow:0x8c24ff},
-  inferno:{name:"INFERNO X",color:0xff453d,armor:0x40151c,glow:0xff241b},
-  gold:{name:"GOLDEN PHANTOM",color:0xffd34d,armor:0x493612,glow:0xffb900},
-  creator:{name:"ABDE LEGEND",color:0x42eaff,armor:0x090d16,glow:0xffc928}
+ cyber:   {name:"CYBER NEXUS",color:0x00eaff,armor:0x102a42,glow:0x00dfff},
+ shadow:  {name:"VOID SHADOW",color:0xc05cff,armor:0x21122f,glow:0x8c24ff},
+ inferno: {name:"INFERNO X",color:0xff453d,armor:0x40151c,glow:0xff241b},
+ gold:    {name:"GOLDEN PHANTOM",color:0xffd34d,armor:0x493612,glow:0xffb900},
+ creator: {name:"ABDE LEGEND",color:0x42eaff,armor:0x090d16,glow:0xffc928}
 };
+
 const WEAPONS = {
-  pulse:{name:"PULSE RIFLE",ammo:30,rate:220,color:0x00dfff},
-  plasma:{name:"PLASMA DESTROYER",ammo:12,rate:500,color:0xb45cff},
-  rapid:{name:"NEON RAPID SMG",ammo:50,rate:100,color:0xff4545},
-  creator:{name:"ABDE GOLDEN BLASTER",ammo:40,rate:120,color:0xffc928}
+ pulse:   {name:"PULSE RIFLE",ammo:30,rate:220,color:0x00dfff},
+ plasma:  {name:"PLASMA DESTROYER",ammo:12,rate:500,color:0xb45cff},
+ rapid:   {name:"NEON RAPID SMG",ammo:50,rate:100,color:0xff4545},
+ creator: {name:"ABDE GOLDEN BLASTER",ammo:20,rate:300,color:0xffc928}
 };
 
-let selectedSkin="cyber",selectedWeapon="pulse";
-let started=false,socket=null,myId=null;
-let scene,camera,renderer,player,playerBody,viewModel,gun,clock;
-let yaw=0,pitch=0,vy=0,grounded=true,health=100,ammo=30,kills=0,deaths=0;
-let creatorVerified=false,adminFlying=false,selectedAdminPlayerId=null;
-let lastShot=0,lastMove=0,lastFrame=performance.now();
-let localHitUntil=0;
-const keys=Object.create(null);
-const remotePlayers=new Map(),tracers=[],damageTexts=[];
-let lastServerPlayers=[];
-const obstacles=[];
-
-function setMessage(s){$("message").textContent=String(s||"");}
-function toast(s){$("toast").textContent=String(s||"");clearTimeout(toast.timer);toast.timer=setTimeout(()=>$("toast").textContent="",2500);}
-function adminStatus(s){$("adminStatus").textContent=String(s||"");}
-function normalizeName(s){return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().toLowerCase();}
-function updateFlyButton(){$("adminFly").textContent=adminFlying?"DESACTIVAR VUELO":"ACTIVAR VUELO";}
-
-function updateHUD(p){
-  if(!p)return;
-  health=Math.max(0,Math.min(100,Number(p.health??health)));
-  ammo=Number(p.ammo??ammo);kills=Number(p.kills??kills);deaths=Number(p.deaths??deaths);
-  $("health").textContent=health;$("healthBar").style.width=health+"%";
-  $("healthBar").style.background=health<=25?"#ff405c":health<=55?"#ffca46":"#39ed91";
-  $("ammo").textContent=ammo;$("kills").textContent=kills;$("deaths").textContent=deaths;
-  $("rankName").textContent=p.rank||"JUGADOR";
-  $("weaponName").textContent=WEAPONS[p.weapon]?.name||p.weapon||"PULSE RIFLE";
-  $("skinName").textContent=SKINS[p.skin]?.name||p.skin||"CYBER NEXUS";
-  if(p.flyEnabled!==undefined){adminFlying=Boolean(p.flyEnabled);updateFlyButton();}
-}
+let selectedSkin = "cyber";
+let selectedWeapon = "pulse";
+let started = false;
+let socket = null;
+let myId = null;
+let yaw = 0, pitch = 0, vy = 0;
+let grounded = true;
+let lastShot = 0, lastMove = 0;
+let health = 100, ammo = 30, kills = 0, deaths = 0;
+let creatorVerified = false;
+let adminFlying = false;
+let selectedAdminPlayerId = null;
+let sponsoredNames = new Set();
+const keys = {};
+const remotePlayers = new Map();
+const tracers = [];
+let lastServerPlayers = [];
 
 function makeChoices(){
-  for(const [id,container] of [["skin",$("skinChoices")],["weapon",$("weaponChoices")]]){
-    container.replaceChildren();
-    const source=id==="skin"?SKINS:WEAPONS;
-    for(const [key,item] of Object.entries(source)){
-      if(key==="creator")continue;
-      const el=document.createElement("div");
-      el.className="choice"+((id==="skin"?selectedSkin:selectedWeapon)===key?" selected":"");
-      const sw=document.createElement("div");sw.className="swatch";
-      sw.style.background="#"+item.color.toString(16).padStart(6,"0");
-      const title=document.createElement("b");title.textContent=item.name;
-      const desc=document.createElement("p");desc.className="small";
-      desc.textContent=id==="weapon"?item.ammo+" balas":"Armadura de combate";
-      el.append(sw,title,desc);
-      el.addEventListener("click",()=>{
-        if(id==="skin")selectedSkin=key;else selectedWeapon=key;
-        makeChoices();
-      });
-      container.appendChild(el);
-    }
-  }
+ const skinContainer = $("skinChoices");
+ skinContainer.innerHTML = "";
+
+ for(const [id,s] of Object.entries(SKINS)){
+  if(id === "creator") continue;
+
+  const el = document.createElement("div");
+  el.className = "choice" + (selectedSkin === id ? " selected" : "");
+  el.innerHTML =
+   `<div class="swatch" style="background:#${s.color.toString(16).padStart(6,"0")};color:#${s.color.toString(16).padStart(6,"0")}"></div>
+   <b>${s.name}</b><p class="small">Armadura de combate</p>`;
+
+  el.onclick = () => {
+   selectedSkin = id;
+   makeChoices();
+   updateLabels();
+  };
+  skinContainer.appendChild(el);
+ }
+
+ const weaponContainer = $("weaponChoices");
+ weaponContainer.innerHTML = "";
+
+ for(const [id,w] of Object.entries(WEAPONS)){
+  if(id === "creator") continue;
+
+  const el = document.createElement("div");
+  el.className = "choice" + (selectedWeapon === id ? " selected" : "");
+  el.innerHTML =
+   `<div class="swatch" style="background:#${w.color.toString(16).padStart(6,"0")};color:#${w.color.toString(16).padStart(6,"0")}"></div>
+   <b>${w.name}</b><p class="small">${w.ammo} balas</p>`;
+
+  el.onclick = () => {
+   selectedWeapon = id;
+   makeChoices();
+   updateLabels();
+  };
+  weaponContainer.appendChild(el);
+ }
 }
+
+function updateLabels(){
+ $("skinName").textContent = SKINS[selectedSkin].name;
+ $("weaponName").textContent = WEAPONS[selectedWeapon].name;
+}
+
 makeChoices();
+updateLabels();
 
-function initGame(){
-  if(!window.THREE){setMessage("No se pudo cargar Three.js.");return;}
-  scene=new THREE.Scene();
-  scene.background=new THREE.Color(0x050b19);
-  scene.fog=new THREE.Fog(0x050b19,80,180);
-  camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,250);
-  camera.rotation.order="YXZ";
-  renderer=new THREE.WebGLRenderer({antialias:true});
-  renderer.setSize(innerWidth,innerHeight);
-  renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
-  renderer.outputColorSpace=THREE.SRGBColorSpace;
-  document.body.appendChild(renderer.domElement);
-  scene.add(new THREE.HemisphereLight(0xbdeaff,0x17213a,2));
-  const sun=new THREE.DirectionalLight(0xffffff,2);
-  sun.position.set(20,50,20);scene.add(sun);
+if(!window.THREE){
+ $("message").textContent = "No se pudo cargar el motor 3D. Recarga la página.";
+}else{
+ const scene = new THREE.Scene();
+ scene.background = new THREE.Color(0x050b19);
+ scene.fog = new THREE.Fog(0x050b19,70,170);
 
-  function material(color,emissive=0){return new THREE.MeshStandardMaterial({color,emissive,emissiveIntensity:1.4,metalness:.35,roughness:.35});}
-  function addBox(x,y,z,w,h,d,color,emissive=0,collide=true){
-    const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material(color,emissive));
-    mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);
-    if(collide)obstacles.push({minX:x-w/2,maxX:x+w/2,minY:y-h/2,maxY:y+h/2,minZ:z-d/2,maxZ:z+d/2});
-    return mesh;
+ const camera = new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,250);
+ const renderer = new THREE.WebGLRenderer({antialias:true});
+ renderer.setSize(innerWidth,innerHeight);
+ renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+ renderer.shadowMap.enabled = true;
+ renderer.outputColorSpace = THREE.SRGBColorSpace;
+ document.body.appendChild(renderer.domElement);
+
+ scene.add(new THREE.HemisphereLight(0xbdeaff,0x17213a,2));
+
+ const sun = new THREE.DirectionalLight(0xffffff,2);
+ sun.position.set(20,50,20);
+ sun.castShadow = true;
+ scene.add(sun);
+
+ function material(color,emissive=0x000000,metalness=.45,roughness=.28){
+  return new THREE.MeshStandardMaterial({
+   color,emissive,emissiveIntensity:1.5,metalness,roughness
+  });
+ }
+
+ const floorMat = material(0x21364d,0x0a1e31,.5,.48);
+ const darkMat = material(0x243b53,0x0b1e32,.45,.42);
+ const cyanMat = material(0x00eaff,0x00aaff,.3,.18);
+ const pinkMat = material(0xff36d2,0xc00077,.3,.18);
+ const goldMat = material(0xffd447,0xffa600,.35,.2);
+ const platformTopMat = material(0x4386a5,0x16445b,.32,.42);
+ const platformSideMat = material(0x24445c,0x0a2539,.45,.42);
+ const columnBodyMat = material(0x354f68,0x102337,.4,.42);
+ const solidPlatforms = [];
+ const solidObstacles = [];
+
+ // Colisiones físicas de bloques y columnas: dimensiones y altura reales.
+ function registerObstacle(x,z,w,d,bottomY,topY){
+  solidObstacles.push({x,z,w,d,bottomY,topY});
+ }
+
+ function box(w,h,d,x,y,z,mat){
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+  mesh.position.set(x,y,z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  scene.add(mesh);
+  return mesh;
+ }
+
+ // ARENA NEÓN: suelo, perímetro y zonas de combate
+ box(160,1,160,0,-.5,0,floorMat);
+ box(160,12,1,0,6,-80,darkMat);
+ box(160,12,1,0,6,80,darkMat);
+ box(1,12,160,-80,6,0,darkMat);
+ box(1,12,160,80,6,0,darkMat);
+
+ const grid = new THREE.GridHelper(158,100,0x00dfff,0x1c3852);
+ grid.position.y = .025;
+
+ scene.add(grid);
+
+ // Bordes luminosos del suelo
+ const lineMat = new THREE.MeshBasicMaterial({color:0x00dfff});
+ const pinkLineMat = new THREE.MeshBasicMaterial({color:0xff35d1});
+ function groundLine(w,d,x,z,mat,y=.035){
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w,.035,d),mat);
+  m.position.set(x,y,z); scene.add(m); return m;
+ }
+ groundLine(150,.18,0,-73,lineMat);
+ groundLine(150,.18,0,73,lineMat);
+ groundLine(.18,150,-73,0,pinkLineMat);
+ groundLine(.18,150,73,0,pinkLineMat);
+ // Carriles que conducen al centro
+ for(const z of [-42,-21,21,42]) groundLine(118,.07,0,z,z===-21||z===21?pinkLineMat:lineMat,.04);
+ for(const x of [-42,-21,21,42]) groundLine(.07,118,x,0,x===-21||x===21?pinkLineMat:lineMat,.04);
+
+ // Gran plataforma central con anillos de luz
+ box(28,.35,28,0,.08,0,darkMat);
+ // Base central: también se puede pisar desde arriba.
+ solidPlatforms.push({x:0,z:0,w:28,d:28,topY:.255});
+ registerObstacle(0,0,28,28,-.1,.255);
+ groundLine(28,.08,0,-14,lineMat,.29); groundLine(28,.08,0,14,lineMat,.29);
+ groundLine(.08,28,-14,0,lineMat,.29); groundLine(.08,28,14,0,lineMat,.29);
+ box(12,.5,12,0,.38,0,platformSideMat);
+ solidPlatforms.push({x:0,z:0,w:12,d:12,topY:.63});
+ registerObstacle(0,0,12,12,.13,.63);
+ box(8,.12,8,0,.7,0,goldMat);
+ solidPlatforms.push({x:0,z:0,w:8,d:8,topY:.76});
+ registerObstacle(0,0,8,8,.64,.76);
+ // Núcleo energético central
+ const core = new THREE.Mesh(new THREE.OctahedronGeometry(2.2,1),material(0x00dfff,0x0088ff,.65,.2));
+ core.position.set(0,4.1,0); scene.add(core);
+ const coreRing = new THREE.Mesh(new THREE.TorusGeometry(4.2,.09,8,64),cyanMat);
+ coreRing.rotation.x=Math.PI/2; coreRing.position.y=1.15; scene.add(coreRing);
+ const coreRing2 = new THREE.Mesh(new THREE.TorusGeometry(5.5,.06,8,64),pinkMat);
+ coreRing2.rotation.x=Math.PI/2; coreRing2.position.y=.8; scene.add(coreRing2);
+
+ // Torres periféricas altas con franjas y focos
+ for(let i=0;i<24;i++){
+  const a=i*Math.PI*2/24;
+  const x=Math.cos(a)*65, z=Math.sin(a)*65;
+  const h=8+(i%4)*3;
+  box(4.5,h,4.5,x,h/2,z,columnBodyMat);
+  registerObstacle(x,z,4.95,4.95,0,h+.15);
+  box(4.8,.22,4.8,x,h,z,i%2?cyanMat:pinkMat);
+  box(4.62,.12,4.62,x,h*.62,z,i%2?pinkMat:cyanMat);
+  const lamp=new THREE.PointLight(i%2?0x00dfff:0xff35d1,1.4,13);
+  lamp.position.set(x,h+1,z); scene.add(lamp);
+ }
+
+ // Coberturas bajas distribuidas en ambos lados, dejando libre el centro
+ for(let i=0;i<8;i++){
+  const side=i<4?-1:1, n=i%4;
+  const x=side*(20+n*10), z=(n%2===0?-1:1)*(19+Math.floor(n/2)*12);
+  box(9,2.2,3.2,x,1.1,z,platformSideMat);
+  registerObstacle(x,z,9.25,3.55,0,2.4);
+  box(9.1,.16,3.3,x,2.25,z,n%2?pinkMat:cyanMat);
+  box(8.2,.10,.12,x,1.55,z-1.63,goldMat);
+  box(.18,1.5,.18,x-3.4,1.1,z-.1,goldMat);
+  box(.18,1.5,.18,x+3.4,1.1,z-.1,goldMat);
+ }
+
+ // Puertas decorativas y paneles luminosos en las paredes
+ for(const side of [-1,1]){
+  for(let i=0;i<5;i++){
+   const p=(i-2)*25;
+   box(7,5,.35,p,3.2,side*79.25,darkMat);
+   box(6.5,.12,.12,p,5.65,side*79,lineMat);
+   box(.12,4.5,.12,p-3.25,3.2,side*79,lineMat);
+   box(.12,4.5,.12,p+3.25,3.2,side*79,lineMat);
+   box(.35,5,7,side*79.25,3.2,p,darkMat);
+   box(.12,.12,6.5,side*79,5.65,p,lineMat);
+   box(.12,4.5,.12,side*79,p*0+3.2,p-3.25,lineMat);
+   box(.12,4.5,.12,side*79,3.2,p+3.25,lineMat);
+  }
+ }
+
+ // Balizas flotantes de ambientación en las esquinas
+ for(const x of [-48,48]) for(const z of [-48,48]){
+  box(2,.25,2,x,7,z,goldMat);
+  const beacon=new THREE.PointLight(0xffc928,2,18);
+  beacon.position.set(x,7,z); scene.add(beacon);
+ }
+
+ // DETALLES EXTRA: arena más cuidada, capas de luz y decoración
+ // Anillos geométricos alrededor del núcleo
+ for (const cfg of [
+  {r:8.5,t:.10,y:.38,c:0xff35d1},
+  {r:10.2,t:.07,y:.25,c:0x00dfff},
+  {r:12.1,t:.055,y:.16,c:0xffc928}
+ ]) {
+  const ring = new THREE.Mesh(
+   new THREE.TorusGeometry(cfg.r,cfg.t,8,96),
+   new THREE.MeshBasicMaterial({color:cfg.c})
+  );
+  ring.rotation.x=Math.PI/2; ring.position.y=cfg.y; scene.add(ring);
+ }
+
+ // PLATAFORMAS ELEVADAS: superficies contrastadas y bordes brillantes.
+ // Las alturas se guardan para que el jugador pueda saltar y aterrizar sobre ellas.
+ function addBattlePlatform(x,z,w=13,d=13,topY=1.2,accent=lineMat){
+  const thick=topY;
+  box(w,thick,d,x,thick/2,z,platformSideMat);
+  // La tapa queda un poco por encima de la base para evitar z-fighting.
+  box(w-.42,.12,d-.42,x,topY+.02,z,platformTopMat);
+  // Cuatro cantos luminosos que hacen visible la plataforma desde lejos.
+  box(w+.18,.14,.22,x,topY+.025,z-d/2+.08,accent);
+  box(w+.18,.14,.22,x,topY+.025,z+d/2-.08,accent);
+  box(.22,.14,d-.18,x-w/2+.08,topY+.025,z,accent);
+  box(.22,.14,d-.18,x+w/2-.08,topY+.025,z,accent);
+  // Flechas/placas amarillas para distinguir visualmente la parte superior.
+  for(const sign of [-1,1]){
+   box(.24,.045,2.6,x+sign*(w/2-1.15),topY+.035,z,goldMat);
+   box(2.6,.045,.24,x,topY+.035,z+sign*(d/2-1.15),goldMat);
+  }
+  solidPlatforms.push({x,z,w,d,topY});
+ }
+ for(const sx of [-1,1]) for(const sz of [-1,1]){
+  addBattlePlatform(sx*34,sz*34,13,13,1.2,(sx===sz)?pinkMat:cyanMat);
+ }
+ addBattlePlatform(-36,0,11,9,1.05,pinkMat);
+ addBattlePlatform(36,0,11,9,1.05,cyanMat);
+ // Al aterrizar se comprueba primero la superficie más alta.
+ solidPlatforms.sort((a,b)=>b.topY-a.topY);
+
+ // Columnas tecnológicas pequeñas entre las torres
+ for(let i=0;i<16;i++){
+  const a=(i+.5)*Math.PI*2/16;
+  const x=Math.cos(a)*53, z=Math.sin(a)*53;
+  box(1.5,4,1.5,x,2,z,columnBodyMat);
+  registerObstacle(x,z,1.85,1.85,0,4.1);
+  box(1.68,.16,1.68,x,3.5,z,i%2?cyanMat:pinkMat);
+  // Franjas luminosas visibles en las cuatro caras de cada columna.
+  box(.16,2.8,1.56,x+.77,2,z,i%2?pinkMat:cyanMat);
+  box(.16,2.8,1.56,x-.77,2,z,i%2?pinkMat:cyanMat);
+  box(1.56,2.8,.16,x,2,z+.77,i%2?cyanMat:pinkMat);
+  box(1.56,2.8,.16,x,2,z-.77,i%2?cyanMat:pinkMat);
+ }
+
+ // Marcos verticales de luz junto a las esquinas: decorativos, sin cerrar caminos
+ for(const sx of [-1,1]) for(const sz of [-1,1]){
+  const x=sx*47, z=sz*47;
+  box(.22,8,.22,x,4,z,cyanMat);
+  registerObstacle(x,z,.38,.38,0,8);
+  box(3.5,.22,.22,x-sx*1.6,7.9,z,pinkMat);
+  box(.22,.22,3.5,x,7.9,z-sz*1.6,pinkMat);
+  const glow=new THREE.PointLight(0x00dfff,1.1,16);
+  glow.position.set(x,5,z); scene.add(glow);
+ }
+
+ // Paneles de señalización luminosos en el interior del perímetro
+ for(let i=0;i<8;i++){
+  const a=i*Math.PI/4;
+  const x=Math.cos(a)*59, z=Math.sin(a)*59;
+  const panel=box(3.4,2.4,.18,x,5,z,material(0x10263b,0x062b45,.7,.3));
+  panel.rotation.y=-a;
+  const stripe=box(2.5,.10,.10,x,5.45,z, i%2?pinkMat:cyanMat);
+  stripe.rotation.y=-a;
+ }
+
+ // Arma en primera persona
+ const weaponGroup = new THREE.Group();
+ camera.add(weaponGroup);
+ scene.add(camera);
+
+ const handMat = material(0x956044);
+ const gunBody = new THREE.Mesh(
+  new THREE.BoxGeometry(.25,.22,.72),
+  material(0x152335)
+ );
+ gunBody.position.set(.42,-.32,-.72);
+ weaponGroup.add(gunBody);
+
+ const gunBarrel = new THREE.Mesh(
+  new THREE.CylinderGeometry(.055,.075,.48,12),
+  cyanMat
+ );
+ gunBarrel.rotation.x = Math.PI/2;
+ gunBarrel.position.set(.42,-.29,-1.12);
+ weaponGroup.add(gunBarrel);
+
+ const gunTop = new THREE.Mesh(
+  new THREE.BoxGeometry(.12,.07,.45),
+  goldMat
+ );
+ gunTop.position.set(.42,-.18,-.82);
+ weaponGroup.add(gunTop);
+
+ const hand = new THREE.Mesh(
+  new THREE.BoxGeometry(.16,.16,.25),
+  handMat
+ );
+ hand.position.set(.28,-.43,-.62);
+ weaponGroup.add(hand);
+
+ const player = {x:0,y:0,z:55};
+
+ function syncCamera(){
+  camera.position.set(player.x,player.y+1.7,player.z);
+  camera.rotation.order = "YXZ";
+  camera.rotation.y = yaw;
+  camera.rotation.x = pitch;
+ }
+
+ function updateWeaponAppearance(){
+  const skin = SKINS[selectedSkin];
+  const weapon = WEAPONS[selectedWeapon];
+
+  gunBarrel.material = material(weapon.color,weapon.color);
+  gunBody.material = material(skin.armor,skin.glow);
+  gunTop.material = material(skin.color,skin.glow);
+
+  updateLabels();
+  $("ammo").textContent = ammo;
+ }
+
+ function setToast(message){
+  $("toast").textContent = message;
+  setTimeout(()=>{
+   if($("toast").textContent === message) $("toast").textContent = "";
+  },1700);
+ }
+
+ function updateHealthBar(value){
+  health=Math.max(0,Math.min(100,Number(value)||0));
+  const label=$("health"); if(label) label.textContent=String(health);
+  const fill=$("healthFill");
+  if(fill){
+   fill.style.width=health+"%";
+   fill.style.background=health<=25?"linear-gradient(90deg,#ff304f,#ff8a65)":health<=55?"linear-gradient(90deg,#ff9f43,#ffe66d)":"linear-gradient(90deg,#39f29b,#c6ff69)";
+  }
+ }
+ function showDamageNumber(targetId,damage,healthLeft){
+  const entry=remotePlayers.get(targetId);
+  if(!entry || !entry.model) return;
+  const point=entry.model.position.clone().add(new THREE.Vector3(0,2.35,0));
+  point.project(camera);
+  if(point.z < -1 || point.z > 1) return;
+  const x=(point.x*.5+.5)*innerWidth;
+  const y=(-point.y*.5+.5)*innerHeight;
+  const el=document.createElement("div");
+  el.className="damageNumber";
+  const amount=document.createElement("div"); amount.textContent="-"+Math.max(0,Number(damage)||0);
+  const remaining=document.createElement("small"); remaining.textContent=Math.max(0,Number(healthLeft)||0)+" HP";
+  el.append(amount,remaining);
+  el.style.left=x+"px"; el.style.top=y+"px";
+  $("damageLayer").appendChild(el);
+  setTimeout(()=>el.remove(),900);
+ }
+
+ function normalizeSponsorName(name){
+  return String(name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().toLowerCase();
+ }
+ function isSponsored(p){
+  return Boolean(p && (p.sponsored || p.blueTick || p.verifiedSponsor || sponsoredNames.has(normalizeSponsorName(p.name))));
+ }
+
+ function makeNameTag(name,rank,skinId,sponsored=false){
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 128;
+  const ctx = canvas.getContext("2d");
+
+  ctx.textAlign = "center";
+  ctx.font = "bold 38px Arial";
+  ctx.fillStyle = skinId === "creator" ? "#ffd34d" : "#ffffff";
+  ctx.shadowColor = skinId === "creator" ? "#ffb900" : "#00dfff";
+  ctx.shadowBlur = 12;
+  const fullName = (rank === "CREADOR" ? "ABDE · " : "")+String(name||"Jugador");
+
+    ctx.fillText(fullName,256,45);
+  if(sponsored){
+   const textWidth = Math.min(ctx.measureText(fullName).width, 390);
+   const bx = Math.min(492, 256 + textWidth/2 + 19);
+   ctx.save();
+   ctx.shadowColor = "#168bff";
+   ctx.shadowBlur = 14;
+   ctx.beginPath(); ctx.arc(bx,32,12,0,Math.PI*2);
+   ctx.fillStyle = "#168bff"; ctx.fill();
+   ctx.shadowBlur = 0;
+   ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 3;
+   ctx.lineCap = "round"; ctx.lineJoin = "round";
+   ctx.beginPath(); ctx.moveTo(bx-5,32); ctx.lineTo(bx-1,36); ctx.lineTo(bx+6,28); ctx.stroke();
+   ctx.restore();
   }
 
-  const floor=new THREE.Mesh(new THREE.PlaneGeometry(160,160),material(0x101c30,0x071426));
-  floor.rotation.x=-Math.PI/2;floor.position.y=-.04;scene.add(floor);
-  const grid=new THREE.GridHelper(160,80,0x00aaca,0x203650);grid.position.y=.01;scene.add(grid);
-  addBox(0,5,-80,160,10,3,0x102c48,0x003d68);
-  addBox(0,5,80,160,10,3,0x102c48,0x003d68);
-  addBox(-80,5,0,3,10,160,0x102c48,0x003d68);
-  addBox(80,5,0,3,10,160,0x102c48,0x003d68);
-  addBox(0,.35,0,18,.7,18,0x17334b,0x00364f);
-  for(const [x,z] of [[-18,-18],[18,-18],[-18,18],[18,18]])addBox(x,3,z,5,6,5,0x263f5c,0x00243d);
-  addBox(0,1.2,-28,13,2.4,3,0x1a4560,0x003b55);
-  addBox(0,1.2,28,13,2.4,3,0x1a4560,0x003b55);
-  addBox(-28,1.2,0,3,2.4,13,0x1a4560,0x003b55);
-  addBox(28,1.2,0,3,2.4,13,0x1a4560,0x003b55);
-  for(const [x,z] of [[-10,-10],[10,-10],[-10,10],[10,10]])addBox(x,.65,z,9,1.3,1.4,0x29445a,0x00334c);
-  for(let i=0;i<20;i++){
-    const a=i*Math.PI*2/20,x=Math.cos(a)*53,z=Math.sin(a)*53;
-    addBox(x,1.7,z,1,3.4,1,0x15344b,0x004e79);
-    const lamp=new THREE.PointLight(0x00cfff,1.3,10);lamp.position.set(x,3.4,z);scene.add(lamp);
+  ctx.shadowBlur = 0;
+  ctx.font = "bold 24px Arial";
+  ctx.fillStyle = rank === "CREADOR" ? "#ffd34d" : "#78eaff";
+  ctx.fillText(rank,256,82);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+   map:texture,transparent:true,depthTest:false
+  }));
+  sprite.scale.set(4.2,1.05,1);
+  sprite.position.y = 2.8;
+  return sprite;
+ }
+
+ function createAvatar(skinId,name,rank,sponsored=false){
+  const s = SKINS[skinId] || SKINS.cyber;
+  const group = new THREE.Group();
+  const armor = material(s.armor);
+  const neon = material(s.color,s.glow);
+  const helmet = material(0x101827);
+
+  function part(w,h,d,x,y,z,mat){
+   const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+   mesh.position.set(x,y,z);
+   mesh.castShadow = true;
+   group.add(mesh);
+   return mesh;
   }
 
-  player=new THREE.Group();scene.add(player);
-  playerBody=new THREE.Group();player.add(playerBody);
-  const skin=SKINS[selectedSkin];
-  const bodyMat=material(skin.armor,skin.glow),darkMat=material(0x09111c);
-  const body=new THREE.Mesh(new THREE.BoxGeometry(.8,.9,.42),bodyMat);body.position.y=1.15;playerBody.add(body);
-  const chest=new THREE.Mesh(new THREE.BoxGeometry(.86,.32,.46),material(skin.color,skin.glow));chest.position.set(0,1.35,0);playerBody.add(chest);
-  const head=new THREE.Mesh(new THREE.SphereGeometry(.28,16,12),darkMat);head.position.y=1.85;playerBody.add(head);
-  const visor=new THREE.Mesh(new THREE.BoxGeometry(.42,.12,.08),material(skin.color,skin.glow));visor.position.set(0,1.88,-.245);playerBody.add(visor);
+  // Torso, casco y visor
+  part(.72,.8,.42,0,1.05,0,armor);
+  part(.52,.48,.5,0,1.68,0,helmet);
+  part(.40,.10,.075,0,1.72,.29,neon);
+  part(.20,.23,.08,0,1.10,.25,neon);
+  part(.42,.52,.22,0,1.15,-.30,helmet);
+
+  // Hombros, brazos y piernas
   for(const side of [-1,1]){
-    const leg=new THREE.Mesh(new THREE.BoxGeometry(.27,.72,.32),darkMat);leg.position.set(side*.22,.45,0);playerBody.add(leg);
-    const arm=new THREE.Mesh(new THREE.BoxGeometry(.22,.72,.25),bodyMat);arm.position.set(side*.53,1.2,-.08);playerBody.add(arm);
+   part(.34,.24,.38,side*.53,1.40,0,neon);
+   part(.24,.55,.25,side*.49,1.03,0,armor);
+   part(.27,.65,.30,side*.19,.36,0,armor);
+   part(.29,.16,.32,side*.19,.66,.02,neon);
   }
 
-camera.position.set(0,1.65,0);
-player.add(camera);
-
-// Ocultar el cuerpo del jugador para que no veas dentro de su cabeza.
-playerBody.visible = false;
-  // Modelo de primera persona: brazos y pistola pegados a la cámara.
-  viewModel=new THREE.Group();camera.add(viewModel);
-  viewModel.position.set(0,0,0);
-  function firstPersonBox(w,h,d,color,x,y,z,emissive=0){
-    const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material(color,emissive));
-    mesh.position.set(x,y,z);viewModel.add(mesh);return mesh;
+  // Detalles exclusivos del creador
+  if(skinId === "creator"){
+   part(.9,.07,.48,0,1.48,0,goldMat);
+   part(.14,.6,.14,-.39,1,-.02,goldMat);
+   part(.14,.6,.14,.39,1,-.02,goldMat);
   }
-  firstPersonBox(.18,.48,.2,0x102a42,.28,-.34,-.45,0x003344);
-  firstPersonBox(.18,.48,.2,0x102a42,.49,-.30,-.43,0x003344);
-  firstPersonBox(.15,.15,.2,0x0b1522,.28,-.57,-.60);
-  firstPersonBox(.15,.15,.2,0x0b1522,.49,-.53,-.58);
-  gun=new THREE.Group();gun.position.set(.37,-.32,-.67);viewModel.add(gun);
-  const gunBody=new THREE.Mesh(new THREE.BoxGeometry(.19,.18,.58),material(0x263b52,0x00506c));gun.add(gunBody);
-  gunBody.position.z=-.12;
-  const barrel=new THREE.Mesh(new THREE.CylinderGeometry(.055,.055,.24,10),material(0x00dfff,0x00dfff));
-  barrel.rotation.x=Math.PI/2;barrel.position.z=-.48;gun.add(barrel);
-  const handle=new THREE.Mesh(new THREE.BoxGeometry(.13,.24,.14),material(0x111a29));handle.position.set(0,-.18,.02);gun.add(handle);
 
-  clock=new THREE.Clock();
-  renderer.domElement.addEventListener("click",()=>{
-    if(started&&document.pointerLockElement!==renderer.domElement)renderer.domElement.requestPointerLock?.();
+  group.add(makeNameTag(name,rank,skinId,sponsored));
+  return group;
+ }
+
+ function updateRemote(p){
+  if(!p || !p.id || p.id === myId) return;
+
+  const skin = SKINS[p.skin] ? p.skin : "cyber";
+  const sponsored = isSponsored(p);
+  const signature = [p.name,p.rank,skin,sponsored ? "sponsored" : "normal"].join("|");
+
+  if(!remotePlayers.has(p.id) ||
+     remotePlayers.get(p.id).signature !== signature){
+
+   if(remotePlayers.has(p.id)){
+    scene.remove(remotePlayers.get(p.id).model);
+   }
+
+   const model = createAvatar(skin,p.name,p.rank,sponsored);
+   scene.add(model);
+   remotePlayers.set(p.id,{model,signature});
+  }
+
+  const model = remotePlayers.get(p.id).model;
+  model.position.set(Number(p.x)||0,Number(p.y)||0,Number(p.z)||0);
+  model.rotation.y = Number(p.yaw)||0;
+ }
+
+
+ function updateAdminPanel(list){
+  const playerList = $("adminPlayerList");
+  if(!playerList) return;
+  const safeList = Array.isArray(list) ? list.filter(p=>p && p.id) : [];
+  $("adminSocketId").textContent = myId || "—";
+  $("adminConnStatus").textContent = socket?.connected ? "Conectado" : "Desconectado";
+  $("adminPlayerCount").textContent = String(safeList.length);
+  playerList.replaceChildren();
+  if(!safeList.length){
+   const empty=document.createElement("div"); empty.className="adminNotice";
+   empty.textContent="Todavía no hay jugadores conectados."; playerList.appendChild(empty); return;
+  }
+  for(const p of safeList){
+   const row=document.createElement("div"); row.className="adminPlayer"+(selectedAdminPlayerId===p.id?" selected":"");
+   const left=document.createElement("div");
+   const name=document.createElement("strong"); name.textContent=String(p.name||"Jugador");
+   if(isSponsored(p)){const tick=document.createElement("span");tick.className="blueTick";tick.textContent="✓";tick.title="Tick azul";name.appendChild(tick);}
+   const meta=document.createElement("small");
+   meta.textContent=`${p.rank||"JUGADOR"}${p.id===myId?" · TÚ":""} · ${p.alive===false?"ELIMINADO":"VIVO"} · ${p.health??"—"} HP · Bajas ${p.kills??0} · Muertes ${p.deaths??0} · Arma ${p.weapon||"—"}`;
+   const pos=document.createElement("small");pos.textContent=`ID: ${p.id} · Posición ${(Number(p.x)||0).toFixed(1)}, ${(Number(p.y)||0).toFixed(1)}, ${(Number(p.z)||0).toFixed(1)}`;
+   left.append(name,meta,pos);
+   const actions=document.createElement("div");actions.className="adminPlayerButtons";
+   const addAction=(label,event,cls="")=>{const b=document.createElement("button");b.type="button";b.className="adminBtn "+cls;b.textContent=label;b.addEventListener("click",()=>{selectedAdminPlayerId=p.id;runAdminAction(event,{targetId:String(p.id)});});actions.appendChild(b);};
+   const tickBtn=document.createElement("button");tickBtn.type="button";tickBtn.className="adminBtn sponsorButton"+(isSponsored(p)?" gold":"");tickBtn.textContent=isSponsored(p)?"✓ Quitar tick":"✓ Dar tick";tickBtn.addEventListener("click",()=>{selectedAdminPlayerId=p.id;if(!socket?.connected){adminMessage("Servidor desconectado.",true);return;}socket.emit("sponsor:set",{playerId:String(p.id),sponsored:!isSponsored(p)});});actions.appendChild(tickBtn);
+   if(p.id!==myId && !p.isCreator){
+    addAction("Eliminar","admin:kill","danger");
+    addAction("Curar","admin:heal","green");
+    addAction("Revivir","admin:revive");
+    addAction("Traer aquí","admin:teleport");
+    addAction("Expulsar","admin:kick","danger");
+    const select=document.createElement("select");select.className="adminBtn";select.setAttribute("aria-label","Cambiar arma");
+    [["pulse","Pulse Rifle"],["plasma","Plasma Destroyer"],["rapid","Neon Rapid SMG"]].forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;if(p.weapon===v)o.selected=true;select.appendChild(o);});
+    select.addEventListener("change",()=>{selectedAdminPlayerId=p.id;runAdminAction("admin:setWeapon",{targetId:String(p.id),weapon:select.value});});actions.appendChild(select);
+   }
+   row.append(left,actions);row.addEventListener("click",e=>{if(e.target===row||e.target===left||e.target===name||e.target===meta||e.target===pos){selectedAdminPlayerId=p.id;updateAdminPanel(lastServerPlayers);}});playerList.appendChild(row);
+  }
+ }
+ function adminMessage(message,isError=false){const el=$("adminStatus");if(el){el.textContent=message;el.style.color=isError?"#ff8795":"#7af0b9";}setToast(message);}
+ function runAdminAction(event,payload){if(!socket?.connected){adminMessage("Servidor desconectado.",true);return;}if(!creatorVerified){adminMessage("No tienes permisos de creador.",true);return;}socket.emit(event,payload);}
+ $("adminFly").addEventListener("click",()=>{adminFlying=!adminFlying;runAdminAction("admin:toggleFly",{enabled:adminFlying});});
+ $("adminBroadcastSend").addEventListener("click",()=>{const message=$("adminBroadcastText").value.trim();if(!message){adminMessage("Escribe un aviso primero.",true);return;}runAdminAction("admin:broadcast",{message});$("adminBroadcastText").value="";});
+ function toggleAdminPanel(force){
+  if(!creatorVerified){ setToast("No eres creador verificado. Antes de entrar, escribe la CREATOR_KEY de Render en el campo de clave."); return; }
+  const panel=$("adminPanel");
+  const show=typeof force==="boolean" ? force : panel.style.display!=="block";
+  panel.style.display=show?"block":"none";
+  if(show){ updateAdminPanel(lastServerPlayers); }
+ }
+ $("adminToggle").addEventListener("click",()=>toggleAdminPanel());
+ $("adminClose").addEventListener("click",()=>toggleAdminPanel(false));
+ $("adminRefresh").addEventListener("click",()=>updateAdminPanel(lastServerPlayers));
+ $("adminCopy").addEventListener("click",async()=>{
+  const report=[
+   "LEGENDS OF ABDE - INFORME DEL CLIENTE",
+   `URL servidor: ${SERVER_URL}`,
+   `Conexión: ${socket?.connected ? "Conectado" : "Desconectado"}`,
+   `Socket ID: ${myId || "—"}`,
+   `Jugadores recibidos: ${lastServerPlayers.length}`,
+   `Creador verificado: ${creatorVerified ? "Sí" : "No"}`
+  ].join("\n");
+  try{ await navigator.clipboard.writeText(report); setToast("Informe copiado"); }
+  catch{ setToast("No se pudo copiar: el navegador bloqueó el portapapeles"); }
+ });
+
+ function connect(){
+  if(typeof io === "undefined"){
+   $("connection").textContent = "Socket.IO no disponible";
+   $("message").textContent = "No se pudo cargar Socket.IO. Recarga la página.";
+   return;
+  }
+  // No crear sockets nuevos cada vez que se pulsa el botón de entrada.
+  if(socket){
+   if(!socket.connected) socket.connect();
+   return;
+  }
+  socket = io(SERVER_URL,{
+   autoConnect:false,
+   reconnection:true,
+   reconnectionAttempts:Infinity,
+   reconnectionDelay:1000,
+   reconnectionDelayMax:5000,
+   timeout:20000,
+   transports:["polling","websocket"]
   });
-  addEventListener("resize",()=>{
-    camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);
-  });
-  $("play").disabled=false;$("play").textContent="ENTRAR EN LA PARTIDA";
-  setMessage("Elige tu equipo y entra en la arena.");
-  animate();
-}
-
-function playerCanMoveTo(x,z){
-  if(x < -77 || x > 77 || z < -77 || z > 77)return false;
-  for(const o of obstacles){
-    if(o.minY>1.95)continue;
-    const nx=Math.max(o.minX,Math.min(x,o.maxX)),nz=Math.max(o.minZ,Math.min(z,o.maxZ));
-    if((x-nx)**2+(z-nz)**2<.65**2)return false;
-  }
-  return true;
-}
-
-function createRemotePlayer(p){
-  const group=new THREE.Group();group.position.set(Number(p.x)||0,Number(p.y)||0,Number(p.z)||0);
-  const s=SKINS[p.skin]||SKINS.cyber;
-  function box(w,h,d,color,x,y,z,emissive=0){
-    const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color,emissive,emissiveIntensity:1.5}));
-    mesh.position.set(x,y,z);group.add(mesh);
-  }
-  box(.8,.9,.42,s.armor,0,1.15,0,s.glow);
-  box(.27,.72,.32,0x09111c,-.22,.45,0);
-  box(.27,.72,.32,0x09111c,.22,.45,0);
-  box(.22,.72,.25,s.armor,-.53,1.2,-.08);
-  box(.22,.72,.25,s.armor,.53,1.2,-.08);
-  box(.42,.12,.08,s.color,0,1.88,-.245,s.glow);
-  const head=new THREE.Mesh(new THREE.SphereGeometry(.28,12,10),new THREE.MeshStandardMaterial({color:0x09111c}));
-  head.position.y=1.85;group.add(head);
-
-  const canvas=document.createElement("canvas");canvas.width=512;canvas.height=128;
-  const texture=new THREE.CanvasTexture(canvas);
-  const label=new THREE.Mesh(new THREE.PlaneGeometry(3.2,.8),new THREE.MeshBasicMaterial({map:texture,transparent:true,depthWrite:false}));
-  label.position.y=2.65;group.add(label);
-  const hpGroup=new THREE.Group();hpGroup.position.y=2.25;group.add(hpGroup);
-  const hpBack=new THREE.Mesh(new THREE.PlaneGeometry(1.3,.13),new THREE.MeshBasicMaterial({color:0x34121a,side:THREE.DoubleSide}));hpGroup.add(hpBack);
-  const hpFill=new THREE.Mesh(new THREE.PlaneGeometry(1.26,.09),new THREE.MeshBasicMaterial({color:0x39ed91,side:THREE.DoubleSide}));hpFill.position.z=.006;hpGroup.add(hpFill);
-  scene.add(group);
-  const r={group,label,canvas,hpGroup,hpFill,target:{x:p.x||0,y:p.y||0,z:p.z||0,yaw:p.yaw||0},data:p};
-  updateRemote(r,p);return r;
-}
-
-function updateRemote(r,p){
-  r.data=p;r.target={x:Number(p.x)||0,y:Number(p.y)||0,z:Number(p.z)||0,yaw:Number(p.yaw)||0};
-  const ctx=r.canvas.getContext("2d");ctx.clearRect(0,0,512,128);
-  ctx.textAlign="center";ctx.font="bold 34px Arial";ctx.shadowBlur=12;
-  ctx.shadowColor=p.isCreator?"#ffd65a":"#00dfff";
-  ctx.fillStyle=p.isCreator?"#ffd65a":"#ffffff";
-  ctx.fillText(String(p.name||"Jugador").slice(0,16),256,44);
-  if(p.verified){ctx.font="bold 31px Arial";ctx.fillStyle="#48eaff";ctx.fillText("✓ VERIFICADO",256,88);}
-  else if(p.sponsored){ctx.font="bold 31px Arial";ctx.fillStyle="#168bff";ctx.fillText("✓ PATROCINADO",256,88);}
-  r.label.material.map.needsUpdate=true;
-  const hp=Math.max(0,Math.min(100,Number(p.health??100)));
-  r.hpFill.scale.x=Math.max(.001,hp/100);r.hpFill.position.x=-(1.26*(1-hp/100))/2;
-  r.hpFill.material.color.set(hp<=25?0xff405c:hp<=55?0xffca46:0x39ed91);
-  r.hpGroup.visible=hp>0;
-}
-
-function syncRemotePlayers(list){
-  if(!Array.isArray(list))return;
-  lastServerPlayers=list;
-  const keep=new Set();
-  for(const p of list){
-    if(!p?.id||String(p.id)===String(myId))continue;
-    const id=String(p.id);keep.add(id);
-    let r=remotePlayers.get(id);
-    if(!r){r=createRemotePlayer(p);remotePlayers.set(id,r);}
-    else updateRemote(r,p);
-  }
-  for(const [id,r] of remotePlayers){
-    if(!keep.has(id)){
-      scene.remove(r.group);
-      r.group.traverse(o=>{
-        o.geometry?.dispose();
-        if(Array.isArray(o.material))o.material.forEach(m=>m.dispose());
-        else o.material?.dispose();
-      });
-      remotePlayers.delete(id);
-    }
-  }
-  $("players").textContent=list.length+"/"+MAX_PLAYERS;
-  renderAdminPlayers();
-}
-
-function tracer(start,direction,distance,color){
-  const len=Math.max(.2,Math.min(60,Number(distance)||60));
-  const end=start.clone().add(direction.clone().multiplyScalar(len));
-  const geometry=new THREE.BufferGeometry().setFromPoints([start,end]);
-  const line=new THREE.Line(geometry,new THREE.LineBasicMaterial({color:color||0x00dfff,transparent:true,opacity:.95,depthTest:false}));
-  line.renderOrder=10;scene.add(line);
-  tracers.push({line,expires:performance.now()+130});
-}
-
-function localShotEffect(){
-  gun.updateWorldMatrix(true,false);
-  const start=new THREE.Vector3();gun.getWorldPosition(start);
-  const dir=new THREE.Vector3(-Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),-Math.cos(yaw)*Math.cos(pitch)).normalize();
-  tracer(start,dir,60,(WEAPONS[selectedWeapon]||WEAPONS.pulse).color);
-}
-
-function damagePopup(targetId,damage,remaining){
-  if(!scene||Number(damage)<=0)return;
-  let pos;
-  if(String(targetId)===String(myId))pos=player.position.clone();
-  else{
-    const target=remotePlayers.get(String(targetId));
-    if(!target)return;
-    pos=target.group.position.clone();
-  }
-  const canvas=document.createElement("canvas");canvas.width=512;canvas.height=160;
-  const ctx=canvas.getContext("2d");ctx.textAlign="center";ctx.font="bold 78px Arial";
-  ctx.lineWidth=8;ctx.strokeStyle="#30000b";ctx.strokeText("-"+Number(damage)+" HP",256,82);
-  ctx.fillStyle="#ff405c";ctx.fillText("-"+Number(damage)+" HP",256,82);
-  ctx.font="bold 35px Arial";ctx.fillStyle="white";ctx.fillText("VIDA: "+Math.max(0,Number(remaining)||0),256,132);
-  const texture=new THREE.CanvasTexture(canvas);
-  const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,transparent:true,depthTest:false,depthWrite:false}));
-  sprite.scale.set(2.8,.9,1);sprite.position.copy(pos);sprite.position.y+=2.8;scene.add(sprite);
-  damageTexts.push({sprite,texture,created:performance.now(),duration:1100});
-}
-
-function shoot(){
-  if(!started||!socket?.connected)return;
-  const now=performance.now(),w=WEAPONS[selectedWeapon]||WEAPONS.pulse;
-  if(now-lastShot<w.rate)return;
-  lastShot=now;localShotEffect();
-  socket.emit("shoot",{yaw,pitch});
-}
-
-function changeWeapon(id){
-  if(!started||!socket?.connected||!WEAPONS[id])return;
-  selectedWeapon=id;socket.emit("changeWeapon",{weapon:id});
-  $("weaponName").textContent=WEAPONS[id].name;
-}
-
-function movePlayer(dt){
-  if(!started||!socket?.connected)return;
-  const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
-  const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
-  const move=new THREE.Vector3();
-  if(keys.KeyW)move.add(forward);if(keys.KeyS)move.sub(forward);
-  if(keys.KeyD)move.add(right);if(keys.KeyA)move.sub(right);
-  if(move.lengthSq())move.normalize();
-  const speed=(keys.ShiftLeft||keys.ShiftRight)?12:7.5;
-  const nx=player.position.x+move.x*speed*dt,nz=player.position.z+move.z*speed*dt;
-
-  if(adminFlying&&creatorVerified){
-    player.position.x=Math.max(-77,Math.min(77,nx));
-    player.position.z=Math.max(-77,Math.min(77,nz));
-    if(keys.Space)player.position.y=Math.min(30,player.position.y+12*dt);
-    if(keys.ControlLeft||keys.ControlRight)player.position.y=Math.max(0,player.position.y-12*dt);
-    vy=0;
-  }else{
-    if(playerCanMoveTo(nx,player.position.z))player.position.x=nx;
-    if(playerCanMoveTo(player.position.x,nz))player.position.z=nz;
-    if(keys.Space&&grounded){vy=7.2;grounded=false;}
-    vy-=18*dt;player.position.y+=vy*dt;
-    if(player.position.y<=0){player.position.y=0;vy=0;grounded=true;}
-  }
-
-  player.rotation.y=yaw;
-  camera.rotation.set(pitch,0,0);
-  const now=performance.now();
-  if(now-lastMove>60){
-    lastMove=now;
-    socket.emit("move",{x:player.position.x,y:player.position.y,z:player.position.z,yaw});
-  }
-}
-
-function animate(){
-  requestAnimationFrame(animate);
-  if(!renderer||!scene)return;
-  const dt=Math.min(clock.getDelta(),.05),now=performance.now();
-
-  if(started)movePlayer(dt);
-
-  for(const r of remotePlayers.values()){
-    r.group.position.x+=(r.target.x-r.group.position.x)*Math.min(1,dt*12);
-    r.group.position.y+=(r.target.y-r.group.position.y)*Math.min(1,dt*12);
-    r.group.position.z+=(r.target.z-r.group.position.z)*Math.min(1,dt*12);
-    r.group.rotation.y=r.target.yaw;
-    r.label.quaternion.copy(camera.quaternion);
-    r.hpGroup.quaternion.copy(camera.quaternion);
-  }
-  for(let i=tracers.length-1;i>=0;i--){
-    if(now>tracers[i].expires){
-      const t=tracers[i];scene.remove(t.line);t.line.geometry.dispose();t.line.material.dispose();tracers.splice(i,1);
-    }
-  }
-  for(let i=damageTexts.length-1;i>=0;i--){
-    const d=damageTexts[i],age=now-d.created;
-    d.sprite.position.y+=dt*.45;d.sprite.material.opacity=Math.max(0,1-age/d.duration);
-    if(age>d.duration){
-      scene.remove(d.sprite);d.sprite.material.dispose();d.texture.dispose();damageTexts.splice(i,1);
-    }
-  }
-  if(now>=localHitUntil)$("hitmarker").classList.remove("show");
-  renderer.render(scene,camera);
-  if(now-lastFrame>=500){$("fps").textContent=Math.round(1000/Math.max(1,now-lastFrame));lastFrame=now;}
-}
-
-function requestAdminPlayers(){if(creatorVerified&&socket?.connected)socket.emit("admin:getPlayers");}
-function toggleAdmin(){
-  if(!creatorVerified)return;
-  const panel=$("adminPanel"),open=panel.style.display!=="block";
-  panel.style.display=open?"block":"none";
-  if(open)requestAdminPlayers();
-}
-function adminAction(event,payload){
-  if(!creatorVerified||!socket?.connected){adminStatus("No estás conectado como creador.");return;}
-  socket.emit(event,payload);
-}
-
-function renderAdminPlayers(){
-  const list=$("adminPlayerList");if(!list)return;
-  list.replaceChildren();
-  $("adminPlayerCount").textContent=lastServerPlayers.length;
-  if(!lastServerPlayers.length){list.textContent="No hay jugadores conectados.";return;}
-
-  for(const p of lastServerPlayers){
-    const item=document.createElement("div");
-    item.className="adminPlayer"+(String(selectedAdminPlayerId)===String(p.id)?" selected":"");
-    const info=document.createElement("div"),title=document.createElement("strong"),details=document.createElement("small");
-    title.textContent=(p.name||"Jugador")+(p.isCreator?" 👑":"")+(p.verified?" ✓ VERIFICADO":p.sponsored?" ✓ AZUL":"");
-    details.textContent="ID: "+p.id+" | Vida: "+(p.health??"?")+" | Bajas: "+(p.kills??0)+" | Muertes: "+(p.deaths??0);
-    info.append(title,details);
-    const actions=document.createElement("div");actions.className="adminPlayerButtons";
-
-    function button(text,cls,callback){
-      const b=document.createElement("button");b.className="adminBtn "+(cls||"");b.textContent=text;
-      b.addEventListener("click",callback);actions.appendChild(b);
-    }
-    button("Seleccionar","",()=>{
-      selectedAdminPlayerId=p.id;$("adminSocketId").textContent=p.id;
-      adminStatus("Seleccionado: "+p.name);renderAdminPlayers();
-    });
-    if(!p.isCreator){
-      button(p.verified?"Quitar verificación":"Verificar ✓","green",()=>{
-        adminAction("admin:verify",{targetId:p.id,enabled:!p.verified});
-      });
-      button("Expulsar","danger",()=>{
-        if(confirm("¿Expulsar a "+p.name+"?"))adminAction("admin:kick",{targetId:p.id});
-      });
-      button("Bloquear nombre","danger",()=>{
-        if(confirm("¿Bloquear el nombre de "+p.name+" y expulsarlo?"))adminAction("admin:block",{targetId:p.id});
-      });
-      button("Eliminar","danger",()=>adminAction("admin:kill",{targetId:p.id}));
-      button("Curar","green",()=>adminAction("admin:heal",{targetId:p.id}));
-      button("Revivir","green",()=>adminAction("admin:revive",{targetId:p.id}));
-      button("Teletransportar","",()=>adminAction("admin:teleport",{targetId:p.id}));
-      button("Tick azul", "",()=>adminAction("sponsor:set",{playerId:p.id,sponsored:!p.sponsored}));
-    }
-    item.append(info,actions);list.appendChild(item);
-  }
-}
-
-function connect(){
-  if(typeof io==="undefined"){setMessage("No se pudo cargar Socket.IO.");return;}
-  if(socket){socket.removeAllListeners();socket.disconnect();}
-  $("connection").textContent="Conectando…";$("play").disabled=true;
-  socket=io(SERVER_URL,{autoConnect:false,reconnection:true,reconnectionAttempts:Infinity,reconnectionDelay:1000,reconnectionDelayMax:5000,timeout:15000});
-
   socket.on("connect",()=>{
-    $("connection").textContent="Conectado";$("adminConnStatus").textContent="Conectado";
-    $("adminSocketId").textContent=socket.id||"—";
-    socket.emit("joinGame",{
-      name:$("playerName").value.trim().slice(0,16)||"Jugador",
-      skin:selectedSkin,weapon:selectedWeapon,creatorKey:$("creatorKey").value
-    });
+   myId=socket.id;
+   console.log("Socket.IO conectado:",myId);
+   $("connection").textContent="Conectado";
+   $("adminSocketId").textContent=myId;
+   $("adminConnStatus").textContent="Conectado";
+   socket.emit("joinGame",{
+    name:($("playerName").value||"Jugador").trim().slice(0,16),
+    creatorKey:$("creatorKey").value||"",
+    weapon:selectedWeapon,
+    skin:selectedSkin
+   });
   });
-  socket.on("connect_error",()=>{
-    $("connection").textContent="Error";setMessage("No se pudo conectar con Render. Comprueba que el servidor esté activo.");
-    $("play").disabled=false;$("play").textContent="VOLVER A INTENTAR";
+  socket.on("disconnect",reason=>{
+   console.warn("Socket.IO desconectado:",reason);
+   $("connection").textContent="Desconectado";
+   $("adminConnStatus").textContent="Desconectado";
+   myId=null;
   });
-  socket.on("disconnect",()=>{
-    $("connection").textContent="Desconectado";$("adminConnStatus").textContent="Desconectado";
-    creatorVerified=false;adminFlying=false;$("adminToggle").style.display="none";$("adminPanel").style.display="none";
-    $("play").disabled=false;$("play").textContent="VOLVER A INTENTAR";
+  socket.on("connect_error",err=>{
+   console.error("Error Socket.IO:",err?.message||err);
+   $("connection").textContent="Error / reintentando";
+   $("message").textContent="Render no ha aceptado la conexión todavía. Comprueba el servidor.";
+  });
+  socket.on("notice",message=>setToast(String(message)));
+  socket.on("sponsor:state",data=>{
+   const names=Array.isArray(data?.names) ? data.names : (Array.isArray(data) ? data : []);
+   sponsoredNames=new Set(names.map(normalizeSponsorName).filter(Boolean));
+   for(const p of lastServerPlayers){ if(p && p.id!==myId) updateRemote(p); }
+   if(creatorVerified) updateAdminPanel(lastServerPlayers);
+  });
+  socket.on("sponsor:result",data=>{
+   if(!data || !data.ok){setToast(data?.message || "El servidor no ha autorizado el cambio del tick");return;}
+   const action=data.sponsored ? "Tick azul concedido a " : "Tick azul retirado a ";
+   setToast(action+String(data.playerName || "jugador"));
+  });
+  socket.on("admin:actionResult",data=>{if(!data)return;adminMessage(data.message|| (data.ok?"Acción completada.":"La acción ha fallado."),!data.ok);if(creatorVerified)socket.emit("admin:getPlayers");});
+  socket.on("admin:error",message=>adminMessage(String(message||"Permiso denegado."),true));
+  socket.on("admin:flyStatus",data=>{adminFlying=Boolean(data?.enabled);$("adminFly").textContent=adminFlying?"✈ Desactivar vuelo":"✈ Activar vuelo";adminMessage(adminFlying?"Vuelo activado: ESPACIO sube, CTRL baja.":"Vuelo desactivado.");});
+  socket.on("admin:teleported",p=>{if(!p)return;player.x=Number(p.x)||0;player.y=Number(p.y)||0;player.z=Number(p.z)||0;syncCamera();});
+  socket.on("admin:weaponChanged",data=>{if(data?.weapon&&WEAPONS[data.weapon]){selectedWeapon=data.weapon;ammo=Number(data.ammo)||0;updateWeaponAppearance();}});
+  socket.on("joined",data=>{
+   if(!data || !data.you) return;
+   const p=data.you;
+   // Compatibilidad con servidores que aún no emiten creatorVerified:
+   // el rango aquí viene del servidor, no de lo que escriba el navegador.
+   creatorVerified = p.rank === "CREADOR";
+   $("adminToggle").style.display = "block";
+   $("adminToggle").textContent = creatorVerified
+     ? "⚙ PANEL CREADOR · F2"
+     : "🔒 PANEL CREADOR";
+   myId=socket.id || p.id || myId;
+   player.x=Number(p.x)||0;
+   player.y=Number(p.y)||0;
+   player.z=Number(p.z)||0;
+   yaw=Number(p.yaw)||0;
+   health=p.health ?? 100;
+   ammo=p.ammo ?? ammo;
+   kills=p.kills ?? 0;
+   deaths=p.deaths ?? 0;
+   if(SKINS[p.skin]) selectedSkin=p.skin;
+   if(WEAPONS[p.weapon]) selectedWeapon=p.weapon;
+   updateHealthBar(health);
+   $("ammo").textContent=ammo;
+   $("kills").textContent=kills;
+   $("deaths").textContent=deaths;
+   $("rankName").textContent=p.rank || "JUGADOR";
+   $("brand").textContent=p.rank==="CREADOR" ? "ABDE · CREADOR" : "LEGENDS OF ABDE";
+   updateWeaponAppearance();
+   syncCamera();
   });
   socket.on("creatorVerified",data=>{
-    creatorVerified=Boolean(data?.ok);$("adminToggle").style.display=creatorVerified?"block":"none";
-    if(creatorVerified){$("rankName").textContent="CREADOR";adminStatus("Permisos confirmados.");toast("Acceso de creador confirmado.");requestAdminPlayers();}
-    else $("adminPanel").style.display="none";
+   creatorVerified=Boolean(data && data.ok);
+   $("adminToggle").style.display="block";
+   $("adminToggle").textContent = creatorVerified
+     ? "⚙ PANEL CREADOR · F2"
+     : "🔒 PANEL CREADOR";
+   if(!creatorVerified){
+    $("adminPanel").style.display="none";
+    return;
+   }
+   selectedSkin="creator";
+   selectedWeapon="creator";
+   ammo=WEAPONS.creator.ammo;
+   $("rankName").textContent="CREADOR";
+   $("brand").textContent="ABDE · CREADOR";
+   $("ammo").textContent=ammo;
+   updateWeaponAppearance();
+   setToast("Creador verificado. Panel disponible con F2.");
   });
-  socket.on("joined",data=>{
-    const me=data?.you;
-    if(!me){setMessage("El servidor no ha confirmado la entrada.");return;}
-    myId=String(me.id);player.position.set(Number(me.x)||0,Number(me.y)||0,Number(me.z)||0);
-    yaw=Number(me.yaw)||0;player.rotation.y=yaw;updateHUD(me);
-    started=true;$("start").style.display="none";$("play").disabled=false;
-    renderer.domElement.requestPointerLock?.();toast("¡Bienvenido a LEGENDS OF ABDE!");
+    socket.on("state",data=>{
+   const list=Array.isArray(data) ? data : data?.players;
+   if(!Array.isArray(list)) return;
+   lastServerPlayers=list.filter(p=>p && p.id);
+   const seen=new Set();
+   for(const p of lastServerPlayers){
+    if(p.id===myId){
+     health=p.health ?? health; ammo=p.ammo ?? ammo; kills=p.kills ?? kills; deaths=p.deaths ?? deaths;
+     updateHealthBar(health); $("ammo").textContent=ammo;
+     $("kills").textContent=kills; $("deaths").textContent=deaths;
+     continue;
+    }
+    seen.add(p.id); updateRemote(p);
+   }
+   for(const [id,item] of remotePlayers){
+    if(!seen.has(id)){ scene.remove(item.model); remotePlayers.delete(id); }
+   }
+   $("players").textContent=Math.min(MAX_PLAYERS,lastServerPlayers.length)+"/"+MAX_PLAYERS;
+   if(creatorVerified) updateAdminPanel(lastServerPlayers);
   });
-  socket.on("state",list=>{
-    syncRemotePlayers(list);
-    if(Array.isArray(list)){const me=list.find(p=>String(p.id)===String(myId));if(me)updateHUD(me);}
-  });
-  socket.on("shotEffect",data=>{
-    if(!data||String(data.shooterId)===String(myId))return;
-    tracer(new THREE.Vector3(Number(data.x)||0,Number(data.y)||0,Number(data.z)||0),
-      new THREE.Vector3(Number(data.dx)||0,Number(data.dy)||0,Number(data.dz)||-1).normalize(),
-      data.distance,new THREE.Color(data.color||"#00dfff"));
+  // Compatibilidad opcional si el backend permite enviar una lista administrativa.
+  socket.on("admin:players",data=>{
+   const list=Array.isArray(data) ? data : data?.players;
+   if(Array.isArray(list)){lastServerPlayers=list.filter(p=>p&&p.id);updateAdminPanel(lastServerPlayers);}
   });
   socket.on("shotResult",data=>{
-    if(data?.ammo!==undefined){ammo=Number(data.ammo);$("ammo").textContent=ammo;}
-    if(data?.weapon&&WEAPONS[data.weapon]){$("weaponName").textContent=WEAPONS[data.weapon].name;selectedWeapon=data.weapon;}
-    if(data?.message)toast(data.message);
+   if(data && data.ammo!==undefined){ammo=data.ammo;$("ammo").textContent=ammo;}
+   if(data && data.ok===false && ammo<=0) setToast("Munición agotada");
   });
+  socket.on("shotEffect",data=>{
+   if(!data) return;
+   const start=new THREE.Vector3(Number(data.x)||0,Number(data.y)||0,Number(data.z)||0);
+   const direction=new THREE.Vector3(Number(data.dx)||0,Number(data.dy)||0,Number(data.dz)||0);
+   const end=start.clone().add(direction.multiplyScalar(Number(data.distance)||60));
+   const geometry=new THREE.BufferGeometry().setFromPoints([start,end]);
+   const line=new THREE.Line(geometry,new THREE.LineBasicMaterial({color:data.color||"#00dfff",transparent:true,opacity:.95}));
+   scene.add(line); tracers.push({line,until:performance.now()+100});
+   const flash=new THREE.PointLight(data.color||"#00dfff",3,3);
+   flash.position.copy(start); scene.add(flash); setTimeout(()=>scene.remove(flash),55);
+   if(data.hit) setToast("¡Impacto!");
+  });
+  // El servidor confirma los impactos reales: solo mostramos daño cuando el raycast del servidor acierta.
   socket.on("hitConfirm",data=>{
-    if(!data)return;
-    if(Number(data.damage)>0){
-      localHitUntil=performance.now()+220;$("hitmarker").classList.add("show");
-      toast("¡IMPACTO! -"+data.damage+" HP");
-      damagePopup(data.targetId,data.damage,data.health);
-    }
+   if(!data || !data.targetId) return;
+   showDamageNumber(String(data.targetId),data.damage,data.health);
   });
   socket.on("playerHit",data=>{
-    if(!data)return;
-    const targetId=data.targetId??data.id;
-    if(String(targetId)===String(myId)){
-      updateHUD({health:data.health});
-      toast("Te han quitado "+data.damage+" HP");
-      damagePopup(myId,data.damage,data.health);
-    }else if(String(data.shooterId)===String(myId)){
-      damagePopup(targetId,data.damage,data.health);
-    }
+   if(!data || data.id!==myId) return;
+   health=data.health; updateHealthBar(health);
+   if(health<=0){setToast("Te han eliminado");setTimeout(()=>socket?.emit("respawn"),2700);}
   });
   socket.on("elimination",data=>{
-    if(String(data?.victim)===String(myId))toast("Has sido eliminado. Reaparecerás en unos segundos.");
-    if(String(data?.attacker)===String(myId))toast("¡Eliminación conseguida!");
+   if(!data) return;
+   if(data.attacker===myId){kills=data.attackerKills ?? kills+1;$("kills").textContent=kills;setToast("¡Eliminación!");}
+   if(data.victim===myId){deaths++;$("deaths").textContent=deaths;setToast("Has sido eliminado");}
   });
-  socket.on("respawned",data=>{
-    if(data&&String(data.id)===String(myId)){
-      player.position.set(Number(data.x)||0,Number(data.y)||0,Number(data.z)||0);
-      updateHUD(data);toast("Has reaparecido.");
-    }
-  });
-  socket.on("moveCorrection",data=>{
-    if(data){player.position.set(Number(data.x)||0,Number(data.y)||0,Number(data.z)||0);yaw=Number(data.yaw)||0;}
-  });
-  socket.on("notice",toast);
-  socket.on("worldRanking",data=>{window.worldRanking=Array.isArray(data)?data:[];});
-  socket.on("sponsor:state",data=>{
-    const names=new Set((data?.names||[]).map(normalizeName));
-    lastServerPlayers=lastServerPlayers.map(p=>({...p,sponsored:names.has(normalizeName(p.name))}));
-    syncRemotePlayers(lastServerPlayers);
-  });
-  socket.on("admin:players",list=>{
-    if(creatorVerified&&Array.isArray(list)){lastServerPlayers=list;renderAdminPlayers();}
-  });
-  socket.on("admin:flyStatus",data=>{
-    adminFlying=Boolean(data?.enabled);updateFlyButton();adminStatus(adminFlying?"Vuelo activado.":"Vuelo desactivado.");
-  });
-  socket.on("admin:actionResult",data=>{
-    if(!data)return;adminStatus(data.message||"Acción procesada.");toast(data.message||"Acción procesada.");
-    if(data.ok)requestAdminPlayers();
-  });
-  socket.on("admin:error",message=>adminStatus(message));
-  socket.on("admin:teleported",data=>{
-    if(data&&String(data.id)===String(myId))player.position.set(Number(data.x)||0,Number(data.y)||0,Number(data.z)||0);
-  });
-  socket.on("admin:weaponChanged",data=>{
-    if(data?.weapon&&WEAPONS[data.weapon]){$("weaponName").textContent=WEAPONS[data.weapon].name;selectedWeapon=data.weapon;}
-    if(data?.ammo!==undefined){ammo=Number(data.ammo);$("ammo").textContent=ammo;}
+  socket.on("respawned",p=>{
+   if(!p) return;
+   player.x=Number(p.x)||0; player.y=Number(p.y)||0; player.z=Number(p.z)||0;
+   health=p.health ?? 100; ammo=p.ammo ?? ammo; vy=0;
+   updateHealthBar(health); $("ammo").textContent=ammo;
+   syncCamera(); setToast("De vuelta a la arena");
   });
   socket.connect();
+ }
+
+ function shoot(){
+  const now = performance.now();
+  const weapon = WEAPONS[selectedWeapon];
+
+  if(now-lastShot < weapon.rate) return;
+
+  if(ammo <= 0){
+   setToast("Pulsa R para recargar");
+   return;
+  }
+
+  if(!socket || !socket.connected){
+   setToast("Servidor desconectado");
+   return;
+  }
+
+  lastShot = now;
+  socket.emit("shoot",{yaw,pitch});
+ }
+
+ document.addEventListener("keydown",e=>{
+  if(e.code==="F2" && creatorVerified){e.preventDefault();toggleAdminPanel();return;}
+  if(e.code==="Escape" && $("adminPanel").style.display==="block"){toggleAdminPanel(false);}
+  keys[e.code] = true;
+
+  if(e.code === "KeyR" && started && socket?.connected){
+   socket.emit("reload");
+  }
+
+  if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)){
+   e.preventDefault();
+  }
+ });
+
+ document.addEventListener("keyup",e=>{
+  keys[e.code] = false;
+ });
+
+ document.addEventListener("mousemove",e=>{
+  if(!started || document.pointerLockElement !== renderer.domElement) return;
+
+  yaw -= e.movementX*.002;
+  pitch -= e.movementY*.002;
+  pitch = THREE.MathUtils.clamp(pitch,-1.4,1.4);
+ });
+
+ renderer.domElement.addEventListener("mousedown",e=>{
+  if(e.button !== 0 || !started) return;
+
+  if(document.pointerLockElement !== renderer.domElement){
+   renderer.domElement.requestPointerLock();
+  }else{
+   shoot();
+  }
+ });
+
+ let previousTime = performance.now();
+ let frameCount = 0;
+ let fpsTime = 0;
+
+ function animate(now){
+  requestAnimationFrame(animate);
+
+  const dt = Math.min((now-previousTime)/1000,.04);
+  previousTime = now;
+
+  // Eliminar trazadores antiguos
+  for(let i=tracers.length-1;i>=0;i--){
+   if(now >= tracers[i].until){
+    scene.remove(tracers[i].line);
+    tracers[i].line.geometry.dispose();
+    tracers[i].line.material.dispose();
+    tracers.splice(i,1);
+   }
+  }
+
+  if(started){
+   const speed =
+    (keys.ShiftLeft || keys.ShiftRight) ? 13 : 8;
+
+   const forward =
+    (keys.KeyW || keys.ArrowUp ? 1 : 0) -
+    (keys.KeyS || keys.ArrowDown ? 1 : 0);
+
+   const sideways =
+    (keys.KeyD || keys.ArrowRight ? 1 : 0) -
+    (keys.KeyA || keys.ArrowLeft ? 1 : 0);
+
+   const length = Math.hypot(forward,sideways) || 1;
+
+   const oldX=player.x, oldZ=player.z;
+   const moveX=(-Math.sin(yaw)*forward/length+Math.cos(yaw)*sideways/length)*speed*dt;
+   const moveZ=(-Math.cos(yaw)*forward/length-Math.sin(yaw)*sideways/length)*speed*dt;
+   const PLAYER_RADIUS=.38;
+   const PLAYER_HEIGHT=1.7;
+   const overlapsPlatform=(x,z,plat,pad=0)=>
+    Math.abs(x-plat.x)<plat.w/2+pad && Math.abs(z-plat.z)<plat.d/2+pad;
+
+   // Comprueba bloques y columnas sin impedir que el jugador salga si el servidor
+   // lo coloca inicialmente dentro de uno de ellos.
+   function blockedAt(x,z,fromX,fromZ){
+    for(const o of solidObstacles){
+     const verticalOverlap=player.y<o.topY-.035 && player.y+PLAYER_HEIGHT>o.bottomY+.035;
+     if(!verticalOverlap) continue;
+     const targetX=o.w/2+PLAYER_RADIUS-Math.abs(x-o.x);
+     const targetZ=o.d/2+PLAYER_RADIUS-Math.abs(z-o.z);
+     const targetInside=targetX>0 && targetZ>0;
+     if(!targetInside) continue;
+     const oldXPen=o.w/2+PLAYER_RADIUS-Math.abs(fromX-o.x);
+     const oldZPen=o.d/2+PLAYER_RADIUS-Math.abs(fromZ-o.z);
+     const wasInside=oldXPen>0 && oldZPen>0;
+     if(wasInside){
+      const oldPen=Math.min(oldXPen,oldZPen);
+      const newPen=Math.min(targetX,targetZ);
+      if(newPen<oldPen-.001) continue;
+     }
+     return true;
+    }
+    for(const plat of solidPlatforms){
+     if(player.y<plat.topY-.12 && overlapsPlatform(x,z,plat,.15)){
+      const oldXPen=plat.w/2+.15-Math.abs(fromX-plat.x);
+      const oldZPen=plat.d/2+.15-Math.abs(fromZ-plat.z);
+      const wasInside=oldXPen>0 && oldZPen>0;
+      if(wasInside){
+       const newPenX=plat.w/2+.15-Math.abs(x-plat.x);
+       const newPenZ=plat.d/2+.15-Math.abs(z-plat.z);
+       if(Math.min(newPenX,newPenZ)<Math.min(oldXPen,oldZPen)-.001) continue;
+      }
+      return true;
+     }
+    }
+    return false;
+   }
+
+   const tryX=THREE.MathUtils.clamp(oldX+moveX,-77,77);
+   if(!blockedAt(tryX,oldZ,oldX,oldZ)) player.x=tryX;
+   const tryZ=THREE.MathUtils.clamp(oldZ+moveZ,-77,77);
+   if(!blockedAt(player.x,tryZ,player.x,oldZ)) player.z=tryZ;
+
+   if(adminFlying && creatorVerified){
+    const vertical=(keys.Space?1:0)-((keys.ControlLeft||keys.ControlRight)?1:0);
+    player.y=THREE.MathUtils.clamp(player.y+vertical*12*dt,0,29.5);vy=0;grounded=false;
+   } else {
+   if(keys.Space && grounded){vy=9.2;grounded=false;}
+   const previousY=player.y;
+   vy-=22*dt;
+   const nextY=player.y+vy*dt;
+   let landed=false;
+   // Aterrizaje sobre cada plataforma elevada al caer desde arriba.
+   for(const plat of solidPlatforms){
+    if(vy<=0 && previousY>=plat.topY-.02 && nextY<=plat.topY && overlapsPlatform(player.x,player.z,plat,-.1)){
+     player.y=plat.topY;vy=0;grounded=true;landed=true;break;
+    }
+   }
+   if(!landed){player.y=nextY;grounded=false;}
+   if(player.y<=0){player.y=0;vy=0;grounded=true;}
+   }
+
+   player.x = THREE.MathUtils.clamp(player.x,-77,77);
+   player.z = THREE.MathUtils.clamp(player.z,-77,77);
+
+   syncCamera();
+
+   if(socket?.connected && now-lastMove > 100){
+    lastMove = now;
+    socket.emit("move",{
+     x:player.x,y:player.y,z:player.z,yaw
+    });
+   }
+  }
+
+  frameCount++;
+  fpsTime += dt;
+
+  if(fpsTime >= 1){
+   $("fps").textContent = Math.round(frameCount/fpsTime);
+   frameCount = 0;
+   fpsTime = 0;
+  }
+
+  renderer.render(scene,camera);
+ }
+
+ $("play").onclick = ()=>{
+  started = true;
+  $("start").style.display = "none";
+  connect();
+  syncCamera();
+  renderer.domElement.requestPointerLock();
+ };
+
+ $("play").disabled = false;
+ $("play").textContent = "ENTRAR EN LA ARENA";
+ $("message").textContent = "Arena lista. Elige tu equipamiento.";
+ requestAnimationFrame(animate);
+
+ window.addEventListener("resize",()=>{
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+ });
 }
-
-$("play").addEventListener("click",connect);
-$("adminToggle").addEventListener("click",toggleAdmin);
-$("adminClose").addEventListener("click",()=>$("adminPanel").style.display="none");
-$("adminRefresh").addEventListener("click",requestAdminPlayers);
-$("adminFly").addEventListener("click",()=>adminAction("admin:toggleFly",{enabled:!adminFlying}));
-$("adminBroadcastSend").addEventListener("click",()=>{
-  const message=$("adminBroadcastText").value.trim();
-  if(!message)return adminStatus("Escribe un mensaje primero.");
-  adminAction("admin:broadcast",{message});$("adminBroadcastText").value="";
-});
-$("adminCopy").addEventListener("click",async()=>{
-  const report="LEGENDS OF ABDE\nSocket: "+(socket?.id||"desconectado")+"\nJugadores: "+lastServerPlayers.length;
-  try{await navigator.clipboard.writeText(report);adminStatus("Informe copiado.");}
-  catch{adminStatus(report);}
-});
-
-addEventListener("keydown",event=>{
-  keys[event.code]=true;
-  if(["Space","ArrowUp","ArrowDown"].includes(event.code)&&started)event.preventDefault();
-  if(event.code==="KeyR"&&started&&socket?.connected)socket.emit("reload");
-  if(event.code==="F2"&&creatorVerified){event.preventDefault();toggleAdmin();}
-  if(event.code==="Digit1")changeWeapon("pulse");
-  if(event.code==="Digit2")changeWeapon("plasma");
-  if(event.code==="Digit3")changeWeapon("rapid");
-});
-addEventListener("keyup",event=>{keys[event.code]=false;});
-addEventListener("mousemove",event=>{
-  if(!renderer||document.pointerLockElement!==renderer.domElement)return;
-  yaw-=event.movementX*.0022;pitch-=event.movementY*.0022;
-  pitch=Math.max(-1.35,Math.min(1.35,pitch));
-});
-addEventListener("mousedown",event=>{
-  if(event.button===0&&started&&document.pointerLockElement===renderer.domElement)shoot();
-});
-addEventListener("blur",()=>{for(const k of Object.keys(keys))keys[k]=false;});
-document.addEventListener("pointerlockchange",()=>{
-  if(document.pointerLockElement!==renderer?.domElement)for(const k of Object.keys(keys))keys[k]=false;
-});
-
-initGame();
 </script>
 </body>
 </html>
