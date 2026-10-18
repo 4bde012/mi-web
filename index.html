@@ -77,7 +77,19 @@ h1{color:var(--cyan);text-shadow:0 0 18px #00bfff;margin:4px;font-size:clamp(26p
  <h2>JUGADORES EN EL SERVIDOR</h2>
  <div id="adminPlayerList" class="adminList"><div class="adminNotice">Esperando el primer estado del servidor…</div></div>
 </div>
+<div class="adminActions" style="margin:12px 0">
+  <button class="adminBtn" id="adminKillSelected">
+    Eliminar jugador seleccionado
+  </button>
 
+  <button class="adminBtn gold" id="adminFlyToggle">
+    Activar vuelo
+  </button>
+
+  <select id="adminTarget" class="adminBtn">
+    <option value="">Selecciona un jugador</option>
+  </select>
+</div>
 <div id="start">
  <div id="card">
   <h1>LEGENDS OF ABDE</h1>
@@ -742,7 +754,50 @@ if(!window.THREE){
    setToast("No se pudo copiar: el navegador bloqueó el portapapeles");
   }
  });
+let adminFlying = false;
 
+$("adminKillSelected").addEventListener("click", () => {
+  if (!socket?.connected || !creatorVerified) {
+    setToast("Debes entrar como creador y conectar con Render.");
+    return;
+  }
+
+  const targetId = $("adminTarget").value;
+
+  if (!targetId) {
+    setToast("Selecciona un jugador.");
+    return;
+  }
+
+  socket.emit("admin:kill", { targetId });
+});
+
+$("adminFlyToggle").addEventListener("click", () => {
+  if (!socket?.connected || !creatorVerified) {
+    setToast("Debes entrar como creador y conectar con Render.");
+    return;
+  }
+
+  adminFlying = !adminFlying;
+
+  socket.emit("admin:toggleFly", {
+    enabled: adminFlying
+  });
+
+  $("adminFlyToggle").textContent =
+    adminFlying ? "Desactivar vuelo" : "Activar vuelo";
+});
+
+socket?.on?.("admin:actionResult", data => {
+  setToast(data?.message || "Resultado de la acción recibido.");
+});
+
+socket?.on?.("admin:flyStatus", data => {
+  adminFlying = Boolean(data?.enabled);
+
+  $("adminFlyToggle").textContent =
+    adminFlying ? "Desactivar vuelo" : "Activar vuelo";
+});
  function connect(){
   if(typeof io==="undefined"){
    $("connection").textContent="Socket.IO no disponible";
