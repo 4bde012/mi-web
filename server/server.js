@@ -19,289 +19,328 @@ const MAX_PLAYERS = 40;
 const CREATOR_KEY = process.env.CREATOR_KEY || "";
 
 const SKINS = ["cyber", "shadow", "inferno", "gold"];
+
 const WEAPONS = {
-  pulse:   { ammo: 30, damage: 25, rate: 220 },
-  plasma:  { ammo: 12, damage: 50, rate: 500 },
-  rapid:   { ammo: 50, damage: 10, rate: 100 }
+  pulse: {
+    ammo: 30,
+    damage: 25,
+    rate: 220
+  },
+  plasma: {
+    ammo: 12,
+    damage: 50,
+    rate: 500
+  },
+  rapid: {
+    ammo: 50,
+    damage: 10,
+    rate: 100
+  }
 };
 
 const players = new Map();
 const lastShots = new Map();
 
+app.use(express.json());
+
 app.get("/", (req, res) => {
-  res.status(200).send("LEGENDS OF ABDE - Servidor activo");
+  res.send("LEGENDS OF ABDE - Servidor activo");
 });
 
 app.get("/health", (req, res) => {
   res.json({
     status: "ok",
+    game: "LEGENDS OF ABDE",
     players: players.size,
     maxPlayers: MAX_PLAYERS
   });
 });
 
+function clamp(value, min, max) {
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) {
+    return min;
+  }
+
+  return Math.max(min, Math.min(max, number));
+}
+
 function publicPlayer(p) {
   return {
     id: p.id,
     name: p.name,
-    skin: p.skin,
-    weapon: p.weapon,
-    rank: p.rank,
     x: p.x,
     y: p.y,
     z: p.z,
-    yaw: p.yaw,
+    rotation: p.rotation,
     health: p.health,
+    maxHealth: p.maxHealth,
+    weapon: p.weapon,
     ammo: p.ammo,
-    kills: p.kills,
-    deaths: p.deaths
+    skin: p.skin,
+    alive: p.alive,
+    creator: p.creator,
+    kills: p.kills
   };
 }
 
 function broadcastState() {
-  io.emit("state", [...players.values()].map(publicPlayer));
+  io.emit(
+    "state",
+    Array.from(players.values()).map(publicPlayer)
+  );
+}
+
+function noticePlayer(id, message) {
+  io.to(id).emit("notice", message);
 }
 
 function respawnPlayer(p) {
-  p.x = Math.random() * 100 - 50;
-  p.y = 0;
-  p.z = Math.random() * 100 - 50;
-  p.yaw = 0;
-  p.health = 100;
-  p.ammo = p.weapon === "creator" ? 20 : WEAPONS[p.weapon].ammo;
+  p.x = Math.random() * 20 - 10;
+  p.y = 1;
+  p.z = Math.random() * 20 - 10;
+  p.health = p.maxHealth;
+  p.alive = true;
+
+  io.to(p.id).emit("respawned", publicPlayer(p));
 }
 
-io.on("connection", socket => {
-  console.log("Conexión:", socket.id);
+io.on("connection", (socket) => {
+  console.log("Jugador conectado:", socket.id);
 
-  socket.on("joinGame", data => {
-    if (players.has(socket.id)) return;
-
-    if (players.size >= MAX_PLAYERS) {
-      socket.emit("notice", "El servidor está lleno.");
-      socket.disconnect(true);
+  socket.on("joinGame", (data = {}) => {
+    if (players.has(socket.id)) {
+      socket.emit("joined", {
+        you: publicPlayer(players.get(socket.id))
+      });
       return;
     }
 
-    data = data || {};
+    if (players.size >= MAX_PLAYERS) {
+      socket.emit("notice", "El servidor está lleno.");
+      return;
+    }
+
+    const name =
+      String(data.name || "Jugador")
+        .trim()
+        .slice(0, 20) || "Jugador";
+
+    const requestedWeapon = String(data.weapon || "pulse");
+    const weapon = Object.hasOwn(WEAPONS, requestedWeapon)
+      ? requestedWeapon
+      : "pulse";
+
+    const requestedSkin = String(data.skin || "cyber");
+    const skin = SKINS.includes(requestedSkin)
+      ? requestedSkin
+      : "cyber";
 
     const creator =
       CREATOR_KEY.length > 0 &&
-      typeof data.creatorKey === "string" &&
-      data.creatorKey === CREATOR_KEY;
+      String(data.creatorKey || "") === CREATOR_KEY;
 
-    const skin = creator
-      ? "creator"
-      : SKINS.includes(data.skin) ? data.skin : "cyber";
-
-    const weapon = creator
-      ? "creator"
-      : Object.hasOwn(WEAPONS, data.weapon) ? data.weapon : "pulse";
+    const weaponInfo = WEAPONS[weapon];
 
     const p = {
       id: socket.id,
-      name: String(data.name || "Jugador")
-        .replace(/[<>]/g, "")
-        .trim()
-        .slice(0, 16) || "Jugador",
-      skin,
-      weapon,
-      rank: creator ? "CREADOR" : "JUGADOR",
-      x: Math.random() * 40 - 20,
-      y: 0,
-      z: Math.random() * 40 - 20,
-      yaw: 0,
+      name,
+      x: Math.random() * 20 - 10,
+      y: 1,
+      z: Math.random() * 20 - 10,
+      rotation: 0,
       health: 100,
-      ammo: weapon === "creator" ? 20 : WEAPONS[weapon].ammo,
-      kills: 0,
-      deaths: 0,
-      lastShot: 0,
-      lastReload: 0
+      maxHealth: 100,
+      weapon,
+      ammo: weaponInfo.ammo,
+      skin,
+      alive: true,
+      creator,
+      kills: 0
     };
 
     players.set(socket.id, p);
 
-    socket.emit("joined", { you: publicPlayer(p) });
+    socket.emit("joined", {
+      you: publicPlayer(p)
+    });
 
-    if (creator) {
-      socket.emit("creatorVerified", { ok: true });
-    } else if (data.creatorKey) {
-      socket.emit("creatorVerified", { ok: false });
-    }
+    socket.emit("creatorVerified", {
+      ok: creator
+    });
 
     socket.emit("notice", "¡Bienvenido a LEGENDS OF ABDE!");
+
     broadcastState();
   });
 
-  socket.on("move", data => {
+  socket.on("move", (data = {}) => {
     const p = players.get(socket.id);
-    if (!p || !data) return;
 
-    const x = Number(data.x);
-    const y = Number(data.y);
-    const z = Number(data.z);
-    const yaw = Number(data.yaw);
+    if (!p || !p.alive) {
+      return;
+    }
 
-    if (![x, y, z, yaw].every(Number.isFinite)) return;
+    p.x = clamp(data.x, -1000, 1000);
+    p.y = clamp(data.y, -100, 1000);
+    p.z = clamp(data.z, -1000, 1000);
+    p.rotation = clamp(data.rotation, -100000, 100000);
 
-    // Limitar las posiciones a la arena.
-    p.x = Math.max(-77, Math.min(77, x));
-    p.y = Math.max(0, Math.min(10, y));
-    p.z = Math.max(-77, Math.min(77, z));
-    p.yaw = yaw;
+    // Actualiza la posición de los demás jugadores.
+    broadcastState();
   });
 
-  socket.on("shoot", data => {
+  socket.on("shoot", (data = {}) => {
     const p = players.get(socket.id);
-    if (!p || !data) return;
+
+    if (!p || !p.alive) {
+      return;
+    }
+
+    const weapon = WEAPONS[p.weapon];
+
+    if (!weapon) {
+      return;
+    }
 
     const now = Date.now();
-    const creator = p.weapon === "creator";
-    const weapon = creator
-      ? { ammo: 20, damage: 35, rate: 300 }
-      : WEAPONS[p.weapon];
+    const lastShot = lastShots.get(socket.id) || 0;
 
-    const yaw = Number(data.yaw);
-    const pitch = Number(data.pitch);
-
-    if (!Number.isFinite(yaw) || !Number.isFinite(pitch)) return;
-
-    if (p.health <= 0) {
-      socket.emit("shotResult", { ok: false, ammo: p.ammo });
+    if (now - lastShot < weapon.rate) {
       return;
     }
 
-    if (now - p.lastShot < weapon.rate) {
-      socket.emit("shotResult", { ok: false, ammo: p.ammo });
-      return;
-    }
+    lastShots.set(socket.id, now);
 
     if (p.ammo <= 0) {
-      socket.emit("shotResult", { ok: false, ammo: 0 });
+      noticePlayer(socket.id, "¡No tienes munición! Recarga.");
       return;
     }
 
-    p.lastShot = now;
-    p.ammo--;
+    p.ammo -= 1;
 
-    const dx = -Math.sin(yaw) * Math.cos(pitch);
-    const dy = Math.sin(pitch);
-    const dz = -Math.cos(yaw) * Math.cos(pitch);
+    const angle = Number(data.angle);
+    const targetId = String(data.targetId || "");
 
-    const start = {
-      x: p.x,
-      y: p.y + 1.7,
-      z: p.z
-    };
+    let hitPlayer = null;
 
-    let target = null;
-    let bestDistance = 60;
-    const tolerance = 0.13;
+    // Si el cliente indica un objetivo válido,
+    // comprobamos que esté delante y cerca de la línea de tiro.
+    if (Number.isFinite(angle) && targetId) {
+      const target = players.get(targetId);
 
-    for (const other of players.values()) {
-      if (other.id === p.id || other.health <= 0) continue;
+      if (
+        target &&
+        target.id !== p.id &&
+        target.alive
+      ) {
+        const dx = target.x - p.x;
+        const dz = target.z - p.z;
+        const distance = Math.sqrt(dx * dx + dz * dz);
 
-      const tx = other.x - start.x;
-      const ty = other.y + 1.1 - start.y;
-      const tz = other.z - start.z;
+        const targetAngle = Math.atan2(dx, dz);
+        const difference = Math.atan2(
+          Math.sin(targetAngle - angle),
+          Math.cos(targetAngle - angle)
+        );
 
-      const distance = Math.hypot(tx, ty, tz);
-      if (distance < 0.1 || distance > bestDistance) continue;
-
-      const dot = (tx * dx + ty * dy + tz * dz) / distance;
-
-      if (dot > Math.cos(tolerance)) {
-        target = other;
-        bestDistance = distance;
-      }
-    }
-
-    let hit = false;
-
-    if (target) {
-      target.health = Math.max(0, target.health - weapon.damage);
-      hit = true;
-
-      io.emit("playerHit", {
-        id: target.id,
-        health: target.health
-      });
-
-      if (target.health <= 0) {
-        p.kills++;
-        target.deaths++;
-
-        io.emit("elimination", {
-          attacker: p.id,
-          victim: target.id,
-          attackerKills: p.kills
-        });
-
-        setTimeout(() => {
-          const current = players.get(target.id);
-          if (current && current.health <= 0) {
-            respawnPlayer(current);
-            io.to(current.id).emit("respawned", publicPlayer(current));
-            broadcastState();
-          }
-        }, 2000);
+        if (distance <= 100 && Math.abs(difference) < 0.25) {
+          hitPlayer = target;
+        }
       }
     }
 
     socket.emit("shotResult", {
-      ok: true,
+      hit: Boolean(hitPlayer),
       ammo: p.ammo,
-      hit
+      weapon: p.weapon
     });
 
     io.emit("shotEffect", {
-      x: start.x,
-      y: start.y,
-      z: start.z,
-      dx,
-      dy,
-      dz,
-      distance: bestDistance,
-      color: creator ? "#ffc928" : "#00dfff",
-      hit
+      shooterId: p.id,
+      x: p.x,
+      y: p.y,
+      z: p.z,
+      angle: Number.isFinite(angle) ? angle : p.rotation,
+      weapon: p.weapon
     });
+
+    if (hitPlayer) {
+      hitPlayer.health = Math.max(
+        0,
+        hitPlayer.health - weapon.damage
+      );
+
+      io.emit("playerHit", {
+        shooterId: p.id,
+        targetId: hitPlayer.id,
+        damage: weapon.damage,
+        health: hitPlayer.health
+      });
+
+      if (hitPlayer.health <= 0) {
+        hitPlayer.alive = false;
+        p.kills += 1;
+
+        io.emit("elimination", {
+          killerId: p.id,
+          victimId: hitPlayer.id,
+          killerName: p.name,
+          victimName: hitPlayer.name
+        });
+
+        setTimeout(() => {
+          const current = players.get(hitPlayer.id);
+
+          if (current && !current.alive) {
+            respawnPlayer(current);
+            broadcastState();
+          }
+        }, 3000);
+      }
+    }
 
     broadcastState();
   });
 
   socket.on("reload", () => {
     const p = players.get(socket.id);
-    if (!p || p.health <= 0) return;
 
-    const now = Date.now();
-    if (now - p.lastReload < 1200) return;
+    if (!p || !p.alive) {
+      return;
+    }
 
-    p.lastReload = now;
-    p.ammo = p.weapon === "creator"
-      ? 20
-      : WEAPONS[p.weapon].ammo;
+    const weapon = WEAPONS[p.weapon];
 
-    socket.emit("shotResult", {
-      ok: true,
-      ammo: p.ammo
-    });
+    if (!weapon) {
+      return;
+    }
+
+    p.ammo = weapon.ammo;
+
+    socket.emit("notice", "¡Arma recargada!");
 
     broadcastState();
   });
 
   socket.on("respawn", () => {
     const p = players.get(socket.id);
-    if (!p || p.health > 0) return;
+
+    if (!p) {
+      return;
+    }
 
     respawnPlayer(p);
-    socket.emit("respawned", publicPlayer(p));
     broadcastState();
   });
 
   socket.on("disconnect", () => {
+    console.log("Jugador desconectado:", socket.id);
+
     players.delete(socket.id);
     lastShots.delete(socket.id);
-    console.log("Desconexión:", socket.id);
+
     broadcastState();
   });
 });
