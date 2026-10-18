@@ -1136,23 +1136,41 @@ function createHealthBar() {
   return { sprite, update };
 }
 
+
 function makeNameTag(name, rank) {
   const canvas = document.createElement("canvas");
   canvas.width = 512;
-  canvas.height = 128;
+  canvas.height = 160;
 
   const ctx = canvas.getContext("2d");
-  ctx.textAlign = "center";
-  ctx.font = "bold 38px Arial";
-  ctx.fillStyle = "#ffffff";
-  ctx.shadowColor = "#00dfff";
-  ctx.shadowBlur = 12;
-  ctx.fillText(String(name).slice(0, 20), 256, 45);
 
-  ctx.shadowBlur = 0;
-  ctx.font = "bold 24px Arial";
-  ctx.fillStyle = rank === "CREADOR" ? "#ffd34d" : "#78eaff";
-  ctx.fillText(rank || "JUGADOR", 256, 82);
+  // Fondo transparente con texto brillante.
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.textAlign = "center";
+
+  if (rank === "CREADOR") {
+    ctx.font = "bold 46px Arial";
+    ctx.fillStyle = "#ffd34d";
+    ctx.shadowColor = "#ff9d00";
+    ctx.shadowBlur = 20;
+    ctx.fillText("👑 ABDE CREADOR", 256, 58);
+
+    ctx.shadowBlur = 8;
+    ctx.font = "bold 25px Arial";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(String(name).slice(0, 20), 256, 105);
+  } else {
+    ctx.font = "bold 34px Arial";
+    ctx.fillStyle = "#ffffff";
+    ctx.shadowColor = "#00dfff";
+    ctx.shadowBlur = 12;
+    ctx.fillText(String(name).slice(0, 20), 256, 55);
+
+    ctx.shadowBlur = 0;
+    ctx.font = "bold 24px Arial";
+    ctx.fillStyle = "#78eaff";
+    ctx.fillText("JUGADOR", 256, 100);
+  }
 
   const texture = new THREE.CanvasTexture(canvas);
 
@@ -1164,139 +1182,10 @@ function makeNameTag(name, rank) {
     })
   );
 
-  sprite.scale.set(4.2, 1.05, 1);
-  sprite.position.y = 2.8;
+  sprite.scale.set(5.2, 1.6, 1);
+  sprite.position.y = 3.5;
 
   return sprite;
-}
-
-function createAvatar(skinId, name, rank) {
-  const skin = SKINS[skinId] || SKINS.cyber;
-  const group = new THREE.Group();
-
-  const armor = mat(skin.armor, 0x05070d, 0.8, 0.24);
-  const neon = mat(skin.color, skin.glow, 0.5, 0.2);
-  const accent = mat(skin.accent, skin.accent, 0.45, 0.22);
-  const dark = mat(0x080c16, 0x03050a, 0.7, 0.3);
-  const visor = mat(skin.color, skin.color, 0.3, 0.15);
-
-  function part(w, h, d, x, y, z, material) {
-    const mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(w, h, d),
-      material
-    );
-
-    mesh.position.set(x, y, z);
-    mesh.castShadow = true;
-    group.add(mesh);
-
-    return mesh;
-  }
-
-  function cone(radius, height, x, y, z, material, rotationZ = 0) {
-    const mesh = new THREE.Mesh(
-      new THREE.ConeGeometry(radius, height, 8),
-      material
-    );
-
-    mesh.position.set(x, y, z);
-    mesh.rotation.z = rotationZ;
-    mesh.castShadow = true;
-    group.add(mesh);
-
-    return mesh;
-  }
-
-  /* PIERNAS */
-
-  for (const side of [-1, 1]) {
-    part(0.3, 0.62, 0.34, side * 0.2, 0.39, 0, armor);
-    part(0.34, 0.17, 0.37, side * 0.2, 0.67, 0.02, neon);
-    part(0.36, 0.15, 0.46, side * 0.2, 0.12, 0.06, dark);
-    part(0.1, 0.32, 0.06, side * 0.2, 0.4, 0.19, accent);
-  }
-
-  /* TORSO */
-
-  part(0.76, 0.8, 0.43, 0, 1.12, 0, armor);
-  part(0.52, 0.28, 0.09, 0, 1.24, 0.24, neon);
-  part(0.32, 0.12, 0.1, 0, 1.03, 0.25, accent);
-  part(0.46, 0.37, 0.12, 0, 1.14, -0.25, dark);
-  part(0.42, 0.53, 0.2, 0, 1.22, -0.32, dark);
-
-  /* BRAZOS Y HOMBRERAS */
-
-  for (const side of [-1, 1]) {
-    part(0.42, 0.27, 0.43, side * 0.55, 1.48, 0, neon);
-    part(0.29, 0.48, 0.32, side * 0.56, 1.1, 0, armor);
-    part(0.3, 0.17, 0.34, side * 0.56, 0.88, 0, accent);
-    part(0.4, 0.12, 0.45, side * 0.55, 1.64, 0, dark);
-  }
-
-  /* CASCO Y VISOR */
-
-  part(0.56, 0.49, 0.52, 0, 1.79, 0, armor);
-  part(0.48, 0.13, 0.1, 0, 1.84, 0.27, visor);
-  part(0.63, 0.09, 0.56, 0, 2.05, 0, dark);
-  part(0.2, 0.08, 0.08, 0, 1.65, 0.29, accent);
-
-  /* DETALLES ÚNICOS DE CADA ARMADURA */
-
-  if (skin.style === "cyber") {
-    cone(0.11, 0.48, -0.19, 2.27, 0, neon, -0.18);
-    cone(0.11, 0.48, 0.19, 2.27, 0, neon, 0.18);
-
-    part(0.09, 0.3, 0.1, -0.32, 1.83, 0, accent);
-    part(0.09, 0.3, 0.1, 0.32, 1.83, 0, accent);
-
-    part(0.14, 0.46, 0.15, -0.39, 1.2, -0.3, neon);
-    part(0.14, 0.46, 0.15, 0.39, 1.2, -0.3, neon);
-  }
-
-  if (skin.style === "shadow") {
-    cone(0.19, 0.68, -0.22, 2.3, -0.02, neon, -0.25);
-    cone(0.19, 0.68, 0.22, 2.3, -0.02, neon, 0.25);
-
-    part(0.14, 0.85, 0.3, -0.49, 1.6, -0.24, dark);
-    part(0.14, 0.85, 0.3, 0.49, 1.6, -0.24, dark);
-
-    part(0.08, 0.6, 0.1, -0.4, 1.7, -0.31, neon);
-    part(0.08, 0.6, 0.1, 0.4, 1.7, -0.31, neon);
-  }
-
-  if (skin.style === "inferno") {
-    cone(0.2, 0.48, -0.55, 1.78, 0, accent, -0.9);
-    cone(0.2, 0.48, 0.55, 1.78, 0, accent, 0.9);
-
-    cone(0.13, 0.38, -0.27, 2.28, 0, neon, -0.15);
-    cone(0.13, 0.38, 0.27, 2.28, 0, neon, 0.15);
-
-    part(0.42, 0.1, 0.1, 0, 1.52, 0.26, accent);
-    part(0.12, 0.35, 0.13, 0, 1.15, 0.34, neon);
-  }
-
-  if (skin.style === "gold") {
-    cone(0.13, 0.42, -0.2, 2.29, 0, accent, -0.15);
-    cone(0.13, 0.42, 0.2, 2.29, 0, accent, 0.15);
-    cone(0.1, 0.3, 0, 2.34, 0, neon);
-
-    part(0.48, 0.12, 0.5, -0.55, 1.67, 0, accent);
-    part(0.48, 0.12, 0.5, 0.55, 1.67, 0, accent);
-
-    part(0.12, 0.54, 0.1, -0.4, 1.3, 0.26, neon);
-    part(0.12, 0.54, 0.1, 0.4, 1.3, 0.26, neon);
-  }
-
-  part(0.1, 0.58, 0.07, -0.18, 1.12, 0.3, accent);
-  part(0.1, 0.58, 0.07, 0.18, 1.12, 0.3, accent);
-
-  group.add(makeNameTag(name, rank));
-
-  const bar = createHealthBar();
-  group.add(bar.sprite);
-  group.userData.healthBar = bar;
-
-  return group;
 }
 
 function updateRemote(p) {
