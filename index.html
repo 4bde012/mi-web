@@ -3,182 +3,263 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#050914">
 <title>LEGENDS OF ABDE</title>
 
 <style>
+:root {
+  --cyan:#42eaff;
+  --purple:#a855ff;
+  --red:#ff405c;
+  --gold:#ffd34d;
+  --panel:rgba(7,15,31,.91);
+  --border:rgba(66,234,255,.48);
+}
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#050816;color:white;font-family:Arial,sans-serif}
-button,input,select{font:inherit}
+html,body{
+  width:100%;height:100%;margin:0;overflow:hidden;
+  background:#030611;color:white;
+  font-family:Arial,Helvetica,sans-serif
+}
+canvas{display:block}
+button,input{font:inherit}
 button{cursor:pointer}
-#game{position:fixed;inset:0;z-index:0}
 #hud{position:fixed;inset:0;z-index:2;pointer-events:none}
-.panel{background:#081226dd;border:1px solid #244367;border-radius:12px;padding:12px;box-shadow:0 0 20px #00dfff20}
-#topLeft{position:absolute;top:12px;left:12px;min-width:190px}
-#topRight{position:absolute;top:12px;right:12px;text-align:right}
-#bottom{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);width:min(360px,85vw);text-align:center}
-#healthBar{height:12px;background:#333;border-radius:10px;overflow:hidden;margin-top:6px}
-#healthFill{height:100%;width:100%;background:#35ed73;transition:width .15s}
-#crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:24px;color:#fff;text-shadow:0 0 8px #00dfff}
-#toast{position:absolute;top:22%;left:50%;transform:translateX(-50%);padding:10px 18px;background:#061326dd;border:1px solid #00dfff;border-radius:8px;display:none;text-align:center}
-#start,#deathScreen{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse,#15294cF2,#030611F8);padding:16px}
-#deathScreen{display:none}
-.menu{width:min(480px,96vw);max-height:95vh;overflow:auto;text-align:center;background:#081226f5;border:1px solid #00dfff;border-radius:18px;padding:22px;box-shadow:0 0 45px #00dfff20}
-h1{margin:0 0 5px;color:#00dfff;letter-spacing:2px;font-size:clamp(25px,6vw,40px)}
-.sub{color:#9fb6d4;margin:0 0 18px}
-input,select{width:100%;padding:11px;margin:6px 0;background:#101d34;color:white;border:1px solid #3c587b;border-radius:8px}
-.primary{width:100%;padding:13px;border:0;border-radius:9px;background:linear-gradient(90deg,#00a7cf,#2768f5);color:white;font-weight:900;margin-top:12px}
-.choiceTitle{text-align:left;color:#a7bdd7;margin-top:13px;font-size:12px}
-.choices{display:flex;gap:7px;flex-wrap:wrap}
-.choice{flex:1;min-width:80px;padding:9px;background:#12213b;color:white;border:1px solid #334c70;border-radius:7px}
-.choice.active{border-color:#00dfff;background:#12334b}
-#message{font-size:12px;color:#ffca61;min-height:18px;margin-top:10px}
-#adminToggle{display:none;position:fixed;right:12px;top:145px;z-index:20;padding:10px 14px;color:#ffdf69;background:#332506;border:1px solid #ffd34d;border-radius:9px;font-weight:bold;pointer-events:auto}
-#adminPanel{display:none;position:fixed;right:12px;top:190px;z-index:20;width:min(390px,calc(100vw - 24px));max-height:70vh;overflow:auto;padding:14px;background:#080c19f7;border:1px solid #ffd34d;border-radius:13px;box-shadow:0 0 25px #ffb90033;pointer-events:auto;font-size:13px}
-#adminPanel h2{color:#ffdf69;margin:4px 0 10px}
-#adminPanel button{padding:9px;border:1px solid #526078;border-radius:7px;background:#172239;color:white}
-.adminAction{width:100%;margin:4px 0}
-.adminGold{background:#44320b!important;border-color:#ffd34d!important;color:#ffdf69!important}
-.adminDanger{background:#4a1420!important;border-color:#ff405c!important}
-.adminSection{margin-top:13px;padding-top:10px;border-top:1px solid #34445e}
-.adminMuted{color:#9cb0c9;font-size:12px}
-.adminPlayer{padding:9px;margin:5px 0;border:1px solid #34445e;border-radius:7px;background:#101a2c;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.adminPlayer.selected{border-color:#ffd34d}
-.adminPlayer button{flex-shrink:0}
-#adminPanel input,#adminPanel select{padding:9px}
-@media(max-width:600px){#topLeft{font-size:12px;min-width:145px}#topRight{font-size:12px}#adminPanel{top:170px;max-height:65vh}}
+#brand{
+  position:absolute;top:15px;left:15px;display:flex;
+  align-items:center;gap:10px;color:var(--cyan);
+  font-size:21px;font-weight:900;letter-spacing:1px;
+  text-shadow:0 0 15px #00bfff
+}
+.logo-icon{
+  width:38px;height:38px;display:flex;justify-content:center;
+  align-items:center;border:2px solid var(--cyan);
+  border-radius:11px;background:#061626;
+  box-shadow:0 0 18px #00dfff55;font-size:25px
+}
+#stats,#right{
+  position:absolute;top:62px;display:grid;gap:7px
+}
+#stats{left:14px}
+#right{top:15px;right:14px;text-align:right}
+.panel{
+  padding:9px 12px;border:1px solid var(--border);
+  border-radius:8px;background:var(--panel);
+  box-shadow:0 3px 12px #0005;font-size:13px;
+  backdrop-filter:blur(8px)
+}
+#crosshair{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);color:white;
+  font-size:25px;font-weight:bold;text-shadow:0 0 7px var(--cyan)
+}
+#crosshair::before,#crosshair::after{
+  content:"";position:absolute;background:var(--cyan);
+  box-shadow:0 0 6px var(--cyan)
+}
+#crosshair::before{width:2px;height:7px;left:50%;top:-12px}
+#crosshair::after{height:2px;width:7px;top:50%;left:-12px}
+#help{
+  position:absolute;left:12px;bottom:12px;padding:10px 13px;
+  border:1px solid #35dfff55;border-radius:9px;
+  background:var(--panel);font-size:12px;line-height:1.8
+}
+#toast{
+  position:absolute;top:65%;left:50%;transform:translateX(-50%);
+  color:#ffe477;font-weight:900;font-size:18px;
+  text-shadow:0 0 12px #ffae00;text-align:center;
+  white-space:nowrap
+}
+#bottomHUD{
+  position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
+  width:min(350px,65vw);text-align:center
+}
+#healthText{
+  margin-bottom:6px;font-size:13px;font-weight:bold;
+  text-shadow:0 2px 5px black
+}
+#healthBar{
+  height:17px;border:2px solid white;border-radius:5px;
+  background:#101522;overflow:hidden
+}
+#healthFill{
+  height:100%;width:100%;background:#35ed73;
+  transition:width .15s,background .15s
+}
+#creatorBadge{
+  display:none;position:absolute;top:90px;left:50%;
+  transform:translateX(-50%);padding:9px 16px;
+  border:1px solid #ffd34d;border-radius:10px;
+  color:#ffe58b;background:rgba(30,20,3,.9);
+  box-shadow:0 0 20px #ffb90055;
+  font-size:15px;font-weight:900;letter-spacing:1px;
+  text-shadow:0 0 12px #ffb900;white-space:nowrap
+}
+#start,#deathScreen{
+  position:fixed;inset:0;z-index:5;display:flex;
+  align-items:center;justify-content:center;padding:14px;
+  background:radial-gradient(ellipse at 50% 30%,#173d5d 0%,#0a1125 43%,#02040b 100%);
+  overflow:auto
+}
+#card{
+  width:min(760px,100%);max-height:96vh;overflow:auto;
+  padding:24px;text-align:center;border:1px solid var(--cyan);
+  border-radius:18px;background:rgba(8,15,29,.97);
+  box-shadow:0 0 40px #00bfff27,inset 0 0 25px #00bfff08
+}
+#brandLarge{
+  color:var(--cyan);font-size:clamp(27px,5vw,44px);
+  font-weight:1000;letter-spacing:2px;text-shadow:0 0 20px #00bfff;
+  margin:8px 0
+}
+.subtitle{color:#9dbbd3;font-size:12px;letter-spacing:3px}
+h2{margin:20px 0 10px;color:#78eaff;font-size:14px;letter-spacing:1px}
+.small{color:#a8c8dc;font-size:12px;line-height:1.5}
+.choices{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;margin:10px 0
+}
+.choice{
+  min-width:0;padding:12px 6px;border:1px solid #344b65;
+  border-radius:11px;background:linear-gradient(145deg,#121d30,#080d18);
+  cursor:pointer;font-size:11px;transition:.15s
+}
+.choice:hover{transform:translateY(-2px);border-color:var(--cyan)}
+.choice.selected{
+  border:2px solid var(--cyan);
+  background:linear-gradient(145deg,#10314a,#11152a);
+  box-shadow:0 0 15px #00bfff33
+}
+.choice.creator-choice{border-color:#8c681b}
+.choice.creator-choice.selected{
+  border:2px solid var(--gold);
+  background:linear-gradient(145deg,#3a2a08,#17101a);
+  box-shadow:0 0 18px #ffb90044
+}
+.swatch{
+  width:35px;height:35px;margin:0 auto 9px;
+  border:2px solid #ffffff88;border-radius:50%;
+  box-shadow:0 0 14px currentColor
+}
+.choice b{display:block;line-height:1.4}
+input{
+  width:100%;margin:5px 0;padding:12px;color:white;
+  background:#050b16;border:1px solid #38516b;
+  border-radius:8px;outline:none
+}
+input:focus{border-color:var(--cyan);box-shadow:0 0 10px #00dfff33}
+#play,.primaryButton{
+  width:100%;margin-top:10px;padding:15px;border:0;border-radius:9px;
+  color:#03101a;background:linear-gradient(100deg,#00b8e8,#73efff);
+  font-size:15px;font-weight:900;letter-spacing:1px;
+  box-shadow:0 0 20px #00bfff30
+}
+#play:disabled{opacity:.55;cursor:wait}
+.secondaryButton{
+  width:100%;margin-top:8px;padding:12px;border:1px solid #45617a;
+  border-radius:8px;background:#111d30;color:white
+}
+#message{min-height:20px;color:#8defff;font-size:13px}
+#deathScreen{z-index:6;display:none;background:rgba(15,0,10,.88)}
+#deathCard{
+  width:min(430px,100%);padding:25px;border:1px solid var(--red);
+  border-radius:15px;background:#100b16;text-align:center;
+  box-shadow:0 0 35px #ff204433
+}
+#deathCard h1{color:var(--red)}
+@media(max-width:600px){
+  #brand{font-size:14px;left:8px;top:8px}
+  .logo-icon{width:29px;height:29px;font-size:18px}
+  #stats{left:7px;top:48px;gap:4px}
+  #right{top:8px;right:7px;gap:4px}
+  .panel{padding:5px 7px;font-size:10px}
+  #help{left:7px;bottom:7px;padding:6px 8px;font-size:9px;line-height:1.5}
+  #bottomHUD{bottom:10px}
+  .choices{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #card{padding:15px}
+  #creatorBadge{top:125px;font-size:12px}
+}
 </style>
 </head>
 
 <body>
-<div id="game"></div>
-
 <div id="hud">
-  <div id="topLeft" class="panel">
-    <strong id="brandText">LEGENDS OF ABDE</strong>
-    <div>Estado: <span id="connection">Desconectado</span></div>
-    <div>Jugadores: <span id="players">0/40</span></div>
-    <div>Rango: <span id="rankName">JUGADOR</span></div>
-    <div>Arma: <span id="weaponName">PULSE RIFLE</span></div>
-    <div>Munición: <span id="ammo">30</span></div>
-    <div>Eliminaciones: <span id="kills">0</span></div>
-    <div>Muertes: <span id="deaths">0</span></div>
+  <div id="brand">
+    <span class="logo-icon">A</span>
+    <span id="brandText">LEGENDS OF ABDE</span>
   </div>
 
-  <div id="topRight" class="panel">
-    <div>FPS: <span id="fps">0</span></div>
-    <div id="creatorBadge" style="display:none;color:#ffdf69">👑 CREADOR</div>
+  <div id="stats">
+    <div class="panel">❤️ Vida: <span id="health">100</span></div>
+    <div class="panel">🔫 Arma: <span id="weaponName">PULSE RIFLE</span></div>
+    <div class="panel">💥 Munición: <span id="ammo">30</span></div>
+    <div class="panel">👑 Rango: <span id="rankName">JUGADOR</span></div>
+    <div class="panel">⚔️ Bajas: <span id="kills">0</span></div>
+    <div class="panel">☠️ Muertes: <span id="deaths">0</span></div>
   </div>
 
+  <div id="right">
+    <div class="panel">FPS: <span id="fps">0</span></div>
+    <div class="panel">Jugadores: <span id="players">0/40</span></div>
+    <div class="panel">Servidor: <span id="connection">Desconectado</span></div>
+    <div class="panel">Skin: <span id="skinName">CYBER NEXUS</span></div>
+  </div>
+
+  <div id="creatorBadge">👑 ABDE CREADOR</div>
   <div id="crosshair">+</div>
-  <div id="toast"></div>
 
-  <div id="bottom" class="panel">
-    <strong>VIDA: <span id="healthText">100 / 100</span></strong>
-    <div id="healthBar"><div id="healthFill"></div></div>
-    <div style="font-size:12px;color:#a7bdd7;margin-top:6px">
-      WASD moverse · Espacio saltar · Ratón disparar · R recargar · E botiquín
-    </div>
+  <div id="help">
+    WASD: moverte<br>
+    Ratón: mirar<br>
+    Espacio: saltar<br>
+    Shift: correr<br>
+    Clic izquierdo: disparar<br>
+    Clic derecho: apuntar<br>
+    R: recargar<br>
+    E: recoger botiquín<br>
+    ESC: liberar ratón
   </div>
+
+  <div id="bottomHUD">
+    <div id="healthText">100 / 100</div>
+    <div id="healthBar"><div id="healthFill"></div></div>
+  </div>
+  <div id="toast"></div>
 </div>
 
 <div id="start">
-  <div class="menu">
-    <h1>LEGENDS OF ABDE</h1>
-    <p class="sub">Arena multijugador · Admin PRO</p>
+  <div id="card">
+    <div id="brandLarge">LEGENDS OF ABDE</div>
+    <div class="subtitle">MULTIPLAYER FUTURISTA · ARENA 3D</div>
 
+    <h2>ACCESO DEL CREADOR</h2>
+    <input id="creatorKey" type="password" autocomplete="off"
+      placeholder="Clave privada del creador">
+    <p class="small">Deja este campo vacío si eres un jugador normal.</p>
+
+    <h2>ELIGE TU ARMADURA</h2>
+    <div class="choices" id="skinChoices"></div>
+
+    <h2>ELIGE TU ARMA</h2>
+    <div class="choices" id="weaponChoices"></div>
+
+    <h2>ENTRAR EN LA ARENA</h2>
     <input id="playerName" maxlength="16" placeholder="Tu nombre" value="Jugador">
-    <input id="creatorKey" type="password" placeholder="Clave de creador (opcional)">
 
-    <div class="choiceTitle">ELIGE TU ARMADURA</div>
-    <div class="choices" id="skinChoices">
-      <button class="choice active" data-skin="cyber">Cyber</button>
-      <button class="choice" data-skin="shadow">Shadow</button>
-      <button class="choice" data-skin="inferno">Inferno</button>
-      <button class="choice" data-skin="gold">Gold</button>
-    </div>
+    <p id="message">Preparando el juego...</p>
+    <button id="play" disabled>PREPARANDO...</button>
 
-    <div class="choiceTitle">ELIGE TU ARMA</div>
-    <div class="choices" id="weaponChoices">
-      <button class="choice active" data-weapon="pulse">Pulse</button>
-      <button class="choice" data-weapon="plasma">Plasma</button>
-      <button class="choice" data-weapon="rapid">Rapid</button>
-    </div>
-
-    <button class="primary" id="play">ENTRAR EN LA ARENA</button>
-    <div id="message">Elige tu equipo y entra a jugar.</div>
+    <p class="small">Juega, consigue eliminaciones y compite con otros jugadores.</p>
   </div>
 </div>
 
 <div id="deathScreen">
-  <div class="menu">
-    <h1 style="color:#ff405c">ELIMINADO</h1>
-    <p>Has sido eliminado de la arena.</p>
-    <button class="primary" id="respawnButton">VOLVER A LA ARENA</button>
+  <div id="deathCard">
+    <h1>HAS SIDO ELIMINADO</h1>
+    <p>Prepárate para volver a la arena.</p>
+    <button id="respawnButton" class="primaryButton">VOLVER A JUGAR</button>
   </div>
-</div>
-
-<button id="adminToggle">👑 ADMIN PRO</button>
-
-<div id="adminPanel">
-  <h2>👑 ADMIN PRO</h2>
-  <p class="adminMuted">Panel exclusivo del creador.</p>
-
-  <button class="adminAction adminGold" id="adminRefresh">🔄 Actualizar jugadores</button>
-  <div class="adminSection">
-    <strong>👥 JUGADORES</strong>
-    <input id="adminSearch" placeholder="Buscar jugador...">
-    <div id="adminPlayerList">Esperando jugadores...</div>
-    <p id="adminSelected" class="adminMuted">Ningún jugador seleccionado.</p>
-    <button class="adminAction adminDanger" id="adminKill">☠️ Eliminar jugador</button>
-    <button class="adminAction adminGold" id="adminHeal">❤️ Curar jugador</button>
-    <button class="adminAction adminGold" id="adminRevive">⚡ Revivir jugador</button>
-    <button class="adminAction" id="adminTeleport">📍 Teletransportar hasta mí</button>
-    <button class="adminAction adminDanger" id="adminKick">🚪 Expulsar jugador</button>
-  </div>
-
-  <div class="adminSection">
-    <strong>🔫 CAMBIAR ARMA</strong>
-    <select id="adminWeapon">
-      <option value="pulse">PULSE RIFLE</option>
-      <option value="plasma">PLASMA DESTROYER</option>
-      <option value="rapid">NEON RAPID SMG</option>
-    </select>
-    <button class="adminAction" id="adminSetWeapon">Aplicar arma</button>
-  </div>
-
-  <div class="adminSection">
-    <strong>🕊️ VUELO DEL CREADOR</strong>
-    <p class="adminMuted">Espacio sube · Ctrl baja</p>
-    <button class="adminAction adminGold" id="adminFly">Activar vuelo</button>
-  </div>
-
-  <div class="adminSection">
-    <strong>📢 MENSAJE GLOBAL</strong>
-    <input id="adminBroadcastText" maxlength="180" placeholder="Aviso para todos los jugadores">
-    <button class="adminAction adminGold" id="adminBroadcast">Enviar aviso</button>
-  </div>
-
-  <div class="adminSection">
-    <strong>🏆 RANKING MUNDIAL</strong>
-    <ol id="adminRanking"><li>Cargando...</li></ol>
-    <button class="adminAction" id="adminRefreshRanking">Actualizar ranking</button>
-  </div>
-
-  <div class="adminSection">
-    <strong>📊 ESTADÍSTICAS</strong>
-    <div id="adminStats" class="adminMuted">Esperando datos...</div>
-    <button class="adminAction" id="adminRefreshStats">Actualizar estadísticas</button>
-  </div>
-
-  <div class="adminSection">
-    <strong>📋 REGISTRO ADMIN</strong>
-    <div id="adminLogs" class="adminMuted">Sin registros cargados.</div>
-    <button class="adminAction" id="adminRefreshLogs">Actualizar registro</button>
-  </div>
-
-  <button class="adminAction" id="adminClose">Cerrar panel</button>
-  <p id="adminMessage" class="adminMuted"></p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
@@ -187,265 +268,830 @@ input,select{width:100%;padding:11px;margin:6px 0;background:#101d34;color:white
 <script>
 "use strict";
 
+/* ================= CONFIGURACIÓN ================= */
+
 const $ = id => document.getElementById(id);
 const SERVER_URL = "https://mi-web-poxe.onrender.com";
 const MAX_PLAYERS = 40;
 
 const SKINS = {
-  cyber: 0x00dfff,
-  shadow: 0x7e78ff,
-  inferno: 0xff4545,
-  gold: 0xffd700,
-  creator: 0xffd700
+  cyber: {
+    name:"CYBER NEXUS", color:0x00f5ff, armor:0x102a42,
+    glow:0x00dfff, accent:0x8cffff, style:"cyber"
+  },
+  shadow: {
+    name:"VOID SHADOW", color:0xc05cff, armor:0x171020,
+    glow:0x8c24ff, accent:0xe2a5ff, style:"shadow"
+  },
+  inferno: {
+    name:"INFERNO X", color:0xff453d, armor:0x351014,
+    glow:0xff241b, accent:0xffa044, style:"inferno"
+  },
+  gold: {
+    name:"GOLDEN PHANTOM", color:0xffd34d, armor:0x30240b,
+    glow:0xffb900, accent:0xffffff, style:"gold"
+  },
+  creator: {
+    name:"👑 ABDE CREADOR", color:0xffd700, armor:0x302005,
+    glow:0xffb900, accent:0xffffff, style:"creator"
+  }
 };
 
 const WEAPONS = {
-  pulse: { name:"PULSE RIFLE", ammo:30, color:0x00dfff },
-  plasma:{ name:"PLASMA DESTROYER", ammo:12, color:0xb45cff },
-  rapid: { name:"NEON RAPID SMG", ammo:50, color:0xff4545 },
-  creator:{ name:"ABDE CREATOR", ammo:40, color:0xffd700 }
+  pulse: {
+    name:"PULSE RIFLE", ammo:30, rate:220,
+    damage:25, color:0x00dfff
+  },
+  plasma: {
+    name:"PLASMA DESTROYER", ammo:12, rate:500,
+    damage:50, color:0xb45cff
+  },
+  rapid: {
+    name:"NEON RAPID SMG", ammo:50, rate:100,
+    damage:10, color:0xff4545
+  },
+  creator: {
+    name:"ABDE CREATOR", ammo:40, rate:120,
+    damage:20, color:0xffd700
+  }
 };
 
-let scene, camera, renderer, socket, myId;
-let started=false, isDead=false, isCreator=false;
-let selectedSkin="cyber", selectedWeapon="pulse";
-let health=100, ammo=30, kills=0, deaths=0;
-let yaw=0, pitch=0, vy=0, grounded=true;
-let previousTime=0, frameCount=0, fpsTime=0;
-let lastShot=0, lastMove=0, lastMedkitCheck=0;
-let isFiring=false, isAiming=false;
-let adminReady=false, adminFlyEnabled=false;
-let selectedPlayerId=null, cachedAdminPlayers=[];
-const keys={};
-const remotePlayers=new Map();
-const medkitObjects=new Map();
-const requestedMedkits=new Set();
-const tracers=[];
-const colliders=[];
-let muzzleLight;
+/* ================= ESTADO ================= */
 
-const player={x:0,y:0,z:0};
+let selectedSkin = "cyber";
+let selectedWeapon = "pulse";
+let socket = null;
+let myId = null;
+let started = false;
+let isDead = false;
+let isCreator = false;
 
-function toast(message) {
-  const el=$("toast");
-  el.textContent=String(message);
-  el.style.display="block";
-  clearTimeout(toast.timer);
-  toast.timer=setTimeout(()=>el.style.display="none",2200);
+let yaw = 0;
+let pitch = 0;
+let vy = 0;
+let grounded = true;
+
+let health = 100;
+let ammo = 30;
+let kills = 0;
+let deaths = 0;
+
+let lastShot = 0;
+let lastMove = 0;
+let lastMedkitCheck = 0;
+let isFiring = false;
+let isAiming = false;
+
+const keys = {};
+const remotePlayers = new Map();
+const tracers = [];
+const floatingDamage = [];
+const medkitObjects = new Map();
+const requestedMedkits = new Set();
+
+let scene, camera, renderer;
+let weaponGroup, gunBody, gunBarrel, gunTop, muzzleLight;
+const player = {x:0,y:0,z:0};
+
+let previousTime = performance.now();
+let frameCount = 0;
+let fpsTime = 0;
+let animationStarted = false;
+
+/* ================= UTILIDADES ================= */
+
+function colorHex(value) {
+  return "#" + Number(value).toString(16).padStart(6,"0");
 }
 
-function material(color, extra={}) {
-  return new THREE.MeshStandardMaterial({color,roughness:0.65,...extra});
+function setToast(message) {
+  $("toast").textContent = message;
+  const shown = message;
+  setTimeout(() => {
+    if ($("toast").textContent === shown) $("toast").textContent = "";
+  },1800);
 }
 
-function addCollider(x,z,w,d) {
-  colliders.push({x,z,w,d});
+function mat(color, emissive=0, metalness=0.4, roughness=0.3) {
+  return new THREE.MeshStandardMaterial({
+    color, emissive, metalness, roughness
+  });
 }
 
-function canMoveTo(x,z,r=0.6) {
-  if(x < -78 || x > 78 || z < -78 || z > 78) return false;
-  for(const c of colliders) {
-    const nx=Math.max(c.x-c.w/2,Math.min(x,c.x+c.w/2));
-    const nz=Math.max(c.z-c.d/2,Math.min(z,c.z+c.d/2));
-    if(Math.hypot(x-nx,z-nz)<r) return false;
+function disposeObject(object) {
+  object.traverse(child => {
+    if (child.geometry) child.geometry.dispose();
+    if (child.material) {
+      const materials = Array.isArray(child.material)
+        ? child.material : [child.material];
+      materials.forEach(material => material.dispose());
+    }
+  });
+}
+
+/* ================= MENÚ ================= */
+
+function makeChoices() {
+  const creatorKeyEntered = $("creatorKey").value.length > 0;
+
+  if (!creatorKeyEntered) {
+    if (selectedSkin === "creator") selectedSkin = "cyber";
+    if (selectedWeapon === "creator") selectedWeapon = "pulse";
   }
+
+  const skinContainer = $("skinChoices");
+  const weaponContainer = $("weaponChoices");
+  skinContainer.innerHTML = "";
+  weaponContainer.innerHTML = "";
+
+  for (const [id, skin] of Object.entries(SKINS)) {
+    if (id === "creator" && !creatorKeyEntered) continue;
+
+    const element = document.createElement("div");
+    element.className = "choice" +
+      (selectedSkin === id ? " selected" : "") +
+      (id === "creator" ? " creator-choice" : "");
+
+    const swatch = document.createElement("div");
+    swatch.className = "swatch";
+    swatch.style.background = colorHex(skin.color);
+    swatch.style.color = colorHex(skin.color);
+
+    const title = document.createElement("b");
+    title.textContent = skin.name;
+
+    const description = document.createElement("p");
+    description.className = "small";
+    description.textContent = id === "creator"
+      ? "Armadura exclusiva"
+      : "Armadura de combate";
+
+    element.append(swatch,title,description);
+    element.addEventListener("click",() => {
+      selectedSkin = id;
+      makeChoices();
+      updateWeaponAppearance();
+    });
+    skinContainer.appendChild(element);
+  }
+
+  for (const [id, weapon] of Object.entries(WEAPONS)) {
+    if (id === "creator" && !creatorKeyEntered) continue;
+
+    const element = document.createElement("div");
+    element.className = "choice" +
+      (selectedWeapon === id ? " selected" : "") +
+      (id === "creator" ? " creator-choice" : "");
+
+    const swatch = document.createElement("div");
+    swatch.className = "swatch";
+    swatch.style.background = colorHex(weapon.color);
+    swatch.style.color = colorHex(weapon.color);
+
+    const title = document.createElement("b");
+    title.textContent = weapon.name;
+
+    const description = document.createElement("p");
+    description.className = "small";
+    description.textContent = weapon.ammo + " balas · " + weapon.damage + " daño";
+
+    element.append(swatch,title,description);
+    element.addEventListener("click",() => {
+      selectedWeapon = id;
+      ammo = weapon.ammo;
+      makeChoices();
+      updateWeaponAppearance();
+    });
+    weaponContainer.appendChild(element);
+  }
+
+  $("skinName").textContent = SKINS[selectedSkin].name;
+  $("weaponName").textContent = WEAPONS[selectedWeapon].name;
+  $("ammo").textContent = ammo;
+}
+
+/* ================= COLISIONES DEL MAPA ================= */
+
+// Esta lista debe estar fuera de addBox para que el movimiento pueda usarla.
+const colliders = [];
+
+function addCollider(x, z, width, depth) {
+  colliders.push({
+    x,
+    z,
+    halfWidth: width / 2,
+    halfDepth: depth / 2
+  });
+}
+
+function canMoveTo(x, z, radius = 0.65) {
+  const limit = 79;
+
+  if (
+    x < -limit + radius || x > limit - radius ||
+    z < -limit + radius || z > limit - radius
+  ) {
+    return false;
+  }
+
+  for (const block of colliders) {
+    const closestX = Math.max(
+      block.x - block.halfWidth,
+      Math.min(x, block.x + block.halfWidth)
+    );
+
+    const closestZ = Math.max(
+      block.z - block.halfDepth,
+      Math.min(z, block.z + block.halfDepth)
+    );
+
+    const dx = x - closestX;
+    const dz = z - closestZ;
+
+    if (dx * dx + dz * dz < radius * radius) {
+      return false;
+    }
+  }
+
   return true;
 }
 
-function addBox(x,y,z,w,h,d,color,collide=true) {
-  const mesh=new THREE.Mesh(
+/* ================= MUNDO 3D ================= */
+
+function addBox(w,h,d,x,y,z,material) {
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
+  const mesh = new THREE.Mesh(
     new THREE.BoxGeometry(w,h,d),
-    material(color)
+    material
   );
-  mesh.position.set(x,y+h/2,z);
+
+  mesh.position.set(x,y,z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
   scene.add(mesh);
-  if(collide && h>=1) addCollider(x,z,w,d);
+
+  // Solo registrar bloques estructurales altos.
+  // Esto evita que el suelo y las luces decorativas bloqueen al jugador.
+  if (h >= 1 && y >= h / 2 - 0.01) {
+    addCollider(x,z,w,d);
+  }
+
   return mesh;
 }
 
 function createWorld() {
-  scene=new THREE.Scene();
-  scene.background=new THREE.Color(0x050816);
-  scene.fog=new THREE.Fog(0x050816,35,125);
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x030611);
+  scene.fog = new THREE.FogExp2(0x030611,0.0025);
 
-  camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,250);
-
-  renderer=new THREE.WebGLRenderer({antialias:true});
-  renderer.setSize(innerWidth,innerHeight);
-  renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
-  renderer.outputColorSpace=THREE.SRGBColorSpace;
-  $("game").appendChild(renderer.domElement);
-
-  scene.add(new THREE.HemisphereLight(0x9acbff,0x111629,2));
-
-  const light=new THREE.DirectionalLight(0xffffff,1.5);
-  light.position.set(20,35,10);
-  scene.add(light);
-
-  const floor=new THREE.Mesh(
-    new THREE.PlaneGeometry(160,160),
-    material(0x10182a)
+  camera = new THREE.PerspectiveCamera(
+    75,window.innerWidth/window.innerHeight,0.1,300
   );
-  floor.rotation.x=-Math.PI/2;
-  floor.position.y=-0.05;
-  scene.add(floor);
 
-  const grid=new THREE.GridHelper(160,80,0x00aaca,0x243653);
-  grid.position.y=0.01;
+  renderer = new THREE.WebGLRenderer({
+    antialias:true,powerPreference:"high-performance"
+  });
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  renderer.domElement.style.position = "fixed";
+  renderer.domElement.style.inset = "0";
+  renderer.domElement.style.zIndex = "0";
+  document.body.insertBefore(renderer.domElement,document.body.firstChild);
+
+  scene.add(new THREE.HemisphereLight(0x9eeaff,0x171026,2));
+
+  const mainLight = new THREE.DirectionalLight(0xe7f7ff,2.2);
+  mainLight.position.set(20,45,15);
+  mainLight.castShadow = true;
+  scene.add(mainLight);
+
+  const cyanLight = new THREE.PointLight(0x00dfff,90,65);
+  cyanLight.position.set(-20,12,-15);
+  scene.add(cyanLight);
+
+  const purpleLight = new THREE.PointLight(0x9d30ff,90,65);
+  purpleLight.position.set(25,12,20);
+  scene.add(purpleLight);
+
+  const redLight = new THREE.PointLight(0xff224c,65,45);
+  redLight.position.set(0,9,35);
+  scene.add(redLight);
+
+  const floorMat = mat(0x101626,0x030715,0.65,0.4);
+  const wallMat = mat(0x11182a,0x080d22,0.7,0.25);
+  const cyanMat = mat(0x00dfff,0x00aaff,0.4,0.2);
+  const purpleMat = mat(0x8b30ff,0x5b00ff,0.4,0.2);
+  const redMat = mat(0xff2855,0xa80030,0.4,0.2);
+  const goldMat = mat(0xffcb45,0xff8a00,0.5,0.2);
+
+  addBox(160,1,160,0,-0.5,0,floorMat);
+  addBox(160,12,1,0,6,-80,wallMat);
+  addBox(160,12,1,0,6,80,wallMat);
+  addBox(1,12,160,-80,6,0,wallMat);
+  addBox(1,12,160,80,6,0,wallMat);
+
+  addBox(160,0.25,0.35,0,0.15,-79,cyanMat);
+  addBox(160,0.25,0.35,0,0.15,79,purpleMat);
+  addBox(0.35,0.25,160,-79,0.15,0,redMat);
+  addBox(0.35,0.25,160,79,0.15,0,cyanMat);
+
+  const grid = new THREE.GridHelper(158,80,0x1685ae,0x253654);
+  grid.position.y = 0.025;
   scene.add(grid);
 
-  addBox(0,0,-80,160,8,2,0x182944);
-  addBox(0,0,80,160,8,2,0x182944);
-  addBox(-80,0,0,2,8,160,0x182944);
-  addBox(80,0,0,2,8,160,0x182944);
-
-  for(let i=0;i<14;i++) {
-    const x=(i%7)*22-66;
-    const z=Math.floor(i/7)*54-27;
-    addBox(x,0,z,4,4,4,i%2?0x24395a:0x17445a);
+  for (let i=-3;i<=3;i++) {
+    addBox(0.07,0.035,145,i*18,0.04,0,cyanMat);
+    addBox(145,0.035,0.07,0,0.045,i*18,purpleMat);
   }
 
-  for(let i=0;i<8;i++) {
-    const x=(i%4)*36-54;
-    const z=Math.floor(i/4)*48-24;
-    addBox(x,0,z,9,2,2,0x263858);
-  }
+  const platform = new THREE.Mesh(
+    new THREE.CylinderGeometry(13,15,1.2,8),
+    mat(0x18233b,0x101c3d,0.8,0.25)
+  );
+  platform.position.set(0,0.3,0);
+  platform.receiveShadow = true;
+  platform.castShadow = true;
+  scene.add(platform);
 
-  for(let i=0;i<35;i++) {
-    const orb=new THREE.Mesh(
-      new THREE.SphereGeometry(0.22,8,8),
-      new THREE.MeshBasicMaterial({color:i%2?0x00dfff:0x9d5cff})
+  for (const radius of [10,12,15]) {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(radius,0.12,8,80),
+      radius===12?purpleMat:cyanMat
     );
-    orb.position.set(Math.random()*140-70,Math.random()*6+1,Math.random()*140-70);
+    ring.rotation.x = Math.PI/2;
+    ring.position.y = 0.95;
+    scene.add(ring);
+  }
+
+  for (let i=0;i<24;i++) {
+    const angle = i*Math.PI*2/24;
+    const x = Math.cos(angle)*65;
+    const z = Math.sin(angle)*65;
+    const height = 8+(i%4)*3;
+
+    addBox(4,height,4,x,height/2,z,wallMat);
+    addBox(4.4,0.3,4.4,x,height,z,i%2?cyanMat:purpleMat);
+    addBox(4.1,0.12,4.1,x,1,z,i%3===0?redMat:cyanMat);
+  }
+
+  const covers = [
+    [-25,-24],[25,-24],[-25,24],[25,24],
+    [-42,0],[42,0],[0,-40],[0,40],
+    [-43,-43],[43,43],[-43,43],[43,-43]
+  ];
+
+  covers.forEach((pos,i) => {
+    const x=pos[0],z=pos[1];
+    const height=i%3===0?3.5:2.5;
+
+    addBox(8,height,8,x,height/2,z,i%3===0?purpleMat:wallMat);
+    addBox(8.2,0.12,8.2,x,height,z,i%2?cyanMat:redMat);
+    addBox(0.18,height*0.6,0.18,x-3.5,height*0.55,z+4.05,cyanMat);
+  });
+
+  const corners=[[-58,-58],[58,-58],[-58,58],[58,58]];
+
+  corners.forEach((pos,i) => {
+    const x=pos[0],z=pos[1];
+    const height=15+(i%2)*5;
+
+    addBox(7,height,7,x,height/2,z,wallMat);
+    addBox(7.5,0.35,7.5,x,height,z,i%2?purpleMat:cyanMat);
+
+    const beam = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.12,0.12,height*0.7,8),
+      i%2?purpleMat:cyanMat
+    );
+    beam.position.set(x,height*0.55,z);
+    scene.add(beam);
+  });
+
+  for (let i=0;i<4;i++) {
+    const angle=i*Math.PI/2;
+    const x=Math.cos(angle)*48;
+    const z=Math.sin(angle)*48;
+
+    const arch=new THREE.Mesh(
+      new THREE.TorusGeometry(5,0.22,8,40),
+      i%2?purpleMat:cyanMat
+    );
+    arch.position.set(x,6,z);
+    arch.rotation.y=-angle;
+    scene.add(arch);
+  }
+
+  const starPositions=[];
+  for (let i=0;i<900;i++) {
+    starPositions.push(
+      (Math.random()-0.5)*400,
+      15+Math.random()*150,
+      (Math.random()-0.5)*400
+    );
+  }
+
+  const starGeometry=new THREE.BufferGeometry();
+  starGeometry.setAttribute(
+    "position",new THREE.Float32BufferAttribute(starPositions,3)
+  );
+
+  scene.add(new THREE.Points(
+    starGeometry,
+    new THREE.PointsMaterial({
+      color:0x8beaff,size:0.5,transparent:true,opacity:0.85
+    })
+  ));
+
+  for (let i=0;i<16;i++) {
+    const angle=i*Math.PI*2/16;
+    const x=Math.cos(angle)*34;
+    const z=Math.sin(angle)*34;
+    const color=i%2?cyanMat:goldMat;
+
+    const orb=new THREE.Mesh(new THREE.SphereGeometry(0.65,12,12),color);
+    orb.position.set(x,2.5,z);
     scene.add(orb);
+
+    const light=new THREE.PointLight(i%2?0x00dfff:0xffa52b,18,12);
+    light.position.copy(orb.position);
+    scene.add(light);
   }
 
-  muzzleLight=new THREE.PointLight(0x00dfff,0,8);
-  camera.add(muzzleLight);
+  createWeapon();
+}
+
+/* ================= ARMA ================= */
+
+function createWeapon() {
+  weaponGroup = new THREE.Group();
+  camera.add(weaponGroup);
   scene.add(camera);
-  syncCamera();
+
+  gunBody = new THREE.Mesh(
+    new THREE.BoxGeometry(0.25,0.22,0.72),mat(0x152335)
+  );
+  gunBody.position.set(0.42,-0.32,-0.72);
+  weaponGroup.add(gunBody);
+
+  gunBarrel = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.055,0.075,0.48,12),
+    mat(0x00dfff,0x00dfff)
+  );
+  gunBarrel.rotation.x=Math.PI/2;
+  gunBarrel.position.set(0.42,-0.29,-1.12);
+  weaponGroup.add(gunBarrel);
+
+  gunTop = new THREE.Mesh(
+    new THREE.BoxGeometry(0.12,0.07,0.45),mat(0xffd34d)
+  );
+  gunTop.position.set(0.42,-0.18,-0.82);
+  weaponGroup.add(gunTop);
+
+  muzzleLight=new THREE.PointLight(0x00dfff,0,5);
+  muzzleLight.position.set(0.42,-0.29,-1.4);
+  weaponGroup.add(muzzleLight);
+
+  updateWeaponAppearance();
 }
 
-function syncCamera() {
-  if(!camera) return;
-  camera.position.set(player.x,player.y+1.7,player.z);
-  camera.rotation.order="YXZ";
-  camera.rotation.y=yaw;
-  camera.rotation.x=pitch;
-}
+function updateWeaponAppearance() {
+  if (gunBarrel && WEAPONS[selectedWeapon] && SKINS[selectedSkin]) {
+    const weapon=WEAPONS[selectedWeapon];
+    const skin=SKINS[selectedSkin];
 
-function updateHealthUI() {
-  health=Math.max(0,Math.min(100,Number(health)||0));
-  $("healthText").textContent=health+" / 100";
-  $("healthFill").style.width=health+"%";
-  $("healthFill").style.background=health>50?"#35ed73":health>25?"#ffce43":"#ff4242";
-
-  if(health<=0 && started && !isDead) {
-    isDead=true;
-    $("deathScreen").style.display="flex";
-    isFiring=false;
+    gunBarrel.material=mat(weapon.color,weapon.color);
+    gunBody.material=mat(skin.armor,skin.glow);
+    gunTop.material=mat(skin.color,skin.glow);
+    muzzleLight.color.setHex(weapon.color);
   }
+
+  $("skinName").textContent=SKINS[selectedSkin]?.name||"CYBER NEXUS";
+  $("weaponName").textContent=WEAPONS[selectedWeapon]?.name||"PULSE RIFLE";
+  $("ammo").textContent=ammo;
 }
 
-function makeChoices() {
-  document.querySelectorAll("[data-skin]").forEach(button=>{
-    button.classList.toggle("active",button.dataset.skin===selectedSkin);
-    button.onclick=()=>{
-      if(started)return;
-      selectedSkin=button.dataset.skin;
-      makeChoices();
-    };
-  });
+/* ================= BARRA DE VIDA ================= */
 
-  document.querySelectorAll("[data-weapon]").forEach(button=>{
-    button.classList.toggle("active",button.dataset.weapon===selectedWeapon);
-    button.onclick=()=>{
-      if(started)return;
-      selectedWeapon=button.dataset.weapon;
-      makeChoices();
-    };
-  });
+function createHealthBar() {
+  const canvas=document.createElement("canvas");
+  canvas.width=256;
+  canvas.height=40;
 
-  const creator=$("creatorKey").value.length>0;
-  document.querySelectorAll("[data-skin='creator'],[data-weapon='creator']").forEach(b=>b.style.display=creator?"block":"none");
+  const ctx=canvas.getContext("2d");
+  const texture=new THREE.CanvasTexture(canvas);
+
+  const sprite=new THREE.Sprite(new THREE.SpriteMaterial({
+    map:texture,transparent:true,depthTest:false
+  }));
+
+  sprite.position.y=3.1;
+  sprite.scale.set(1.5,0.24,1);
+
+  function update(value,maximum=100) {
+    const pct=THREE.MathUtils.clamp(
+      (Number(value)||0)/Math.max(1,Number(maximum)||100),0,1
+    );
+
+    ctx.clearRect(0,0,256,40);
+    ctx.fillStyle="#101522";
+    ctx.fillRect(2,8,252,24);
+    ctx.fillStyle=pct>0.5?"#35ed73":pct>0.25?"#ffce43":"#ff4242";
+    ctx.fillRect(5,11,246*pct,18);
+    ctx.strokeStyle="#ffffff";
+    ctx.lineWidth=3;
+    ctx.strokeRect(2,8,252,24);
+    texture.needsUpdate=true;
+  }
+
+  update(100);
+  return {sprite,update};
 }
 
-function createAvatar(p) {
-  const group=new THREE.Group();
-  const color=SKINS[p.skin]||0x00dfff;
+/* ================= ETIQUETA SOBRE EL JUGADOR ================= */
+/* ================= ETIQUETA DEL JUGADOR ================= */
 
-  const body=new THREE.Mesh(
-    new THREE.CapsuleGeometry(0.42,0.75,4,8),
-    material(color,{emissive:color,emissiveIntensity:0.16})
-  );
-  body.position.y=1;
-  group.add(body);
+function makeNameTag(name,rank) {
+  const canvas=document.createElement("canvas");
+  canvas.width=512;
+  canvas.height=160;
 
-  const head=new THREE.Mesh(
-    new THREE.SphereGeometry(0.27,12,10),
-    material(0xc7d8e9)
-  );
-  head.position.y=1.7;
-  group.add(head);
-
-  const tagCanvas=document.createElement("canvas");
-  tagCanvas.width=256;tagCanvas.height=64;
-  const ctx=tagCanvas.getContext("2d");
-  ctx.fillStyle="#ffffff";
-  ctx.font="bold 24px Arial";
+  const ctx=canvas.getContext("2d");
+  ctx.clearRect(0,0,512,160);
   ctx.textAlign="center";
-  ctx.fillText(String(p.name||"Jugador").slice(0,16),128,40);
 
-  const texture=new THREE.CanvasTexture(tagCanvas);
-  const tag=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,transparent:true}));
-  tag.scale.set(3,0.75,1);
-  tag.position.y=2.4;
-  group.add(tag);
+  if (rank==="CREADOR") {
+    ctx.font="bold 43px Arial";
+    ctx.fillStyle="#ffd34d";
+    ctx.shadowColor="#ff9d00";
+    ctx.shadowBlur=20;
+    ctx.fillText("ABDE CREADOR",256,58);
+    ctx.shadowBlur=8;
+    ctx.font="bold 25px Arial";
+    ctx.fillStyle="#ffffff";
+    ctx.fillText(String(name||"ABDE").slice(0,20),256,105);
+  } else {
+    ctx.font="bold 34px Arial";
+    ctx.fillStyle="#ffffff";
+    ctx.shadowColor="#00dfff";
+    ctx.shadowBlur=12;
+    ctx.fillText(String(name||"Jugador").slice(0,20),256,55);
+    ctx.shadowBlur=0;
+    ctx.font="bold 24px Arial";
+    ctx.fillStyle="#78eaff";
+    ctx.fillText(rank||"JUGADOR",256,100);
+  }
 
+  const texture=new THREE.CanvasTexture(canvas);
+  const sprite=new THREE.Sprite(new THREE.SpriteMaterial({
+    map:texture,transparent:true,depthTest:false
+  }));
+
+  sprite.scale.set(5.2,1.6,1);
+  sprite.position.y=3.5;
+  return sprite;
+}
+
+/* ================= AVATAR 3D ================= */
+
+function createAvatar(skinId,name,rank) {
+  const skin=SKINS[skinId]||SKINS.cyber;
+  const group=new THREE.Group();
+
+  const armor=mat(skin.armor,0x05070d,0.8,0.24);
+  const neon=mat(skin.color,skin.glow,0.5,0.2);
+  const accent=mat(skin.accent,skin.accent,0.45,0.22);
+  const dark=mat(0x080c16,0x03050a,0.7,0.3);
+  const visor=mat(skin.color,skin.color,0.3,0.15);
+
+  function part(w,h,d,x,y,z,material) {
+    const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
+    mesh.position.set(x,y,z);
+    mesh.castShadow=true;
+    group.add(mesh);
+    return mesh;
+  }
+
+  function cone(radius,height,x,y,z,material,rotationZ=0) {
+    const mesh=new THREE.Mesh(
+      new THREE.ConeGeometry(radius,height,8),material
+    );
+    mesh.position.set(x,y,z);
+    mesh.rotation.z=rotationZ;
+    mesh.castShadow=true;
+    group.add(mesh);
+    return mesh;
+  }
+
+  /* PIERNAS */
+  for (const side of [-1,1]) {
+    part(0.3,0.62,0.34,side*0.2,0.39,0,armor);
+    part(0.34,0.17,0.37,side*0.2,0.67,0.02,neon);
+    part(0.36,0.15,0.46,side*0.2,0.12,0.06,dark);
+    part(0.1,0.32,0.06,side*0.2,0.4,0.19,accent);
+  }
+
+  /* TORSO */
+  part(0.76,0.8,0.43,0,1.12,0,armor);
+  part(0.52,0.28,0.09,0,1.24,0.24,neon);
+  part(0.32,0.12,0.1,0,1.03,0.25,accent);
+  part(0.46,0.37,0.12,0,1.14,-0.25,dark);
+  part(0.42,0.53,0.2,0,1.22,-0.32,dark);
+
+  /* BRAZOS Y HOMBRERAS */
+  for (const side of [-1,1]) {
+    part(0.42,0.27,0.43,side*0.55,1.48,0,neon);
+    part(0.29,0.48,0.32,side*0.56,1.1,0,armor);
+    part(0.3,0.17,0.34,side*0.56,0.88,0,accent);
+    part(0.4,0.12,0.45,side*0.55,1.64,0,dark);
+  }
+
+  /* CASCO Y VISOR */
+  part(0.56,0.49,0.52,0,1.79,0,armor);
+  part(0.48,0.13,0.1,0,1.84,0.27,visor);
+  part(0.63,0.09,0.56,0,2.05,0,dark);
+  part(0.2,0.08,0.08,0,1.65,0.29,accent);
+
+  if (skin.style==="cyber") {
+    cone(0.11,0.48,-0.19,2.27,0,neon,-0.18);
+    cone(0.11,0.48,0.19,2.27,0,neon,0.18);
+    part(0.09,0.3,0.1,-0.32,1.83,0,accent);
+    part(0.09,0.3,0.1,0.32,1.83,0,accent);
+    part(0.14,0.46,0.15,-0.39,1.2,-0.3,neon);
+    part(0.14,0.46,0.15,0.39,1.2,-0.3,neon);
+  }
+
+  if (skin.style==="shadow") {
+    cone(0.19,0.68,-0.22,2.3,-0.02,neon,-0.25);
+    cone(0.19,0.68,0.22,2.3,-0.02,neon,0.25);
+    part(0.14,0.85,0.3,-0.49,1.6,-0.24,dark);
+    part(0.14,0.85,0.3,0.49,1.6,-0.24,dark);
+    part(0.08,0.6,0.1,-0.4,1.7,-0.31,neon);
+    part(0.08,0.6,0.1,0.4,1.7,-0.31,neon);
+  }
+
+  if (skin.style==="inferno") {
+    cone(0.2,0.48,-0.55,1.78,0,accent,-0.9);
+    cone(0.2,0.48,0.55,1.78,0,accent,0.9);
+    cone(0.13,0.38,-0.27,2.28,0,neon,-0.15);
+    cone(0.13,0.38,0.27,2.28,0,neon,0.15);
+    part(0.42,0.1,0.1,0,1.52,0.26,accent);
+    part(0.12,0.35,0.13,0,1.15,0.34,neon);
+  }
+
+  if (skin.style==="gold") {
+    cone(0.13,0.42,-0.2,2.29,0,accent,-0.15);
+    cone(0.13,0.42,0.2,2.29,0,accent,0.15);
+    cone(0.1,0.3,0,2.34,0,neon);
+    part(0.48,0.12,0.5,-0.55,1.67,0,accent);
+    part(0.48,0.12,0.5,0.55,1.67,0,accent);
+    part(0.12,0.54,0.1,-0.4,1.3,0.26,neon);
+    part(0.12,0.54,0.1,0.4,1.3,0.26,neon);
+  }
+
+  if (skin.style==="creator") {
+    // Hombreras doradas más grandes.
+    part(0.52,0.18,0.48,-0.56,1.68,0,accent);
+    part(0.52,0.18,0.48,0.56,1.68,0,accent);
+
+    // Corona dorada del creador.
+    cone(0.12,0.38,-0.2,2.3,0,accent,-0.15);
+    cone(0.12,0.38,0,2.4,0,accent);
+    cone(0.12,0.38,0.2,2.3,0,accent,0.15);
+
+    // Líneas doradas de la armadura.
+    part(0.12,0.55,0.1,-0.4,1.25,0.27,neon);
+    part(0.12,0.55,0.1,0.4,1.25,0.27,neon);
+    part(0.48,0.1,0.1,0,1.5,0.28,accent);
+    part(0.12,0.34,0.12,0,1.12,0.34,neon);
+  }
+
+  part(0.1,0.58,0.07,-0.18,1.12,0.3,accent);
+  part(0.1,0.58,0.07,0.18,1.12,0.3,accent);
+
+  group.add(makeNameTag(name,rank));
+
+  const bar=createHealthBar();
+  group.add(bar.sprite);
+  group.userData.healthBar=bar;
+  return group;
+}
+
+/* ================= JUGADORES REMOTOS ================= */
+
+function updateRemote(p) {
+  if (!p || !p.id || p.id===myId) return;
+
+  const skinId=SKINS[p.skin]?p.skin:"cyber";
+  const signature=[
+    p.name||"Jugador",p.rank||"JUGADOR",skinId
+  ].join("|");
+
+  if (!remotePlayers.has(p.id) ||
+      remotePlayers.get(p.id).signature!==signature) {
+    if (remotePlayers.has(p.id)) {
+      const old=remotePlayers.get(p.id).model;
+      scene.remove(old);
+      disposeObject(old);
+    }
+
+    const model=createAvatar(
+      skinId,p.name||"Jugador",p.rank||"JUGADOR"
+    );
+    scene.add(model);
+    remotePlayers.set(p.id,{model,signature});
+  }
+
+  const model=remotePlayers.get(p.id).model;
+  model.position.set(
+    Number(p.x)||0,Number(p.y)||0,Number(p.z)||0
+  );
+  model.rotation.y=Number(p.yaw)||0;
+  model.visible=p.alive!==false;
+  model.userData.healthBar?.update(p.health??100,p.maxHealth??100);
+}
+
+/* ================= DAÑO FLOTANTE ================= */
+
+function showDamageNumber(position,damage) {
+  const canvas=document.createElement("canvas");
+  canvas.width=256;
+  canvas.height=128;
+
+  const ctx=canvas.getContext("2d");
+  ctx.font="bold 76px Arial";
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  ctx.lineWidth=10;
+  ctx.strokeStyle="#111";
+  ctx.strokeText("-"+damage,128,64);
+  ctx.fillStyle="#ffe94a";
+  ctx.fillText("-"+damage,128,64);
+
+  const texture=new THREE.CanvasTexture(canvas);
+  const sprite=new THREE.Sprite(new THREE.SpriteMaterial({
+    map:texture,transparent:true,depthTest:false
+  }));
+
+  const pos=position.isVector3?position:new THREE.Vector3(
+    Number(position.x)||0,Number(position.y)||0,Number(position.z)||0
+  );
+
+  const x=pos.x,y=pos.y+2.8,z=pos.z;
+  sprite.position.set(x,y,z);
+  sprite.scale.set(1.8,0.9,1);
+  scene.add(sprite);
+
+  floatingDamage.push({
+    sprite,texture,start:performance.now(),x,y,z
+  });
+}
+
+/* ================= BOTIQUINES ================= */
+
+function createMedkit() {
+  const group=new THREE.Group();
+  const white=mat(0xf2f5fa);
+  const red=mat(0xff3030,0x990000);
+
+  const base=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.55,0.65),white);
+  const vertical=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.4,0.08),red);
+  const horizontal=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.16,0.08),red);
+
+  group.add(base,vertical,horizontal);
+  group.position.y=0.8;
   scene.add(group);
   return group;
 }
 
-function updateRemote(p) {
-  let item=remotePlayers.get(p.id);
-
-  if(!item) {
-    item={model:createAvatar(p)};
-    remotePlayers.set(p.id,item);
-  }
-
-  item.model.position.set(p.x,p.y,p.z);
-  item.model.rotation.y=p.yaw||0;
-}
-
 function updateMedkits(list) {
-  if(!Array.isArray(list))return;
+  if (!Array.isArray(list)) return;
+
   const seen=new Set();
 
-  for(const kit of list) {
-    if(!kit?.id)continue;
+  for (const kit of list) {
+    if (!kit || kit.id===undefined) continue;
+
     const id=String(kit.id);
     seen.add(id);
 
-    if(!medkitObjects.has(id)) {
-      const group=new THREE.Group();
-      const box=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.55,0.8),material(0x35ed73));
-      group.add(box);
-
-      const cross1=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.4,0.12),material(0xffffff));
-      const cross2=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.12,0.12),material(0xffffff));
-      group.add(cross1,cross2);
-      scene.add(group);
-      medkitObjects.set(id,group);
+    if (!medkitObjects.has(id)) medkitObjects.set(id,createMedkit());
+    if (!medkitObjects.has(id)) {
+      medkitObjects.set(id,createMedkit());
     }
 
     const mesh=medkitObjects.get(id);
-    mesh.position.set(kit.x,kit.y,kit.z);
+    mesh.position.set(
+      Number(kit.x)||0,Number(kit.y??0.8),Number(kit.z)||0
+    );
   }
 
-  for(const [id,mesh] of medkitObjects) {
-    if(!seen.has(id)) {
+  for (const [id,mesh] of medkitObjects) {
+    if (!seen.has(id)) {
       scene.remove(mesh);
+      disposeObject(mesh);
       medkitObjects.delete(id);
       requestedMedkits.delete(id);
     }
@@ -453,41 +1099,73 @@ function updateMedkits(list) {
 }
 
 function checkMedkits(now) {
-  if(!socket?.connected || now-lastMedkitCheck<250 || !keys.KeyE)return;
+  if (!socket?.connected || now-lastMedkitCheck<250) return;
   lastMedkitCheck=now;
+  if (!keys.KeyE) return;
 
-  for(const [id,mesh] of medkitObjects) {
-    if(Math.hypot(player.x-mesh.position.x,player.z-mesh.position.z)<3) {
-      if(!requestedMedkits.has(id)) {
-        requestedMedkits.add(id);
-        socket.emit("collectMedkit",{id});
-      }
+  for (const [id,mesh] of medkitObjects) {
+    const distance=Math.hypot(
+      player.x-mesh.position.x,player.z-mesh.position.z
+    );
+
+    if (distance<3 && !requestedMedkits.has(id)) {
+      requestedMedkits.add(id);
+      socket.emit("collectMedkit",{id});
       break;
     }
   }
 }
 
+/* ================= VIDA Y CÁMARA ================= */
+
+function updateHealthUI() {
+  health=THREE.MathUtils.clamp(Number(health)||0,0,100);
+
+  $("health").textContent=health;
+  $("healthText").textContent=health+" / 100";
+  $("healthFill").style.width=health+"%";
+  $("healthFill").style.background=
+    health>50?"#35ed73":health>25?"#ffce43":"#ff4242";
+
+  if (health<=0 && started && !isDead) {
+    isDead=true;
+    $("deathScreen").style.display="flex";
+    isFiring=false;
+  }
+}
+
+function syncCamera() {
+  camera.position.set(player.x,player.y+1.7,player.z);
+  camera.rotation.order="YXZ";
+  camera.rotation.y=yaw;
+  camera.rotation.x=pitch;
+}
+
+/* ================= CONEXIÓN SOCKET.IO ================= */
+
 function connect() {
-  if(typeof io==="undefined") {
+  if (typeof io==="undefined") {
     $("connection").textContent="Socket.IO no disponible";
     $("message").textContent="No se pudo cargar Socket.IO.";
     return;
   }
 
-  if(socket) {
+  if (socket) {
     socket.removeAllListeners();
     socket.disconnect();
   }
 
   socket=io(SERVER_URL,{
+    autoConnect:false,
     reconnection:true,
     reconnectionAttempts:Infinity,
     reconnectionDelay:1000,
+    reconnectionDelayMax:5000,
     timeout:20000,
     transports:["polling","websocket"]
   });
 
-  socket.on("connect",()=>{
+  socket.on("connect",() => {
     myId=socket.id;
     $("connection").textContent="Conectado";
 
@@ -499,71 +1177,82 @@ function connect() {
     });
   });
 
-  socket.on("disconnect",()=>{
+  socket.on("disconnect",() => {
     $("connection").textContent="Desconectado";
     $("players").textContent="0/"+MAX_PLAYERS;
-    adminReady=false;
-    $("adminToggle").style.display="none";
-    $("adminPanel").style.display="none";
   });
 
-  socket.on("connect_error",error=>{
-    console.error(error);
+  socket.on("connect_error",error => {
+    console.error("Error de conexión:",error);
     $("connection").textContent="Error de conexión";
-    $("message").textContent="No se puede conectar. Comprueba Render.";
+    $("message").textContent="No se puede conectar. Comprueba el servidor de Render.";
   });
 
-  socket.on("notice",message=>toast(message));
+  socket.on("notice",message => setToast(String(message)));
 
-  socket.on("joined",data=>{
-    const p=data?.you;
-    if(!p)return;
+  socket.on("joined",data => {
+    if (!data?.you) {
+      $("message").textContent="El servidor no ha confirmado la entrada.";
+      return;
+    }
 
+    const p=data.you;
     myId=socket.id;
+
     player.x=Number(p.x)||0;
     player.y=Number(p.y)||0;
     player.z=Number(p.z)||0;
     yaw=Number(p.yaw)||0;
-    pitch=0;vy=0;grounded=true;
+    pitch=0;
+    vy=0;
+    grounded=player.y<=0;
+
     health=p.health??100;
-    ammo=p.ammo??30;
+    ammo=p.ammo??(WEAPONS[p.weapon]?.ammo||30);
     kills=p.kills??0;
     deaths=p.deaths??0;
-    selectedSkin=p.skin||selectedSkin;
-    selectedWeapon=p.weapon||selectedWeapon;
+
+    if (SKINS[p.skin]) selectedSkin=p.skin;
+    if (WEAPONS[p.weapon]) selectedWeapon=p.weapon;
+
     isCreator=p.rank==="CREADOR";
 
-    $("rankName").textContent=isCreator?"ABDE CREADOR":"JUGADOR";
+    $("rankName").textContent=isCreator?"ABDE CREADOR":(p.rank||"JUGADOR");
     $("brandText").textContent=isCreator?"ABDE · CREADOR":"LEGENDS OF ABDE";
     $("creatorBadge").style.display=isCreator?"block":"none";
+
     $("kills").textContent=kills;
     $("deaths").textContent=deaths;
-    $("ammo").textContent=ammo;
-    $("weaponName").textContent=WEAPONS[selectedWeapon]?.name||selectedWeapon;
+
+    updateHealthUI();
+    updateWeaponAppearance();
+    makeChoices();
+    syncCamera();
+
     $("message").textContent="Conectado a la arena.";
     $("deathScreen").style.display="none";
     isDead=false;
-    updateHealthUI();
-    syncCamera();
   });
 
-  socket.on("state",data=>{
+  socket.on("state",data => {
     const list=Array.isArray(data)?data:data?.players;
-    if(!Array.isArray(list))return;
+    if (!Array.isArray(list)) return;
+
     const seen=new Set();
 
-    for(const p of list) {
-      if(!p?.id)continue;
+    for (const p of list) {
+      if (!p?.id) continue;
 
-      if(p.id===myId) {
+      if (p.id===myId) {
         health=p.health??health;
         ammo=p.ammo??ammo;
         kills=p.kills??kills;
         deaths=p.deaths??deaths;
+
+        updateHealthUI();
         $("ammo").textContent=ammo;
         $("kills").textContent=kills;
         $("deaths").textContent=deaths;
-        updateHealthUI();
         continue;
       }
 
@@ -571,530 +1260,1023 @@ function connect() {
       updateRemote(p);
     }
 
-    for(const [id,item] of remotePlayers) {
-      if(!seen.has(id)) {
+    for (const [id,item] of remotePlayers) {
+      if (!seen.has(id)) {
         scene.remove(item.model);
+        disposeObject(item.model);
         remotePlayers.delete(id);
       }
     }
 
-    $("players").textContent=Math.min(MAX_PLAYERS,remotePlayers.size+(myId?1:0))+"/"+MAX_PLAYERS;
+    $("players").textContent=
+      Math.min(MAX_PLAYERS,remotePlayers.size+(myId?1:0))+"/"+MAX_PLAYERS;
   });
 
-  socket.on("shotResult",data=>{
-    if(data?.ammo!==undefined) {
+  socket.on("shotResult",data => {
+    if (data?.ammo!==undefined) {
       ammo=data.ammo;
       $("ammo").textContent=ammo;
     }
-    if(data?.ok===false)toast(data.message||"No puedes disparar ahora.");
+    if (data?.ok===false) setToast(data.message||"No puedes disparar ahora");
+
+    if (data?.ok===false) {
+      setToast(data.message||"No puedes disparar ahora");
+    }
   });
 
-  socket.on("hitConfirm",data=>{
-    if(Number(data?.damage)>0)toast("¡IMPACTO! -"+data.damage+" de vida");
+  socket.on("hitConfirm",data => {
+    if (data && Number.isFinite(Number(data.damage))) {
+      setToast("¡IMPACTO! -"+Number(data.damage)+" de vida");
+    }
   });
 
-  socket.on("shotEffect",data=>{
-    if(!data)return;
-    const vals=[data.x,data.y,data.z,data.dx,data.dy,data.dz].map(Number);
-    if(!vals.every(Number.isFinite))return;
+  socket.on("shotEffect",data => {
+    if (!data) return;
+    const values=[data.x,data.y,data.z,data.dx,data.dy,data.dz].map(Number);
 
-    const start=new THREE.Vector3(vals[0],vals[1],vals[2]);
-    const direction=new THREE.Vector3(vals[3],vals[4],vals[5]);
+    const values=[
+      data.x,data.y,data.z,data.dx,data.dy,data.dz
+    ].map(Number);
+
+    if (!values.every(Number.isFinite)) return;
+
+    const start=new THREE.Vector3(values[0],values[1],values[2]);
+    const direction=new THREE.Vector3(values[3],values[4],values[5]);
     const end=start.clone().addScaledVector(direction,Number(data.distance)||60);
+    const end=start.clone().addScaledVector(
+      direction,Number(data.distance)||60
+    );
+
     const geometry=new THREE.BufferGeometry().setFromPoints([start,end]);
-    const line=new THREE.Line(geometry,new THREE.LineBasicMaterial({color:data.color||0x00dfff}));
+    const line=new THREE.Line(geometry,new THREE.LineBasicMaterial({
+      color:data.color||0x00dfff,transparent:true,opacity:0.95
+    }));
+    const line=new THREE.Line(
+      geometry,
+      new THREE.LineBasicMaterial({
+        color:data.color||0x00dfff,transparent:true,opacity:0.95
+      })
+    );
+
     scene.add(line);
     tracers.push({line,until:performance.now()+100});
   });
 
-  socket.on("playerHit",data=>{
-    if(data?.id===myId && data.health!==undefined) {
+  socket.on("playerHit",data => {
+    if (!data) return;
+
+    const targetId=data.targetId||data.id;
+    const damage=Number(data.damage);
+
+    if (Number.isFinite(damage)) {
+      if (targetId===myId) {
+        showDamageNumber(player,damage);
+      } else {
+        const target=remotePlayers.get(targetId);
+        if (target) showDamageNumber(target.model.position,damage);
+      }
+    }
+
+    if (data.id===myId && data.health!==undefined) {
       health=Number(data.health);
       updateHealthUI();
     }
   });
 
-  socket.on("elimination",data=>{
-    if(!data)return;
+  socket.on("elimination",data => {
+    if (!data) return;
 
-    if(data.attacker===myId) {
+    if (data.attacker===myId) {
       kills=data.attackerKills??kills+1;
       $("kills").textContent=kills;
-      toast("¡ELIMINACIÓN!");
+      setToast("¡ELIMINACIÓN!");
     }
 
-    if(data.victim===myId) {
+    if (data.victim===myId) {
       deaths=data.victimDeaths??deaths+1;
       $("deaths").textContent=deaths;
       isDead=true;
       isFiring=false;
       $("deathScreen").style.display="flex";
+      setToast("¡TE HAN ELIMINADO!");
     }
   });
 
-  socket.on("respawned",p=>{
-    if(!p)return;
+  socket.on("respawned",p => {
+    if (!p) return;
+
     player.x=Number(p.x)||0;
     player.y=Number(p.y)||0;
     player.z=Number(p.z)||0;
+
     health=p.health??100;
-    ammo=p.ammo??30;
-    vy=0;grounded=true;isDead=false;
+    ammo=p.ammo??(WEAPONS[selectedWeapon]?.ammo||30);
+    vy=0;
+    grounded=true;
+    isDead=false;
+
     $("deathScreen").style.display="none";
     $("ammo").textContent=ammo;
+
     updateHealthUI();
     syncCamera();
-    toast("¡De vuelta a la arena!");
+    setToast("¡DE VUELTA A LA ARENA!");
   });
 
   socket.on("medkits",updateMedkits);
 
-  socket.on("medkitCollected",data=>{
-    if(!data)return;
-    if(data.id!==undefined)requestedMedkits.delete(String(data.id));
+  socket.on("medkitCollected",data => {
+    if (!data) return;
 
-    if(data.playerId===myId && data.health!==undefined) {
+    if (data.id!==undefined) {
+      const id=String(data.id);
+      requestedMedkits.delete(id);
+
+      const mesh=medkitObjects.get(id);
+
+      if (mesh) {
+        scene.remove(mesh);
+        disposeObject(mesh);
+        medkitObjects.delete(id);
+      }
+    }
+
+    if (data.playerId===myId && data.health!==undefined) {
       health=Number(data.health);
       updateHealthUI();
-      if(data.ok)toast("¡Botiquín recogido!");
+      setToast("¡BOTIQUÍN RECOGIDO!");
     }
   });
 
-  socket.on("admin:teleported",p=>{
-    if(!p)return;
-    player.x=Number(p.x)||0;
-    player.y=Number(p.y)||0;
-    player.z=Number(p.z)||0;
-    yaw=Number(p.yaw)||0;
-    syncCamera();
-    toast("¡Te han teletransportado!");
-  });
-
-  socket.on("admin:weaponChanged",data=>{
-    if(!data||!WEAPONS[data.weapon])return;
-    selectedWeapon=data.weapon;
-    ammo=Number(data.ammo)||0;
-    $("weaponName").textContent=WEAPONS[selectedWeapon].name;
-    $("ammo").textContent=ammo;
-    toast("Arma cambiada por el administrador.");
-  });
-
-  socket.on("admin:flyStatus",data=>{
-    adminFlyEnabled=Boolean(data?.enabled);
-    $("adminFly").textContent=adminFlyEnabled?"Desactivar vuelo":"Activar vuelo";
-    toast(adminFlyEnabled?"Vuelo activado.":"Vuelo desactivado.");
-  });
-
-  socket.on("worldRanking",renderRanking);
-
-  socket.on("admin:players",list=>{
-    if(!adminReady)return;
-    cachedAdminPlayers=Array.isArray(list)?list:[];
-    renderAdminPlayers();
-  });
-
-  socket.on("admin:stats",stats=>{
-    if(!adminReady||!stats)return;
-    $("adminStats").textContent=
-      "Conectados: "+stats.online+"/"+stats.maxPlayers+
-      " | Kills: "+stats.totalKills+
-      " | Muertes: "+stats.totalDeaths+
-      " | Registrados: "+stats.rankingPlayers;
-  });
-
-  socket.on("admin:logs",renderLogs);
-
-  socket.on("admin:actionResult",result=>{
-    $("adminMessage").textContent=result?.message||"Acción procesada.";
-    if(result?.ok) {
-      socket.emit("admin:getPlayers");
-      socket.emit("admin:getStats");
-      socket.emit("admin:getLogs");
-    }
-  });
-
-  socket.on("admin:error",message=>{
-    adminReady=false;
-    $("adminToggle").style.display="none";
-    $("adminPanel").style.display="none";
-    $("adminMessage").textContent=String(message||"Acceso denegado.");
-  });
-
-  socket.on("joined",data=>{
-    adminReady=Boolean(data?.you?.rank==="CREADOR");
-    $("adminToggle").style.display=adminReady?"block":"none";
-
-    if(adminReady) {
-      socket.emit("admin:getPlayers");
-      socket.emit("admin:getRanking");
-      socket.emit("admin:getStats");
-    }
-  });
+  socket.connect();
 }
+
+/* ================= DISPAROS ================= */
 
 function shoot() {
   const now=performance.now();
-  if(!started||isDead||!socket?.connected)return;
-  const weapon=WEAPONS[selectedWeapon]||WEAPONS.pulse;
-  if(now-lastShot<({pulse:220,plasma:500,rapid:100,creator:120}[selectedWeapon]||220))return;
+  const weapon=WEAPONS[selectedWeapon];
 
-  if(ammo<=0) {
-    toast("Pulsa R para recargar");
+  if (!started || isDead || !weapon) return;
+  if (now-lastShot<weapon.rate) return;
+
+  if (ammo<=0) {
+    setToast("Pulsa R para recargar");
+    isFiring=false;
+    return;
+  }
+
+  if (!socket?.connected) {
+    setToast("Servidor desconectado");
     isFiring=false;
     return;
   }
 
   lastShot=now;
+
   const direction=new THREE.Vector3();
   camera.getWorldDirection(direction);
+
   const start=camera.position.clone().addScaledVector(direction,0.8);
   const end=start.clone().addScaledVector(direction,60);
   const geometry=new THREE.BufferGeometry().setFromPoints([start,end]);
-  const color=weapon.color;
-  const line=new THREE.Line(geometry,new THREE.LineBasicMaterial({color}));
+  const line=new THREE.Line(geometry,new THREE.LineBasicMaterial({
+    color:weapon.color,transparent:true,opacity:1
+  }));
+
+  const line=new THREE.Line(
+    geometry,
+    new THREE.LineBasicMaterial({
+      color:weapon.color,transparent:true,opacity:1
+    })
+  );
+
   scene.add(line);
   tracers.push({line,until:now+100});
 
-  if(muzzleLight) {
-    muzzleLight.color.setHex(color);
-    muzzleLight.intensity=8;
-    setTimeout(()=>{if(muzzleLight)muzzleLight.intensity=0;},55);
+  if (muzzleLight) {
+    muzzleLight.color.setHex(weapon.color);
+    muzzleLight.intensity=12;
+
+    setTimeout(() => {
+      if (muzzleLight) muzzleLight.intensity=0;
+    },55);
   }
 
   socket.emit("shoot",{yaw,pitch,weapon:selectedWeapon});
 }
 
+/* ================= MOVIMIENTO ================= */
+/* ================= MOVIMIENTO CON COLISIONES ================= */
+
 function updateMovement(dt,now) {
-  if(isDead)return;
+  if (isDead) return;
 
   const speed=(keys.ShiftLeft||keys.ShiftRight)?13:8;
-  const forward=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0);
-  const sideways=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);
+
+  const forward=
+    (keys.KeyW||keys.ArrowUp?1:0)-
+    (keys.KeyS||keys.ArrowDown?1:0);
+
+  const sideways=
+    (keys.KeyD||keys.ArrowRight?1:0)-
+    (keys.KeyA||keys.ArrowLeft?1:0);
+
   const length=Math.hypot(forward,sideways)||1;
 
-  const moveX=(-Math.sin(yaw)*forward/length+Math.cos(yaw)*sideways/length)*speed*dt;
-  const moveZ=(-Math.cos(yaw)*forward/length-Math.sin(yaw)*sideways/length)*speed*dt;
+  player.x+=(
+  const moveX=(
+    -Math.sin(yaw)*forward/length+
+    Math.cos(yaw)*sideways/length
+  )*speed*dt;
 
-  const nx=player.x+moveX;
-  if(canMoveTo(nx,player.z))player.x=nx;
-  const nz=player.z+moveZ;
-  if(canMoveTo(player.x,nz))player.z=nz;
+  player.z+=(
+  const moveZ=(
+    -Math.cos(yaw)*forward/length-
+    Math.sin(yaw)*sideways/length
+  )*speed*dt;
 
-  if(isCreator&&adminFlyEnabled) {
-    const vertical=(keys.Space?1:0)-(keys.ControlLeft||keys.ControlRight?1:0);
-    player.y=THREE.MathUtils.clamp(player.y+vertical*speed*dt,0,29);
-  } else {
-    if(keys.Space&&grounded) {vy=9;grounded=false;}
-    vy-=22*dt;
-    player.y+=vy*dt;
-    if(player.y<=0) {player.y=0;vy=0;grounded=true;}
+  if (keys.Space&&grounded&&!isDead) {
+  // X y Z se comprueban por separado para poder deslizarse por las paredes.
+  const nextX=player.x+moveX;
+
+  if (canMoveTo(nextX,player.z)) {
+    player.x=nextX;
   }
 
+  const nextZ=player.z+moveZ;
+
+  if (canMoveTo(player.x,nextZ)) {
+    player.z=nextZ;
+  }
+
+  // Salto y gravedad.
+  if (keys.Space&&grounded) {
+    vy=9;
+    grounded=false;
+  }
+
+  vy-=22*dt;
+  player.y+=vy*dt;
+
+  if (player.y<=0) {
+    player.y=0;
+    vy=0;
+    grounded=true;
+  }
+
+  player.x=THREE.MathUtils.clamp(player.x,-77,77);
+  player.z=THREE.MathUtils.clamp(player.z,-77,77);
   syncCamera();
 
-  if(socket?.connected&&now-lastMove>100) {
+  if (socket?.connected&&now-lastMove>100) {
     lastMove=now;
     socket.emit("move",{x:player.x,y:player.y,z:player.z,yaw});
   }
 }
 
+/* ================= CONTROLES ================= */
+
 function setupControls() {
-  document.addEventListener("keydown",event=>{
+  document.addEventListener("keydown",event => {
     keys[event.code]=true;
 
-    if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(event.code))event.preventDefault();
+    if (["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(event.code)) {
+    if ([
+      "Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"
+    ].includes(event.code)) {
+      event.preventDefault();
+    }
 
-    if(event.code==="KeyR"&&started&&socket?.connected&&!isDead)socket.emit("reload");
+    if (event.code==="KeyR"&&started&&socket?.connected&&!isDead) {
+      socket.emit("reload");
+    }
   });
 
-  document.addEventListener("keyup",event=>keys[event.code]=false);
+  document.addEventListener("keyup",event => {
+    keys[event.code]=false;
+  });
 
-  document.addEventListener("mousemove",event=>{
-    if(!started||isDead||document.pointerLockElement!==renderer.domElement)return;
+  document.addEventListener("mousemove",event => {
+    if (!started||isDead||document.pointerLockElement!==renderer.domElement) return;
+    if (
+      !started ||
+      isDead ||
+      document.pointerLockElement!==renderer.domElement
+    ) return;
+
     yaw-=event.movementX*0.002;
     pitch-=event.movementY*0.002;
     pitch=THREE.MathUtils.clamp(pitch,-1.4,1.4);
   });
 
-  renderer.domElement.addEventListener("contextmenu",e=>e.preventDefault());
+  renderer.domElement.addEventListener("contextmenu",event => event.preventDefault());
+  renderer.domElement.addEventListener("contextmenu",event => {
+    event.preventDefault();
+  });
 
-  renderer.domElement.addEventListener("mousedown",event=>{
-    if(!started||isDead)return;
+  renderer.domElement.addEventListener("mousedown",event => {
+    if (!started||isDead) return;
 
-    if(document.pointerLockElement!==renderer.domElement) {
+    if (document.pointerLockElement!==renderer.domElement) {
       renderer.domElement.requestPointerLock?.();
       return;
     }
 
-    if(event.button===2) {
+    if (event.button===2) {
       isAiming=true;
       camera.fov=45;
       camera.updateProjectionMatrix();
     }
 
-    if(event.button===0) {
+    if (event.button===0) {
       isFiring=true;
       shoot();
     }
   });
 
-  document.addEventListener("mouseup",event=>{
-    if(event.button===0)isFiring=false;
-    if(event.button===2) {
+  document.addEventListener("mouseup",event => {
+    if (event.button===0) isFiring=false;
+
+    if (event.button===2) {
       isAiming=false;
       camera.fov=75;
       camera.updateProjectionMatrix();
     }
   });
 
-  document.addEventListener("pointerlockchange",()=>{
-    if(document.pointerLockElement!==renderer.domElement) {
-      isFiring=false;isAiming=false;
+  document.addEventListener("pointerlockchange",() => {
+    if (document.pointerLockElement!==renderer.domElement) {
+      isFiring=false;
+      isAiming=false;
+
+      if (camera) {
+        camera.fov=75;
+        camera.updateProjectionMatrix();
+      }
+    }
+  });
+
+  window.addEventListener("blur",() => {
+    isFiring=false;
+    isAiming=false;
+
+    if (camera) {
       camera.fov=75;
       camera.updateProjectionMatrix();
     }
+
+    for (const key of Object.keys(keys)) keys[key]=false;
   });
 
-  window.addEventListener("blur",()=>{
-    isFiring=false;isAiming=false;
-    Object.keys(keys).forEach(key=>keys[key]=false);
-  });
-
-  $("respawnButton").onclick=()=>{
-    if(socket?.connected)socket.emit("respawn");
-    else toast("Servidor desconectado.");
-  };
-}
-
-function renderRanking(entries) {
-  const list=$("adminRanking");
-  if(!list)return;
-  list.replaceChildren();
-
-  if(!Array.isArray(entries)||!entries.length) {
-    const li=document.createElement("li");
-    li.textContent="Todavía no hay estadísticas.";
-    list.appendChild(li);
-    return;
-  }
-
-  entries.slice(0,20).forEach(entry=>{
-    const li=document.createElement("li");
-    li.textContent=String(entry.name||"Jugador")+" — "+(Number(entry.kills)||0)+" kills";
-    list.appendChild(li);
-  });
-}
-
-function renderAdminPlayers() {
-  const container=$("adminPlayerList");
-  container.replaceChildren();
-  const query=$("adminSearch").value.trim().toLowerCase();
-
-  const filtered=cachedAdminPlayers.filter(p=>
-    String(p.name||"").toLowerCase().includes(query)
-  );
-
-  if(!filtered.length) {
-    container.textContent="No hay jugadores que coincidan.";
-    return;
-  }
-
-  filtered.forEach(p=>{
-    const row=document.createElement("div");
-    row.className="adminPlayer"+(selectedPlayerId===p.id?" selected":"");
-
-    const info=document.createElement("div");
-    const name=document.createElement("strong");
-    name.textContent=(p.isCreator?"👑 ":"")+String(p.name||"Jugador");
-
-    const details=document.createElement("div");
-    details.className="adminMuted";
-    details.textContent="Vida: "+p.health+" · Kills: "+p.kills+" · Muertes: "+p.deaths+" · "+(p.alive?"Vivo":"Eliminado");
-    info.append(name,details);
-
-    const button=document.createElement("button");
-    if(p.isCreator||p.id===myId) {
-      button.textContent="Creador";
-      button.disabled=true;
-    } else {
-      button.textContent=selectedPlayerId===p.id?"Seleccionado":"Elegir";
-      button.onclick=()=>{
-        selectedPlayerId=p.id;
-        $("adminSelected").textContent="Seleccionado: "+p.name;
-        renderAdminPlayers();
-      };
+  $("respawnButton").addEventListener("click",() => {
+    if (!socket?.connected) {
+      setToast("Servidor desconectado");
+      return;
     }
 
-    row.append(info,button);
-    container.appendChild(row);
-  });
-
-  if(selectedPlayerId&&!cachedAdminPlayers.some(p=>p.id===selectedPlayerId)) {
-    selectedPlayerId=null;
-    $("adminSelected").textContent="Ningún jugador seleccionado.";
-  }
-}
-
-function renderLogs(entries) {
-  const container=$("adminLogs");
-  container.replaceChildren();
-
-  if(!Array.isArray(entries)||!entries.length) {
-    container.textContent="Todavía no hay acciones registradas.";
-    return;
-  }
-
-  entries.slice(0,20).forEach(entry=>{
-    const row=document.createElement("div");
-    row.style.cssText="padding:7px 0;border-bottom:1px solid #34445e";
-
-    const title=document.createElement("strong");
-    title.textContent=String(entry.action||"Acción");
-
-    const details=document.createElement("div");
-    details.textContent=String(entry.admin||"Admin")+" · "+String(entry.details||"");
-
-    const time=document.createElement("div");
-    const date=new Date(entry.time);
-    time.textContent=Number.isNaN(date.getTime())?"":date.toLocaleString();
-
-    row.append(title,details,time);
-    container.appendChild(row);
+    socket.emit("respawn");
   });
 }
 
-function sendAdminAction(eventName,extra={}) {
-  if(!adminReady||!socket?.connected) {
-    $("adminMessage").textContent="No estás conectado como creador.";
-    return;
-  }
-
-  if(!selectedPlayerId) {
-    $("adminMessage").textContent="Selecciona primero un jugador.";
-    return;
-  }
-
-  socket.emit(eventName,{targetId:selectedPlayerId,...extra});
-}
-
-function refreshAdmin() {
-  if(!adminReady||!socket?.connected)return;
-  socket.emit("admin:getPlayers");
-  socket.emit("admin:getRanking");
-  socket.emit("admin:getStats");
-  socket.emit("admin:getLogs");
-}
-
-function setupAdmin() {
-  $("creatorKey").addEventListener("input",makeChoices);
-  $("adminToggle").onclick=()=>{
-    $("adminPanel").style.display=$("adminPanel").style.display==="block"?"none":"block";
-    if($("adminPanel").style.display==="block")refreshAdmin();
-  };
-  $("adminClose").onclick=()=>$("adminPanel").style.display="none";
-  $("adminRefresh").onclick=()=>socket?.emit("admin:getPlayers");
-  $("adminRefreshRanking").onclick=()=>socket?.emit("admin:getRanking");
-  $("adminRefreshStats").onclick=()=>socket?.emit("admin:getStats");
-  $("adminRefreshLogs").onclick=()=>socket?.emit("admin:getLogs");
-  $("adminSearch").addEventListener("input",renderAdminPlayers);
-
-  $("adminKill").onclick=()=>{
-    if(!selectedPlayerId)return toast("Selecciona un jugador.");
-    if(confirm("¿Seguro que quieres eliminar a este jugador?"))sendAdminAction("admin:kill");
-  };
-  $("adminHeal").onclick=()=>sendAdminAction("admin:heal");
-  $("adminRevive").onclick=()=>sendAdminAction("admin:revive");
-  $("adminTeleport").onclick=()=>sendAdminAction("admin:teleport");
-  $("adminKick").onclick=()=>{
-    if(!selectedPlayerId)return toast("Selecciona un jugador.");
-    if(confirm("¿Seguro que quieres expulsarlo?"))sendAdminAction("admin:kick");
-  };
-  $("adminSetWeapon").onclick=()=>sendAdminAction("admin:setWeapon",{weapon:$("adminWeapon").value});
-  $("adminBroadcast").onclick=()=>{
-    if(!adminReady||!socket?.connected)return toast("No tienes permisos de administrador.");
-    const message=$("adminBroadcastText").value.trim();
-    if(!message)return toast("Escribe un mensaje.");
-    socket.emit("admin:broadcast",{message});
-    $("adminBroadcastText").value="";
-  };
-  $("adminFly").onclick=()=>{
-    if(!adminReady||!socket?.connected)return toast("No tienes permisos de administrador.");
-    socket.emit("admin:toggleFly",{enabled:!adminFlyEnabled});
-  };
-}
+/* ================= BUCLE PRINCIPAL ================= */
 
 function animate(now) {
   requestAnimationFrame(animate);
+
   const dt=Math.min((now-previousTime)/1000,0.04);
   previousTime=now;
 
-  for(let i=tracers.length-1;i>=0;i--) {
-    if(now>=tracers[i].until) {
-      scene.remove(tracers[i].line);
-      tracers[i].line.geometry.dispose();
-      tracers[i].line.material.dispose();
+  for (let i=floatingDamage.length-1;i>=0;i--) {
+    const item=floatingDamage[i];
+    const elapsed=now-item.start;
+
+    item.sprite.position.y=item.y+elapsed*0.002;
+
+    if (elapsed>900) {
+      scene.remove(item.sprite);
+      disposeObject(item.sprite);
+      item.texture.dispose();
+      floatingDamage.splice(i,1);
+    }
+  }
+
+  for (let i=tracers.length-1;i>=0;i--) {
+    const tracer=tracers[i];
+
+    if (now>=tracer.until) {
+      scene.remove(tracer.line);
+      disposeObject(tracer.line);
       tracers.splice(i,1);
     }
   }
 
-  if(started&&!isDead) {
+  if (started&&!isDead) {
     updateMovement(dt,now);
     checkMedkits(now);
 
-    if(isFiring&&document.pointerLockElement===renderer.domElement)shoot();
+    if (isFiring&&document.pointerLockElement===renderer.domElement) shoot();
+    if (
+      isFiring &&
+      document.pointerLockElement===renderer.domElement
+    ) {
+      shoot();
+    }
 
-    for(const [id,mesh] of medkitObjects) {
+    for (const [id,mesh] of medkitObjects) {
       mesh.rotation.y+=dt;
-      mesh.position.y=0.8+Math.sin(now*0.003)*0.08;
+
+      const numericId=Number(id);
+      const offset=Number.isFinite(numericId)?numericId:0;
+
+      mesh.position.y=0.8+Math.sin(now*0.003+offset)*0.08;
     }
   }
 
   frameCount++;
   fpsTime+=dt;
-  if(fpsTime>=1) {
+
+  if (fpsTime>=1) {
     $("fps").textContent=Math.round(frameCount/fpsTime);
-    frameCount=0;fpsTime=0;
+    frameCount=0;
+    fpsTime=0;
   }
 
   renderer.render(scene,camera);
 }
 
+/* ================= INICIO ================= */
+
 function startGame() {
-  if(started)return;
+  if (started) return;
+
   started=true;
+  isDead=false;
   $("play").disabled=true;
   $("start").style.display="none";
+
+  updateWeaponAppearance();
+  syncCamera();
   connect();
   renderer.domElement.requestPointerLock?.();
 }
 
 function init() {
   makeChoices();
-  setupAdmin();
 
-  if(!window.THREE) {
-    $("message").textContent="No se pudo cargar Three.js. Recarga la página.";
+  $("creatorKey").addEventListener("input",() => {
+    if (started) return;
+    makeChoices();
+  });
+
+  if (!window.THREE) {
+    $("message").textContent="No se ha podido cargar Three.js. Recarga la página.";
+    $("message").textContent=
+      "No se ha podido cargar Three.js. Recarga la página.";
     return;
   }
 
-  createWorld();
-  setupControls();
+  try {
+    createWorld();
+    setupControls();
 
-  $("play").onclick=startGame;
+    $("play").disabled=false;
+    $("play").textContent="ENTRAR EN LA ARENA";
+    $("message").textContent="Arena lista. Elige tu armadura y tu arma.";
 
-  window.addEventListener("resize",()=>{
-    if(!camera||!renderer)return;
-    camera.aspect=innerWidth/innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(innerWidth,innerHeight);
-    renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
-  });
+    $("play").addEventListener("click",startGame);
 
-  previousTime=performance.now();
-  requestAnimationFrame(animate);
+    if (!animationStarted) {
+      animationStarted=true;
+      previousTime=performance.now();
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener("resize",() => {
+      if (!camera||!renderer) return;
+
+      camera.aspect=window.innerWidth/window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth,window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
+    });
+  } catch (error) {
+    console.error("Error iniciando el juego:",error);
+    $("message").textContent="Error al iniciar. Abre la consola con F12.";
+  }
 }
 
 init();
 </script>
+  
+
+<style>
+#adminToggle {
+  display:none;
+  position:fixed;
+  top:145px;
+  right:14px;
+  z-index:20;
+  pointer-events:auto;
+  background:#332506;
+  color:#ffdf69;
+  border:1px solid #ffd34d;
+  border-radius:9px;
+  padding:11px 15px;
+  font-weight:900;
+  box-shadow:0 0 15px #ffb90044;
+}
+#adminPanel {
+  display:none;
+  position:fixed;
+  top:190px;
+  right:14px;
+  z-index:20;
+  width:min(370px,calc(100vw - 28px));
+  max-height:65vh;
+  overflow:auto;
+  padding:15px;
+  border:1px solid #ffd34d;
+  border-radius:13px;
+  background:rgba(8,12,25,.97);
+  color:white;
+  box-shadow:0 0 30px #ffb90033;
+  pointer-events:auto;
+  font:13px Arial,sans-serif;
+}
+#adminPanel h2 {
+  color:#ffdf69;
+  margin:5px 0 12px;
+}
+#adminPanel button {
+  padding:9px;
+  border:1px solid #526078;
+  border-radius:7px;
+  background:#172239;
+  color:white;
+  cursor:pointer;
+}
+#adminPanel .adminAction {
+  width:100%;
+  margin:5px 0;
+}
+#adminPanel .adminDanger {
+  background:#4a1420;
+  border-color:#ff405c;
+}
+#adminPanel .adminGold {
+  background:#44320b;
+  border-color:#ffd34d;
+  color:#ffdf69;
+}
+.adminPlayer {
+  padding:9px;
+  margin:5px 0;
+  border:1px solid #34445e;
+  border-radius:7px;
+  background:#101a2c;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+}
+.adminPlayer.selected {
+  border-color:#ffd34d;
+}
+.adminPlayer button {
+  flex-shrink:0;
+}
+.adminSection {
+  margin-top:15px;
+  padding-top:10px;
+  border-top:1px solid #34445e;
+}
+.adminMuted {
+  color:#9cb0c9;
+  font-size:12px;
+}
+#adminRanking {
+  padding-left:24px;
+  line-height:1.8;
+}
+</style>
+
+<button id="adminToggle">👑 ADMIN PANEL</button>
+
+<div id="adminPanel">
+  <h2>👑 ADMINISTRACIÓN</h2>
+  <p class="adminMuted">
+    Panel privado del creador de LEGENDS OF ABDE.
+  </p>
+
+  <button class="adminAction adminGold" id="adminRefresh">
+    🔄 Actualizar jugadores
+  </button>
+
+  <div class="adminSection">
+    <strong>👥 JUGADORES CONECTADOS</strong>
+    <div id="adminPlayerList">Esperando jugadores...</div>
+    <p id="adminSelected">Ningún jugador seleccionado.</p>
+    <button class="adminAction adminDanger" id="adminKill">
+      ☠️ ELIMINAR JUGADOR SELECCIONADO
+    </button>
+  </div>
+
+  <div class="adminSection">
+    <strong>🕊️ MODO VUELO</strong>
+    <p class="adminMuted">
+      Usa Espacio para subir y Ctrl para bajar.
+    </p>
+    <button class="adminAction adminGold" id="adminFly">
+      Activar vuelo
+    </button>
+  </div>
+
+  <div class="adminSection">
+    <strong>🏆 RANKING MUNDIAL DE KILLS</strong>
+    <ol id="adminRanking">
+      <li>Cargando ranking...</li>
+    </ol>
+    <button class="adminAction" id="adminRefreshRanking">
+      Actualizar ranking
+    </button>
+  </div>
+
+  <div class="adminSection">
+    <strong>📊 ESTADÍSTICAS</strong>
+    <p id="adminStats">Esperando datos...</p>
+    <button class="adminAction" id="adminRefreshStats">
+      Actualizar estadísticas
+    </button>
+  </div>
+
+  <button class="adminAction" id="adminClose">Cerrar panel</button>
+  <p id="adminMessage" class="adminMuted"></p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const byId = id => document.getElementById(id);
+
+  let selectedPlayerId = null;
+  let adminFlyEnabled = false;
+  let adminReady = false;
+
+  const adminToggle = byId("adminToggle");
+  const adminPanel = byId("adminPanel");
+  const playerList = byId("adminPlayerList");
+  const selectedLabel = byId("adminSelected");
+  const message = byId("adminMessage");
+
+  function adminMessage(text) {
+    message.textContent = text;
+  }
+
+  function showAdminPanel() {
+    if (!adminReady) return;
+
+    adminPanel.style.display = "block";
+
+    if (socket && socket.connected) {
+      socket.emit("admin:getPlayers");
+      socket.emit("admin:getRanking");
+      socket.emit("admin:getStats");
+    }
+  }
+
+  adminToggle.addEventListener("click", () => {
+    if (adminPanel.style.display === "block") {
+      adminPanel.style.display = "none";
+    } else {
+      showAdminPanel();
+    }
+  });
+
+  byId("adminClose").addEventListener("click", () => {
+    adminPanel.style.display = "none";
+  });
+
+  byId("adminRefresh").addEventListener("click", () => {
+    if (socket && socket.connected) {
+      socket.emit("admin:getPlayers");
+    }
+  });
+
+  byId("adminKill").addEventListener("click", () => {
+    if (!adminReady || !socket || !socket.connected) {
+      adminMessage("No estás conectado como creador.");
+      return;
+    }
+
+    if (!selectedPlayerId) {
+      adminMessage("Selecciona primero un jugador.");
+      return;
+    }
+
+    if (!confirm("¿Seguro que quieres eliminar a este jugador?")) {
+      return;
+    }
+
+    socket.emit("admin:kill", {
+      targetId: selectedPlayerId
+    });
+  });
+
+  byId("adminFly").addEventListener("click", () => {
+    if (!adminReady || !socket || !socket.connected) {
+      adminMessage("No tienes permisos de administrador.");
+      return;
+    }
+
+    socket.emit("admin:toggleFly", {
+      enabled: !adminFlyEnabled
+    });
+  });
+
+  byId("adminRefreshRanking").addEventListener("click", () => {
+    if (socket && socket.connected) {
+      socket.emit("admin:getRanking");
+    }
+  });
+
+  byId("adminRefreshStats").addEventListener("click", () => {
+    if (socket && socket.connected) {
+      socket.emit("admin:getStats");
+    }
+  });
+
+  function renderPlayers(players) {
+    playerList.replaceChildren();
+
+    if (!Array.isArray(players) || players.length === 0) {
+      playerList.textContent = "No hay jugadores conectados.";
+      return;
+    }
+
+    for (const p of players) {
+      if (!p || !p.id) continue;
+
+      const row = document.createElement("div");
+      row.className = "adminPlayer" +
+        (selectedPlayerId === p.id ? " selected" : "");
+
+      const info = document.createElement("div");
+      const name = document.createElement("strong");
+
+      name.textContent =
+        (p.isCreator || p.rank === "CREADOR" ? "👑 " : "") +
+        String(p.name || "Jugador");
+
+      const details = document.createElement("div");
+      details.className = "adminMuted";
+      details.textContent =
+        "Kills: " + (Number(p.kills) || 0) +
+        " · Muertes: " + (Number(p.deaths) || 0) +
+        " · Vida: " + (Number(p.health) || 0);
+
+      info.append(name, details);
+
+      const choose = document.createElement("button");
+      choose.textContent =
+        selectedPlayerId === p.id ? "Seleccionado" : "Elegir";
+
+      if (p.id === myId || p.isCreator || p.rank === "CREADOR") {
+        choose.disabled = true;
+        choose.textContent = "Creador";
+      } else {
+        choose.addEventListener("click", () => {
+          selectedPlayerId = p.id;
+          selectedLabel.textContent =
+            "Seleccionado: " + String(p.name || "Jugador");
+          renderPlayers(players);
+          adminMessage("");
+        });
+      }
+
+      row.append(info, choose);
+      playerList.appendChild(row);
+    }
+
+    if (selectedPlayerId &&
+        !players.some(p => p.id === selectedPlayerId)) {
+    if (
+      selectedPlayerId &&
+      !players.some(p => p.id === selectedPlayerId)
+    ) {
+      selectedPlayerId = null;
+      selectedLabel.textContent = "Ningún jugador seleccionado.";
+    }
+  }
+
+  function renderRanking(entries) {
+    const list = byId("adminRanking");
+    list.replaceChildren();
+
+    if (!Array.isArray(entries) || entries.length === 0) {
+      const li = document.createElement("li");
+      li.textContent = "Todavía no hay estadísticas.";
+      list.appendChild(li);
+      return;
+    }
+
+    for (const entry of entries.slice(0, 20)) {
+    for (const entry of entries.slice(0,20)) {
+      const li = document.createElement("li");
+      li.textContent =
+        String(entry.name || "Jugador") +
+        " — " + (Number(entry.kills) || 0) + " kills";
+      list.appendChild(li);
+    }
+  }
+
+  function renderStats(stats) {
+    byId("adminStats").textContent =
+      "Conectados: " + stats.online + "/" + stats.maxPlayers +
+      " | Kills acumuladas: " + stats.totalKills +
+      " | Muertes acumuladas: " + stats.totalDeaths +
+      " | Jugadores registrados: " + stats.rankingPlayers;
+  }
+
+  // Se conecta a los eventos del socket cuando se crea.
+  // Conservar los eventos del panel al crear el socket.
+  const originalConnect = connect;
+
+  connect = function () {
+    originalConnect();
+
+    if (!socket) return;
+
+    socket.on("joined", data => {
+      const p = data && data.you;
+      adminReady = Boolean(p && p.rank === "CREADOR");
+
+      adminToggle.style.display = adminReady ? "block" : "none";
+
+      if (!adminReady) {
+        adminPanel.style.display = "none";
+        selectedPlayerId = null;
+        adminFlyEnabled = false;
+      } else {
+        socket.emit("admin:getPlayers");
+        socket.emit("admin:getRanking");
+        socket.emit("admin:getStats");
+      }
+    });
+
+    socket.on("admin:players", players => {
+      if (adminReady) renderPlayers(players);
+    });
+
+    socket.on("admin:killResult", result => {
+      adminMessage(result && result.message
+        ? result.message
+        : "No se recibió una respuesta del servidor.");
+
+      if (result && result.ok) {
+        selectedPlayerId = null;
+        selectedLabel.textContent = "Ningún jugador seleccionado.";
+        socket.emit("admin:getPlayers");
+      }
+    });
+
+    socket.on("admin:flyStatus", data => {
+      adminFlyEnabled = Boolean(data && data.enabled);
+
+      byId("adminFly").textContent = adminFlyEnabled
+        ? "Desactivar vuelo"
+        : "Activar vuelo";
+
+      adminMessage(adminFlyEnabled
+        ? "Vuelo activado. Espacio sube y Ctrl baja."
+        : "Vuelo desactivado.");
+    });
+
+    socket.on("admin:stats", stats => {
+      if (adminReady && stats) renderStats(stats);
+    });
+
+    socket.on("worldRanking", ranking => {
+      renderRanking(ranking);
+    });
+
+    socket.on("admin:error", error => {
+      adminReady = false;
+      adminToggle.style.display = "none";
+      adminPanel.style.display = "none";
+      adminMessage(String(error || "Acceso denegado."));
+    });
+
+    socket.on("connect_error", () => {
+      adminMessage("No se pudo conectar al servidor.");
+    });
+  };
+
+  // Movimiento especial: el vuelo solo se activa cuando
+  // el servidor confirma los permisos del creador.
+  // Guardar el movimiento original para el modo normal.
+  const originalUpdateMovement = updateMovement;
+
+  updateMovement = function (dt, now) {
+    if (!adminReady || !adminFlyEnabled || isDead) {
+      originalUpdateMovement(dt, now);
+      return;
+    }
+
+    const speed = (keys.ShiftLeft || keys.ShiftRight) ? 13 : 8;
+    const speed=(keys.ShiftLeft||keys.ShiftRight)?13:8;
+
+    const forward =
+      (keys.KeyW || keys.ArrowUp ? 1 : 0) -
+      (keys.KeyS || keys.ArrowDown ? 1 : 0);
+    const forward=
+      (keys.KeyW||keys.ArrowUp?1:0)-
+      (keys.KeyS||keys.ArrowDown?1:0);
+
+    const sideways =
+      (keys.KeyD || keys.ArrowRight ? 1 : 0) -
+      (keys.KeyA || keys.ArrowLeft ? 1 : 0);
+    const sideways=
+      (keys.KeyD||keys.ArrowRight?1:0)-
+      (keys.KeyA||keys.ArrowLeft?1:0);
+
+    const length = Math.hypot(forward, sideways) || 1;
+    const length=Math.hypot(forward,sideways)||1;
+
+    player.x += (
+      -Math.sin(yaw) * forward / length +
+      Math.cos(yaw) * sideways / length
+    ) * speed * dt;
+    const moveX=(
+      -Math.sin(yaw)*forward/length+
+      Math.cos(yaw)*sideways/length
+    )*speed*dt;
+
+    player.z += (
+      -Math.cos(yaw) * forward / length -
+      Math.sin(yaw) * sideways / length
+    ) * speed * dt;
+    const moveZ=(
+      -Math.cos(yaw)*forward/length-
+      Math.sin(yaw)*sideways/length
+    )*speed*dt;
+
+    const vertical =
+      (keys.Space ? 1 : 0) -
+      (keys.ControlLeft || keys.ControlRight ? 1 : 0);
+    // El creador también respeta las colisiones horizontales.
+    const nextX=player.x+moveX;
+
+    player.y = THREE.MathUtils.clamp(
+      player.y + vertical * speed * dt,
+    if (canMoveTo(nextX,player.z)) {
+      player.x=nextX;
+    }
+
+    const nextZ=player.z+moveZ;
+
+    if (canMoveTo(player.x,nextZ)) {
+      player.z=nextZ;
+    }
+
+    // Espacio sube y Ctrl baja.
+    const vertical=
+      (keys.Space?1:0)-
+      (keys.ControlLeft||keys.ControlRight?1:0);
+
+    player.y=THREE.MathUtils.clamp(
+      player.y+vertical*speed*dt,
+      0,
+      29
+    );
+
+    player.x = THREE.MathUtils.clamp(player.x, -77, 77);
+    player.z = THREE.MathUtils.clamp(player.z, -77, 77);
+
+    syncCamera();
+
+    if (socket && socket.connected && now - lastMove > 100) {
+      lastMove = now;
+      socket.emit("move", {
+        x: player.x,
+        y: player.y,
+        z: player.z,
+    if (socket&&socket.connected&&now-lastMove>100) {
+      lastMove=now;
+
+      socket.emit("move",{
+        x:player.x,
+        y:player.y,
+        z:player.z,
+        yaw
+      });
+    }
+  };
+})();
+</script>
+</body>
+</html>
+
 </body>
 </html>
