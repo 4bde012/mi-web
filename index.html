@@ -1116,6 +1116,16 @@ function connect() {
   });
 
   socket.on("state",updateRemotePlayers);
+ socket.on("moveCorrection", p => {
+  if (!p || p.id !== myId || !myPlayer) return;
+
+  myPlayer.x = p.x;
+  myPlayer.y = p.y;
+  myPlayer.z = p.z;
+  myPlayer.yaw = p.yaw;
+
+  camera.position.set(p.x, p.y + PLAYER_HEIGHT, p.z);
+});
   socket.on("medkits",updateMedkits);
 
   socket.on("notice",message=>{
