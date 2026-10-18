@@ -36,10 +36,16 @@ button:disabled{opacity:.55;cursor:not-allowed}
 #healthText{position:absolute;left:50%;bottom:88px;transform:translateX(-50%);font-weight:bold;text-shadow:0 2px 4px #000}
 @media(max-width:500px){.choices{grid-template-columns:repeat(2,minmax(0,1fr))}#brand{font-size:16px}.panel{font-size:11px;padding:6px}#help{font-size:10px}}
 </style>
+
 </head>
 <body>
 <div id="hud">
-  <div id="brand">LEGENDS OF ABDE</div>
+
+<div id="brand">
+  <span class="logo-icon">A</span>
+  <span id="brandText">LEGENDS OF ABDE</span>
+</div>
+
   <div id="stats">
     <div class="panel">❤️ Vida: <span id="health">100</span></div>
     <div class="panel">🔫 Arma: <span id="weaponName">PULSE RIFLE</span></div>
@@ -73,6 +79,12 @@ button:disabled{opacity:.55;cursor:not-allowed}
 
 <div id="start">
   <div id="card">
+    
+<h2>ACCESO DEL CREADOR</h2>
+<input id="creatorKey" type="password" autocomplete="off"
+  placeholder="Clave privada del creador">
+<p class="small">Acceso reservado al creador.</p>
+
     <h1>LEGENDS OF ABDE</h1>
     <p class="small">MULTIPLAYER FUTURISTA · ARENA 3D</p>
     <h2>ELIGE TU ARMADURA</h2>
@@ -546,6 +558,29 @@ function init(){
   }
 }
 init();
+  <style>
+#brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #42eaff;
+  border-radius: 10px;
+  color: #42eaff;
+  font-size: 23px;
+  font-weight: 900;
+  box-shadow: 0 0 15px #00bfff66;
+}
+</style>
+</head>
+<body>
 </script>
 </body>
 </html>
