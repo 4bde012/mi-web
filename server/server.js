@@ -1,7 +1,10 @@
 
+"use strict";
+
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const crypto = require("crypto");
 
 const app = express();
 const server = http.createServer(app);
@@ -10,422 +13,401 @@ const io = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"]
-  },
-  transports: ["polling", "websocket"]
+  }
 });
 
 const PORT = process.env.PORT || 3000;
 const MAX_PLAYERS = 40;
-const CREATOR_KEY = process.env.CREATOR_KEY || "";
-
-const SKINS = ["cyber", "shadow", "inferno", "gold"];
+const MAX_HEALTH = 100;
+const MEDKIT_HEAL = 40;
+const MAX_MEDKITS = 5;
 
 const WEAPONS = {
-  pulse: {
-    ammo: 30,
-    damage: 25,
-    rate: 220,
-    color: 0x00dfff
-  },
-  plasma: {
-    ammo: 12,
-    damage: 50,
-    rate: 500,
-    color: 0xb45cff
-  },
-  rapid: {
-    ammo: 50,
-    damage: 10,
-    rate: 100,
-    color: 0xff4545
-  }
+  pulse: { name: "PULSE RIFLE", ammo: 30, rate: 220, damage: 25, color: "#00dfff" },
+  plasma: { name: "PLASMA DESTROYER", ammo: 12, rate: 500, damage: 50, color: "#b45cff" },
+  rapid: { name: "NEON RAPID SMG", ammo: 50, rate: 100, damage: 10, color: "#ff4545" }
 };
 
+const SKINS = ["cyber", "shadow", "inferno", "gold"];
 const players = new Map();
-const lastShots = new Map();
 const medkits = new Map();
-let medkitCounter = 0;
-
-function spawnMedkit() {
-  const id = "medkit_" + (++medkitCounter);
-
-  medkits.set(id, {
-    id,
-    x: Math.random() * 120 - 60,
-    y: 0.7,
-    z: Math.random() * 120 - 60
-  });
-
-  io.emit("medkits", Array.from(medkits.values()));
-}
-
-for (let i = 0; i < 5; i++) {
-  spawnMedkit();
-}
-
-setInterval(() => {
-  if (medkits.size < 5) spawnMedkit();
-}, 8000);
-
-app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("LEGENDS OF ABDE - Servidor activo");
+  res.send("LEGENDS OF ABDE: servidor multijugador activo.");
 });
 
 app.get("/health", (req, res) => {
   res.json({
-    status: "ok",
-    game: "LEGENDS OF ABDE",
+    online: true,
     players: players.size,
-    maxPlayers: MAX_PLAYERS
+    medkits: medkits.size
   });
 });
 
-function clamp(value, min, max) {
-  const n = Number(value);
-  return Number.isFinite(n)
-    ? Math.max(min, Math.min(max, n))
-    : min;
+function randomPosition() {
+  return {
+    x: Math.round((Math.random() * 100 - 50) * 10) / 10,
+    y: 0,
+    z: Math.round((Math.random() * 100 - 50) * 10) / 10
+  };
 }
 
 function publicPlayer(p) {
   return {
     id: p.id,
     name: p.name,
+    skin: p.skin,
+    weapon: p.weapon,
+    rank: p.rank,
     x: p.x,
     y: p.y,
     z: p.z,
     yaw: p.yaw,
-    rotation: p.yaw,
     health: p.health,
-    maxHealth: p.maxHealth,
-    weapon: p.weapon,
+    maxHealth: MAX_HEALTH,
     ammo: p.ammo,
-    skin: p.skin,
-    alive: p.alive,
-    creator: p.creator,
-    rank: p.creator ? "CREADOR" : "JUGADOR",
     kills: p.kills,
-    deaths: p.deaths
+    deaths: p.deaths,
+    alive: p.alive
   };
 }
 
 function broadcastState() {
-  io.emit(
-    "state",
-    Array.from(players.values()).map(publicPlayer)
-  );
+  io.emit("state", Array.from(players.values(), publicPlayer));
 }
 
-function noticePlayer(id, message) {
-  io.to(id).emit("notice", message);
+function broadcastMedkits() {
+  io.emit("medkits", Array.from(medkits.values()));
+}
+
+function spawnMedkit() {
+  if (medkits.size >= MAX_MEDKITS) return;
+
+  const pos = randomPosition();
+  const id = crypto.randomUUID();
+
+  medkits.set(id, {
+    id,
+    x: pos.x,
+    y: 0.8,
+    z: pos.z
+  });
+
+  broadcastMedkits();
+}
+
+function fillMedkits() {
+  while (medkits.size < MAX_MEDKITS) {
+    spawnMedkit();
+  }
 }
 
 function respawnPlayer(p) {
-  p.x = Math.random() * 20 - 10;
+  if (!players.has(p.id)) return;
+
+  const pos = randomPosition();
+
+  p.x = pos.x;
   p.y = 0;
-  p.z = Math.random() * 20 - 10;
-  p.health = p.maxHealth;
-  p.ammo = WEAPONS[p.weapon].ammo;
-  p.alive = true;
+  p.z = pos.z;
   p.yaw = 0;
+  p.health = MAX_HEALTH;
+  p.alive = true;
+  p.ammo = WEAPONS[p.weapon].ammo;
+  p.lastShot = 0;
 
   io.to(p.id).emit("respawned", publicPlayer(p));
+  broadcastState();
 }
 
-/*
- * Comprueba si un rayo alcanza a un jugador.
- * El servidor calcula el impacto para que no dependa
- * de que el cliente indique un objetivo.
- */
-function findHitPlayer(shooter, direction, maxDistance = 60) {
-  let closestPlayer = null;
-  let closestDistance = maxDistance;
+function findHitPlayer(shooter, yaw, pitch) {
+  const dx = -Math.sin(yaw) * Math.cos(pitch);
+  const dy = Math.sin(pitch);
+  const dz = -Math.cos(yaw) * Math.cos(pitch);
+
+  const origin = {
+    x: shooter.x,
+    y: shooter.y + 1.7,
+    z: shooter.z
+  };
+
+  let best = null;
+  let bestDistance = 60;
 
   for (const target of players.values()) {
-    if (target.id === shooter.id || !target.alive) {
-      continue;
-    }
+    if (target.id === shooter.id || !target.alive) continue;
 
-    // Centro aproximado del cuerpo del jugador.
     const center = {
       x: target.x,
       y: target.y + 1.1,
       z: target.z
     };
 
-    const ox = center.x - shooter.x;
-    const oy = center.y - (shooter.y + 1.7);
-    const oz = center.z - shooter.z;
+    const rx = center.x - origin.x;
+    const ry = center.y - origin.y;
+    const rz = center.z - origin.z;
 
-    // Distancia proyectada sobre la dirección del disparo.
-    const projection =
-      ox * direction.x +
-      oy * direction.y +
-      oz * direction.z;
+    const along = rx * dx + ry * dy + rz * dz;
 
-    if (projection < 0 || projection > closestDistance) {
-      continue;
-    }
+    if (along < 0 || along > bestDistance) continue;
 
-    // Distancia entre el centro del cuerpo y el rayo.
-    const cx = ox - direction.x * projection;
-    const cy = oy - direction.y * projection;
-    const cz = oz - direction.z * projection;
+    const closest = {
+      x: origin.x + dx * along,
+      y: origin.y + dy * along,
+      z: origin.z + dz * along
+    };
 
-    const distanceSquared = cx * cx + cy * cy + cz * cz;
+    const distance = Math.hypot(
+      center.x - closest.x,
+      center.y - closest.y,
+      center.z - closest.z
+    );
 
-    // Radio aproximado de impacto del avatar.
-    if (distanceSquared <= 0.85 * 0.85) {
-      closestPlayer = target;
-      closestDistance = projection;
+    if (distance <= 1.15) {
+      best = target;
+      bestDistance = along;
     }
   }
 
-  return closestPlayer;
+  return {
+    target: best,
+    origin,
+    direction: { x: dx, y: dy, z: dz },
+    distance: best ? bestDistance : 60
+  };
 }
 
-io.on("connection", (socket) => {
-  console.log("Jugador conectado:", socket.id);
-
-  socket.on("joinGame", (data = {}) => {
-    if (players.has(socket.id)) {
-      socket.emit("joined", {
-        you: publicPlayer(players.get(socket.id))
-      });
+io.on("connection", socket => {
+  socket.on("joinGame", data => {
+    if (players.size >= MAX_PLAYERS && !players.has(socket.id)) {
+      socket.emit("notice", "La arena está llena.");
+      socket.disconnect(true);
       return;
     }
 
-    if (players.size >= MAX_PLAYERS) {
-      socket.emit("notice", "El servidor está lleno.");
-      return;
-    }
+    data = data && typeof data === "object" ? data : {};
 
-    const name =
-      String(data.name || "Jugador").trim().slice(0, 20)
-      || "Jugador";
-
-    const requestedWeapon = String(data.weapon || "pulse");
-    const weapon = Object.hasOwn(WEAPONS, requestedWeapon)
-      ? requestedWeapon
-      : "pulse";
-
-    const requestedSkin = String(data.skin || "cyber");
-    const skin = SKINS.includes(requestedSkin)
-      ? requestedSkin
-      : "cyber";
-
-    const creator =
-      CREATOR_KEY.length > 0 &&
-      String(data.creatorKey || "") === CREATOR_KEY;
+    const weapon = WEAPONS[data.weapon] ? data.weapon : "pulse";
+    const skin = SKINS.includes(data.skin) ? data.skin : "cyber";
+    const pos = randomPosition();
 
     const p = {
       id: socket.id,
-      name,
-      x: Math.random() * 20 - 10,
-      y: 0,
-      z: Math.random() * 20 - 10,
-      yaw: 0,
-      health: 100,
-      maxHealth: 100,
-      weapon,
-      ammo: WEAPONS[weapon].ammo,
+      name: String(data.name || "Jugador").trim().slice(0, 16) || "Jugador",
       skin,
-      alive: true,
-      creator,
+      weapon,
+      rank: "JUGADOR",
+      x: pos.x,
+      y: 0,
+      z: pos.z,
+      yaw: 0,
+      health: MAX_HEALTH,
+      ammo: WEAPONS[weapon].ammo,
       kills: 0,
-      deaths: 0
+      deaths: 0,
+      alive: true,
+      lastShot: 0,
+      reloadUntil: 0
     };
 
     players.set(socket.id, p);
 
-    socket.emit("joined", {
-      you: publicPlayer(p)
-    });
-
-    socket.emit("creatorVerified", {
-      ok: creator
-    });
-
-    socket.emit("notice", "¡Bienvenido a LEGENDS OF ABDE!");
+    socket.emit("joined", { you: publicPlayer(p) });
+    socket.emit("medkits", Array.from(medkits.values()));
 
     broadcastState();
+    socket.broadcast.emit("notice", p.name + " ha entrado en la arena.");
   });
 
-  socket.on("move", (data = {}) => {
+  socket.on("move", data => {
     const p = players.get(socket.id);
+    if (!p || !p.alive || !data) return;
 
-    if (!p || !p.alive) return;
+    const x = Number(data.x);
+    const y = Number(data.y);
+    const z = Number(data.z);
+    const yaw = Number(data.yaw);
 
-    p.x = clamp(data.x, -77, 77);
-    p.y = clamp(data.y, 0, 20);
-    p.z = clamp(data.z, -77, 77);
+    if (![x, y, z, yaw].every(Number.isFinite)) return;
 
-    // El cliente envía yaw, no rotation.
-    p.yaw = clamp(data.yaw ?? data.rotation, -100000, 100000);
-
-    broadcastState();
+    // Limitar posiciones para evitar valores fuera de la arena.
+    p.x = Math.max(-77, Math.min(77, x));
+    p.y = Math.max(0, Math.min(30, y));
+    p.z = Math.max(-77, Math.min(77, z));
+    p.yaw = yaw;
   });
 
-  socket.on("shoot", (data = {}) => {
+  socket.on("shoot", data => {
     const p = players.get(socket.id);
-
     if (!p || !p.alive) return;
 
-    const weapon = WEAPONS[p.weapon];
-
-    if (!weapon) return;
-
+    const weaponId = WEAPONS[p.weapon] ? p.weapon : "pulse";
+    const weapon = WEAPONS[weaponId];
     const now = Date.now();
-    const previousShot = lastShots.get(socket.id) || 0;
 
-    if (now - previousShot < weapon.rate) return;
+    if (now - p.lastShot < weapon.rate - 15) {
+      socket.emit("shotResult", {
+        ok: false,
+        ammo: p.ammo,
+        message: "Dispara un poco más despacio."
+      });
+      return;
+    }
 
     if (p.ammo <= 0) {
       socket.emit("shotResult", {
         ok: false,
         ammo: 0,
-        hit: false
+        message: "Pulsa R para recargar."
       });
-
-      noticePlayer(socket.id, "¡No tienes munición! Pulsa R.");
       return;
     }
 
-    lastShots.set(socket.id, now);
-    p.ammo -= 1;
+    p.lastShot = now;
+    p.ammo--;
 
-    // Validar la dirección recibida.
-    const yaw = clamp(data.yaw, -100000, 100000);
-    const pitch = clamp(data.pitch, -1.4, 1.4);
+    const yaw = Number(data?.yaw);
+    const pitch = Number(data?.pitch);
 
-    // Dirección compatible con la cámara de Three.js.
-    const direction = {
-      x: -Math.sin(yaw) * Math.cos(pitch),
-      y: Math.sin(pitch),
-      z: -Math.cos(yaw) * Math.cos(pitch)
-    };
+    if (!Number.isFinite(yaw) || !Number.isFinite(pitch)) {
+      socket.emit("shotResult", { ok: false, ammo: p.ammo });
+      return;
+    }
 
-    const hitPlayer = findHitPlayer(p, direction, 60);
+    const shot = findHitPlayer(p, yaw, pitch);
 
-    socket.emit("shotResult", {
-      ok: true,
-      hit: Boolean(hitPlayer),
-      ammo: p.ammo,
-      weapon: p.weapon
-    });
-
-    // Efecto visual del disparo para los jugadores conectados.
     io.emit("shotEffect", {
       shooterId: p.id,
-      x: p.x,
-      y: p.y + 1.7,
-      z: p.z,
-      dx: direction.x,
-      dy: direction.y,
-      dz: direction.z,
-      distance: 60,
+      x: shot.origin.x,
+      y: shot.origin.y,
+      z: shot.origin.z,
+      dx: shot.direction.x,
+      dy: shot.direction.y,
+      dz: shot.direction.z,
+      distance: shot.distance,
       color: weapon.color
     });
 
-    if (hitPlayer) {
-      hitPlayer.health = Math.max(
-        0,
-        hitPlayer.health - weapon.damage
-      );
+    socket.emit("shotResult", { ok: true, ammo: p.ammo });
 
-      // Confirmar el daño al atacante.
+    if (shot.target) {
+      const target = shot.target;
+      target.health = Math.max(0, target.health - weapon.damage);
+
       socket.emit("hitConfirm", {
-        targetId: hitPlayer.id,
-        targetName: hitPlayer.name,
+        targetId: target.id,
         damage: weapon.damage,
-        health: hitPlayer.health
+        health: target.health
       });
 
-      // Avisar al jugador alcanzado.
-      io.to(hitPlayer.id).emit("playerHit", {
-        id: hitPlayer.id,
-        targetId: hitPlayer.id,
+      io.emit("playerHit", {
+        id: target.id,
+        targetId: target.id,
         shooterId: p.id,
         damage: weapon.damage,
-        health: hitPlayer.health
+        health: target.health
       });
 
-      console.log(
-        `${p.name} ha causado ${weapon.damage} de daño a ${hitPlayer.name}`
-      );
-
-      if (hitPlayer.health <= 0) {
-        hitPlayer.alive = false;
-        p.kills += 1;
-        hitPlayer.deaths += 1;
+      if (target.health <= 0) {
+        target.alive = false;
+        target.deaths++;
+        p.kills++;
 
         io.emit("elimination", {
           attacker: p.id,
+          victim: target.id,
           attackerKills: p.kills,
-          victim: hitPlayer.id,
-          killerId: p.id,
-          victimId: hitPlayer.id,
-          killerName: p.name,
-          victimName: hitPlayer.name
+          victimDeaths: target.deaths
         });
 
-        setTimeout(() => {
-          const current = players.get(hitPlayer.id);
+        io.emit("notice", p.name + " ha eliminado a " + target.name + ".");
 
-          if (current && !current.alive) {
-            respawnPlayer(current);
-            broadcastState();
-          }
+        setTimeout(() => {
+          const current = players.get(target.id);
+          if (current && !current.alive) respawnPlayer(current);
         }, 3000);
       }
-    }
 
-    broadcastState();
+      broadcastState();
+    }
   });
 
   socket.on("reload", () => {
     const p = players.get(socket.id);
-
     if (!p || !p.alive) return;
 
-    const weapon = WEAPONS[p.weapon];
+    p.ammo = WEAPONS[p.weapon].ammo;
+    socket.emit("shotResult", { ok: true, ammo: p.ammo });
+    socket.emit("notice", "Arma recargada.");
+    broadcastState();
+  });
 
-    if (!weapon) return;
+  socket.on("collectMedkit", data => {
+    const p = players.get(socket.id);
+    if (!p || !p.alive || !data?.id) return;
 
-    p.ammo = weapon.ammo;
+    const kit = medkits.get(String(data.id));
+    if (!kit) {
+      socket.emit("medkitCollected", {
+        id: String(data.id),
+        playerId: p.id,
+        health: p.health,
+        ok: false
+      });
+      return;
+    }
 
-    socket.emit("shotResult", {
-      ok: true,
-      ammo: p.ammo,
-      hit: false
+    const distance = Math.hypot(p.x - kit.x, p.z - kit.z);
+
+    if (distance > 3.5 || p.health >= MAX_HEALTH) {
+      socket.emit("medkitCollected", {
+        id: kit.id,
+        playerId: p.id,
+        health: p.health,
+        ok: false
+      });
+      return;
+    }
+
+    p.health = Math.min(MAX_HEALTH, p.health + MEDKIT_HEAL);
+    medkits.delete(kit.id);
+
+    io.emit("medkitCollected", {
+      id: kit.id,
+      playerId: p.id,
+      health: p.health,
+      ok: true
     });
 
-    noticePlayer(socket.id, "¡Arma recargada!");
-
+    broadcastMedkits();
     broadcastState();
+
+    setTimeout(spawnMedkit, 8000);
   });
 
   socket.on("respawn", () => {
     const p = players.get(socket.id);
-
-    if (!p) return;
-
-    respawnPlayer(p);
-    broadcastState();
+    if (p && !p.alive) respawnPlayer(p);
   });
 
   socket.on("disconnect", () => {
-    console.log("Jugador desconectado:", socket.id);
-
+    const p = players.get(socket.id);
     players.delete(socket.id);
-    lastShots.delete(socket.id);
 
-    broadcastState();
+    if (p) {
+      io.emit("notice", p.name + " ha salido de la arena.");
+      broadcastState();
+    }
   });
 });
 
+fillMedkits();
+
+setInterval(() => {
+  fillMedkits();
+  broadcastState();
+}, 500);
+
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`LEGENDS OF ABDE activo en el puerto ${PORT}`);
+  console.log("LEGENDS OF ABDE escuchando en el puerto " + PORT);
 });
