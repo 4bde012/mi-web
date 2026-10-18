@@ -253,8 +253,11 @@ function initGame(){
     const arm=new THREE.Mesh(new THREE.BoxGeometry(.22,.72,.25),bodyMat);arm.position.set(side*.53,1.2,-.08);playerBody.add(arm);
   }
 
-  camera.position.set(0,1.65,0);player.add(camera);
+camera.position.set(0,1.65,0);
+player.add(camera);
 
+// Ocultar el cuerpo del jugador para que no veas dentro de su cabeza.
+playerBody.visible = false;
   // Modelo de primera persona: brazos y pistola pegados a la cámara.
   viewModel=new THREE.Group();camera.add(viewModel);
   viewModel.position.set(0,0,0);
