@@ -854,11 +854,12 @@ function connect(){
   socket.connect();
 }
 
+
 function shoot(){
   const now = performance.now();
   const weapon = WEAPONS[selectedWeapon];
 
-  if(!weapon || now-lastShot < weapon.rate) return;
+  if(!weapon || now - lastShot < weapon.rate) return;
 
   if(ammo <= 0){
     setToast("Pulsa R para recargar");
@@ -873,7 +874,42 @@ function shoot(){
   }
 
   lastShot = now;
-  socket.emit("shoot",{yaw,pitch});
+
+  // Crear un rayo visible en la dirección de la cámara
+  const direction = new THREE.Vector3();
+  camera.getWorldDirection(direction);
+
+  const start = camera.position.clone()
+    .addScaledVector(direction, 0.8);
+
+  const end = start.clone()
+    .addScaledVector(direction, 60);
+
+  const geometry = new THREE.BufferGeometry()
+    .setFromPoints([start, end]);
+
+  const line = new THREE.Line(
+    geometry,
+    new THREE.LineBasicMaterial({
+      color: weapon.color,
+      transparent: true,
+      opacity: 1
+    })
+  );
+
+  scene.add(line);
+
+  tracers.push({
+    line,
+    until: now + 100
+  });
+
+  // Enviar el disparo al servidor
+  socket.emit("shoot", {
+    yaw,
+    pitch,
+    weapon: selectedWeapon
+  });
 }
 
 function updateMovement(dt,now){
