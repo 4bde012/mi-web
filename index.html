@@ -1188,54 +1188,6 @@ function makeNameTag(name, rank) {
   return sprite;
 }
 
-function updateRemote(p) {
-  if (!p || !p.id || p.id === myId) return;
-
-  const skinId = SKINS[p.skin] ? p.skin : "cyber";
-
-  const signature = [
-    p.name || "Jugador",
-    p.rank || "JUGADOR",
-    skinId
-  ].join("|");
-
-  if (
-    !remotePlayers.has(p.id) ||
-    remotePlayers.get(p.id).signature !== signature
-  ) {
-    if (remotePlayers.has(p.id)) {
-      const old = remotePlayers.get(p.id).model;
-      scene.remove(old);
-      disposeObject(old);
-    }
-
-    const model = createAvatar(
-      skinId,
-      p.name || "Jugador",
-      p.rank || "JUGADOR"
-    );
-
-    scene.add(model);
-    remotePlayers.set(p.id, { model, signature });
-  }
-
-  const model = remotePlayers.get(p.id).model;
-
-  model.position.set(
-    Number(p.x) || 0,
-    Number(p.y) || 0,
-    Number(p.z) || 0
-  );
-
-  model.rotation.y = Number(p.yaw) || 0;
-  model.visible = p.alive !== false;
-
-  model.userData.healthBar?.update(
-    p.health ?? 100,
-    p.maxHealth ?? 100
-  );
-}
-
 /* =========================================================
    NÚMEROS DE DAÑO
 ========================================================= */
